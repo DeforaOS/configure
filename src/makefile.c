@@ -442,6 +442,7 @@ static void _variables_binary(Configure * configure, FILE * fp, char * done)
 		_makefile_output_variable(fp, "DESTDIR",
 				configure->prefs->destdir, 1);
 	}
+	/* BINDIR */
 	if(configure->prefs->bindir[0] == '/')
 		_makefile_output_variable(fp, "BINDIR",
 				configure->prefs->bindir, 1);
@@ -449,6 +450,16 @@ static void _variables_binary(Configure * configure, FILE * fp, char * done)
 					NULL)) != NULL)
 	{
 		_makefile_output_variable(fp, "BINDIR", p, 1);
+		string_delete(p);
+	}
+	/* SBINDIR */
+	if(configure->prefs->sbindir[0] == '/')
+		_makefile_output_variable(fp, "SBINDIR",
+				configure->prefs->sbindir, 1);
+	else if((p = string_new_append("$(PREFIX)/", configure->prefs->sbindir,
+					NULL)) != NULL)
+	{
+		_makefile_output_variable(fp, "SBINDIR", p, 1);
 		string_delete(p);
 	}
 	if(!done[TT_LIBRARY])

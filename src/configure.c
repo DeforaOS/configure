@@ -388,7 +388,7 @@ static void _prefs_init(Prefs * prefs)
 {
 	struct stat st;
 
-	memset(prefs, 0, sizeof(Prefs));
+	memset(prefs, 0, sizeof(*prefs));
 	prefs->destdir = "";
 	if(stat("/Apps", &st) == 0)
 	{
@@ -397,6 +397,7 @@ static void _prefs_init(Prefs * prefs)
 		prefs->libdir = "Libraries";
 		/* XXX needs auto-detection for the sub-directory */
 		prefs->prefix = "/Apps";
+		prefs->sbindir = "Binaries";
 	}
 	else
 	{
@@ -404,6 +405,7 @@ static void _prefs_init(Prefs * prefs)
 		prefs->includedir = "include";
 		prefs->libdir = "lib";
 		prefs->prefix = "/usr/local";
+		prefs->sbindir = "sbin";
 	}
 }
 
@@ -441,7 +443,7 @@ static int _usage(void)
 	Prefs prefs;
 
 	_prefs_init(&prefs);
-	fprintf(stderr, "%s%s%s%s%s%s%s%s%s",
+	fprintf(stderr, "%s%s%s%s%s%s%s%s%s%s%s",
 "Usage: configure [-nvS][options...][directory...]\n"
 "  -n	Do not actually write Makefiles\n"
 "  -v	Verbose mode\n"
@@ -451,7 +453,9 @@ static int _usage(void)
 "  -l	Library files directory (default: \"", prefs.libdir, "\")\n"
 "  -O	Force Operating System (default: auto-detected)\n"
 "  -p	Installation directory prefix (default: \"", prefs.prefix, "\")\n"
-"  -S	Warn about potential security risks\n");
+"  -S	Warn about potential security risks\n"
+"  -s	Super-user executable files directory (default: \"", prefs.sbindir,
+"\")\n");
 	return 1;
 }
 
@@ -464,7 +468,7 @@ int main(int argc, char * argv[])
 	int o;
 
 	_prefs_init(&prefs);
-	while((o = getopt(argc, argv, "d:i:l:nO:p:Sv")) != -1)
+	while((o = getopt(argc, argv, "d:i:l:nO:p:Ss:v")) != -1)
 		switch(o)
 		{
 			case 'b':
@@ -490,6 +494,9 @@ int main(int argc, char * argv[])
 				break;
 			case 'S':
 				prefs.flags |= PREFS_S;
+				break;
+			case 's':
+				prefs.sbindir = optarg;
 				break;
 			case 'v':
 				prefs.flags |= PREFS_v;

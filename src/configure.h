@@ -118,6 +118,7 @@ typedef struct _Prefs
 	char * libdir;
 	char * prefix;
 	char * os;
+	char * sbindir;
 } Prefs;
 # define PREFS_n	0x1
 # define PREFS_S	0x2

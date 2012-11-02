@@ -2,6 +2,7 @@ TARGETS	= configure makedepend makefile.o
 PREFIX	= /usr/local
 DESTDIR	=
 BINDIR	= $(PREFIX)/bin
+SBINDIR	= $(PREFIX)/sbin
 CC	?= cc
 CPPFLAGSF?=
 CPPFLAGS=
