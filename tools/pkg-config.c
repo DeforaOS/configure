@@ -598,7 +598,6 @@ static int version_cmp(char const *v1, char const *v2)
 	int v1t = 0;
 	int v2t = 0;
 	int ret = 0;
-	int c;
 
 	if (strcmp(v1, v2) == 0)
 		return 0;
@@ -607,9 +606,9 @@ static int version_cmp(char const *v1, char const *v2)
 	while (*v1 != '\0' && *v2 != '\0') {
 		v1t = 0;
 		v2t = 0;
-		while(*v1 != '\0' && !isalnum((c = *v1)))
+		while(*v1 != '\0' && !isalnum((unsigned char)*v1))
 			v1++;
-		while(*v2 != '\0' && !isalnum((c = *v2)))
+		while(*v2 != '\0' && !isalnum((unsigned char)*v2))
 			v2++;
 
 		if (v1 == '\0' && v2 == '\0')
@@ -624,23 +623,23 @@ static int version_cmp(char const *v1, char const *v2)
 		ver1 = v1;
 		ver2 = v2;
 
-		if (isdigit((c = *ver1))) {
+		if (isdigit((unsigned char)*ver1)) {
 			v1t = 1;
-			while(*v1 != '\0' && isdigit((c = *v1)))
+			while(*v1 != '\0' && isdigit((unsigned char)*v1))
 				v1++;
 		} else {
 			v1t = 2;
-			while(*v1 != '\0' && isalpha((c = *v1)))
+			while(*v1 != '\0' && isalpha((unsigned char)*v1))
 				v1++;
 		}
 
-		if (isdigit((c = *ver2))) {
+		if (isdigit((unsigned char)*ver2)) {
 			v2t = 1;
-			while(*v2 != '\0' && isdigit((c = *v2)))
+			while(*v2 != '\0' && isdigit((unsigned char)*v2))
 				v2++;
 		} else {
 			v2t = 2;
-			while(*v2 != '\0' && isalpha((c = *v2)))
+			while(*v2 != '\0' && isalpha((unsigned char)*v2))
 				v2++;
 
 		}
