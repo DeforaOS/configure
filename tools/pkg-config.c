@@ -721,16 +721,18 @@ static int _pkgconfig_parse(PkgConfig * pc, FILE * fp)
 		if(line[i - 1] == '\n')
 			line[i - 1] = '\0';
 		/* detect empty lines or comments */
-		for(i = 0; (c = line[i]) != '\0' && isspace(c); i++);
+		for(i = 0; (c = (unsigned char)line[i]) != '\0'
+				&& isspace(c); i++);
 		if(line[i] == '\0' || line[i] == '#')
 			continue;
 		/* look for a '=' or a ':' in the line */
-		for(i = 0; (c = line[i]) != '\0' && (isalnum(c) || c == '_'
-					|| c == '.'); i++);
+		for(i = 0; (c = (unsigned char)line[i]) != '\0'
+				&& (isalnum(c) || c == '_' || c == '.'); i++);
 		if(line[i] == '=')
 		{
 			line[i] = '\0';
-			for(i += 1; (c = line[i]) != '\0' && isspace(c); i++);
+			for(i += 1; (c = (unsigned char)line[i]) != '\0'
+					&& isspace(c); i++);
 			if (line[i] == '\0')
 				continue;
 			if(_pkgconfig_parse_variable(pc, p, line, &line[i]) != 0)
@@ -739,7 +741,8 @@ static int _pkgconfig_parse(PkgConfig * pc, FILE * fp)
 		else if(line[i] == ':')
 		{
 			line[i] = '\0';
-			for(i += 1; (c = line[i]) != '\0' && isspace(c); i++);
+			for(i += 1; (c = (unsigned char)line[i]) != '\0'
+					&& isspace(c); i++);
 			if (line[i] == '\0')
 				continue;
 			if(_pkgconfig_parse_directive(pc, p, line, &line[i]) != 0)
