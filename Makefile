@@ -3,12 +3,12 @@ VERSION	= 0.0.7
 SUBDIRS	= doc src tools
 PREFIX	= /usr/local
 DESTDIR	=
-MKDIR	?= mkdir -p
-INSTALL	?= install
-RM	?= rm -f
-RM	?= rm -f
-LN	?= ln -f
-TAR	?= tar -czvf
+MKDIR	= mkdir -p
+INSTALL	= install
+RM	= rm -f
+RM	= rm -f
+LN	= ln -f
+TAR	= tar -czvf
 
 
 all: subdirs
