@@ -28,10 +28,12 @@ project.conf.html: project.conf.xml
 clean:
 	@for i in $(SUBDIRS); do (cd $$i && $(MAKE) clean) || exit; done
 	$(RM) -- $(configure.1_OBJS) $(configure.html_OBJS) $(project.conf.5_OBJS) $(project.conf.html_OBJS)
+	./docbook.sh -c -P "$(PREFIX)" -- "project.conf.html"
 
 distclean:
 	@for i in $(SUBDIRS); do (cd $$i && $(MAKE) distclean) || exit; done
 	$(RM) -- $(configure.1_OBJS) $(configure.html_OBJS) $(project.conf.5_OBJS) $(project.conf.html_OBJS)
+	./docbook.sh -c -P "$(PREFIX)" -- "project.conf.html"
 	$(RM) -- $(TARGETS)
 
 install: $(TARGETS)
