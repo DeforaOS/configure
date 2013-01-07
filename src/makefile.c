@@ -1533,6 +1533,7 @@ static int _clean_targets(Config * config, FILE * fp)
 	if((targets = string_new(p)) == NULL)
 		return 1;
 	q = targets;
+	/* remove all of the object files */
 	fputs("\t$(RM) --", fp);
 	for(i = 0;; i++)
 	{
@@ -1543,10 +1544,30 @@ static int _clean_targets(Config * config, FILE * fp)
 		fprintf(fp, "%s%s%s", " $(", targets, "_OBJS)");
 		if(c == '\0')
 			break;
+		targets[i] = c;
 		targets += i + 1;
 		i = 0;
 	}
 	fputc('\n', fp);
+	/* let each scripted target remove the relevant object files */
+	for(i = 0;; i++)
+	{
+		if(targets[i] != ',' && targets[i] != '\0')
+			continue;
+		c = targets[i];
+		targets[i] = '\0';
+		if((p = config_get(config, targets, "type")) != NULL
+				&& strcmp(p, "script") == 0
+				&& (p = config_get(config, targets, "script"))
+				!= NULL)
+			fprintf(fp, "\t%s%s%s%s\n", p, " -c -P \"$(PREFIX)\""
+					" -- \"", targets, "\"");
+		if(c == '\0')
+			break;
+		targets[i] = c;
+		targets += i + 1;
+		i = 0;
+	}
 	string_delete(q);
 	return 0;
 }
