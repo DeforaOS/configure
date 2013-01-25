@@ -222,7 +222,8 @@ static int _variables_dist(Configure * configure, FILE * fp)
 				_makefile_output_variable(fp, "DESTDIR",
 						configure->prefs->destdir);
 			}
-			_makefile_output_variable(fp, "MKDIR", "mkdir -p");
+			_makefile_output_variable(fp, "MKDIR",
+					"mkdir -m 0755 -p");
 			_makefile_output_variable(fp, "INSTALL", "install");
 			_makefile_output_variable(fp, "RM", "rm -f");
 			break;
@@ -373,7 +374,8 @@ static int _variables_executables(Configure * configure, FILE * fp)
 		_makefile_output_variable(fp, "TAR", "tar -czvf");
 	if(targets != NULL || includes != NULL)
 	{
-		_makefile_output_variable(fp, "MKDIR", "mkdir -p");
+		_makefile_output_variable(fp, "MKDIR",
+				"mkdir -m 0755 -p");
 		_makefile_output_variable(fp, "INSTALL", "install");
 	}
 	return 0;
