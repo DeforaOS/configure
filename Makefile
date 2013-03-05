@@ -14,13 +14,13 @@ TAR	= tar -czvf
 all: subdirs
 
 subdirs:
-	@for i in $(SUBDIRS); do (cd $$i && $(MAKE)) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE)) || exit; done
 
 clean:
-	@for i in $(SUBDIRS); do (cd $$i && $(MAKE) clean) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) clean) || exit; done
 
 distclean:
-	@for i in $(SUBDIRS); do (cd $$i && $(MAKE) distclean) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) distclean) || exit; done
 
 dist:
 	$(RM) -r -- $(PACKAGE)-$(VERSION)
@@ -62,7 +62,7 @@ dist:
 	$(RM) -- $(PACKAGE)-$(VERSION)
 
 install:
-	@for i in $(SUBDIRS); do (cd $$i && $(MAKE) install) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) install) || exit; done
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
 	$(INSTALL) -m 0644 -- BUGS $(DESTDIR)$(PREFIX)/share/doc/configure/BUGS
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
@@ -73,7 +73,7 @@ install:
 	$(INSTALL) -m 0644 -- README $(DESTDIR)$(PREFIX)/share/doc/configure/README
 
 uninstall:
-	@for i in $(SUBDIRS); do (cd $$i && $(MAKE) uninstall) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) uninstall) || exit; done
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/BUGS
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/CHANGES
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/INSTALL
