@@ -180,7 +180,10 @@ static int _variables_print(Configure * configure, FILE * fp,
 			continue;
 		c = prints[i];
 		prints[i] = '\0';
-		fprintf(fp, " %s", prints);
+		if(strchr(prints, ' ') != NULL)
+			fprintf(fp, " \"%s\"", prints);
+		else
+			fprintf(fp, " %s", prints);
 		if(c == '\0')
 			break;
 		prints += i + 1;
