@@ -787,7 +787,7 @@ static int _targets_subdirs(Configure * configure, FILE * fp)
 		return 0;
 	if((subdirs = config_get(configure->config, "", "subdirs")) != NULL)
 		fprintf(fp, "%s", "\nsubdirs:\n\t@for i in $(SUBDIRS); do"
-				" (cd $$i && $(MAKE)) || exit; done\n");
+				" (cd \"$$i\" && $(MAKE)) || exit; done\n");
 	return 0;
 }
 
@@ -1517,7 +1517,7 @@ static int _write_clean(Configure * configure, FILE * fp)
 		return 0;
 	fputs("\nclean:\n", fp);
 	if(config_get(configure->config, "", "subdirs") != NULL)
-		fputs("\t@for i in $(SUBDIRS); do (cd $$i && $(MAKE) clean)"
+		fputs("\t@for i in $(SUBDIRS); do (cd \"$$i\" && $(MAKE) clean)"
 				" || exit; done\n", fp);
 	return _clean_targets(configure->config, fp);
 }
@@ -1586,7 +1586,7 @@ static int _write_distclean(Configure * configure, FILE * fp)
 		fputs(" clean\n", fp);
 	else
 	{
-		fputs("\n\t@for i in $(SUBDIRS); do (cd $$i"
+		fputs("\n\t@for i in $(SUBDIRS); do (cd \"$$i\""
 				" && $(MAKE) distclean) || exit; done\n", fp);
 		_clean_targets(configure->config, fp);
 	}
@@ -1726,7 +1726,8 @@ static int _write_install(Configure * configure, FILE * fp)
 		fputs(" $(TARGETS)", fp);
 	fputc('\n', fp);
 	if(config_get(configure->config, "", "subdirs") != NULL)
-		fputs("\t@for i in $(SUBDIRS); do (cd $$i && $(MAKE) install)"
+		fputs("\t@for i in $(SUBDIRS); do (cd \"$$i\""
+				" && $(MAKE) install)"
 				" || exit; done\n", fp);
 	ret |= _install_targets(configure, fp);
 	ret |= _install_includes(configure, fp);
@@ -2044,7 +2045,7 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 		return 0;
 	fputs("\nuninstall:\n", fp);
 	if(config_get(configure->config, "", "subdirs") != NULL)
-		fputs("\t@for i in $(SUBDIRS); do (cd $$i &&"
+		fputs("\t@for i in $(SUBDIRS); do (cd \"$$i\" &&"
 				" $(MAKE) uninstall) || exit; done\n", fp);
 	if((p = config_get(configure->config, "", "targets")) != NULL)
 	{
