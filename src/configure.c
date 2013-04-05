@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2004-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2004-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Devel configure */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -157,6 +157,7 @@ unsigned int enum_string_short(unsigned int last, const String * strings[],
 /* configure */
 static void _configure_detect(Configure * configure);
 static HostKernel _detect_kernel(HostOS os, char const * release);
+static void _configure_detect_programs(Configure * configure);
 static int _configure_load(Prefs * prefs, char const * directory,
 		configArray * ca);
 static int _load_subdirs(Prefs * prefs, char const * directory,
@@ -178,6 +179,7 @@ static int _configure(Prefs * prefs, char const * directory)
 		return error_print(PACKAGE);
 	cfgr.prefs = prefs;
 	_configure_detect(&cfgr);
+	_configure_detect_programs(&cfgr);
 	if((ret = _configure_load(prefs, directory, ca)) == 0)
 	{
 		if(prefs->flags & PREFS_n)
@@ -256,6 +258,33 @@ static HostKernel _detect_kernel(HostOS os, char const * release)
 			return i;
 	}
 	return i;
+}
+
+static void _configure_detect_programs(Configure * configure)
+{
+	configure->programs.ar = "ar";
+	configure->programs.as = "as";
+	configure->programs.cc = "cc";
+	configure->programs.ccshared = "$(CC) -shared";
+	configure->programs.cxx = "c++";
+	configure->programs.install = "install";
+	configure->programs.libtool = "libtool";
+	configure->programs.ln = "ln -f";
+	configure->programs.mkdir = "mkdir -m 0755 -p";
+	configure->programs.ranlib = "ranlib";
+	configure->programs.rm = "rm -f";
+	configure->programs.tar = "tar -czvf";
+	/* platform-specific */
+	switch(configure->os)
+	{
+		case HO_WIN32:
+			configure->programs.ccshared = "$(CC) -shared"
+				" -Wl,-no-undefined"
+				" -Wl,--enable-runtime-pseudo-reloc";
+			break;
+		default:
+			break;
+	}
 }
 
 static int _configure_load(Prefs * prefs, String const * directory,

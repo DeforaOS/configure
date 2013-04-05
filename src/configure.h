@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2006-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2006-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Devel configure */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -130,6 +130,21 @@ typedef struct _Configure
 	HostArch arch;
 	HostOS os;
 	HostKernel kernel;
+	struct
+	{
+		char const * ar;
+		char const * as;
+		char const * cc;
+		char const * ccshared;
+		char const * cxx;
+		char const * install;
+		char const * libtool;
+		char const * ln;
+		char const * mkdir;
+		char const * ranlib;
+		char const * rm;
+		char const * tar;
+	} programs;
 } Configure;
 
 

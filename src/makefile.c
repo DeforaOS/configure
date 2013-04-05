@@ -226,9 +226,11 @@ static int _variables_dist(Configure * configure, FILE * fp)
 						configure->prefs->destdir);
 			}
 			_makefile_output_variable(fp, "MKDIR",
-					"mkdir -m 0755 -p");
-			_makefile_output_variable(fp, "INSTALL", "install");
-			_makefile_output_variable(fp, "RM", "rm -f");
+					configure->programs.mkdir);
+			_makefile_output_variable(fp, "INSTALL",
+					configure->programs.install);
+			_makefile_output_variable(fp, "RM",
+					configure->programs.rm);
 			break;
 		}
 		if(c == '\0')
@@ -370,16 +372,17 @@ static int _variables_executables(Configure * configure, FILE * fp)
 	}
 	if(targets != NULL || includes != NULL || package != NULL)
 	{
-		_makefile_output_variable(fp, "RM", "rm -f");
-		_makefile_output_variable(fp, "LN", "ln -f");
+		_makefile_output_variable(fp, "RM", configure->programs.rm);
+		_makefile_output_variable(fp, "LN", configure->programs.ln);
 	}
 	if(package != NULL)
-		_makefile_output_variable(fp, "TAR", "tar -czvf");
+		_makefile_output_variable(fp, "TAR", configure->programs.tar);
 	if(targets != NULL || includes != NULL)
 	{
 		_makefile_output_variable(fp, "MKDIR",
-				"mkdir -m 0755 -p");
-		_makefile_output_variable(fp, "INSTALL", "install");
+				configure->programs.mkdir);
+		_makefile_output_variable(fp, "INSTALL",
+				configure->programs.install);
 	}
 	return 0;
 }
@@ -486,7 +489,8 @@ static void _targets_asflags(Configure * configure, FILE * fp)
 	asf = config_get(configure->config, NULL, "asflags");
 	if(as != NULL || asf != NULL)
 	{
-		_makefile_output_variable(fp, "AS", (as != NULL) ? as : "as");
+		_makefile_output_variable(fp, "AS", (as != NULL) ? as
+				: configure->programs.as);
 		_makefile_output_variable(fp, "ASFLAGS", asf);
 	}
 }
@@ -509,7 +513,7 @@ static void _targets_cflags(Configure * configure, FILE * fp)
 			&& cc == NULL)
 		return;
 	if(cc == NULL)
-		_makefile_output_variable(fp, "CC", "cc");
+		_makefile_output_variable(fp, "CC", configure->programs.cc);
 	else
 		_makefile_output_variable(fp, "CC", cc);
 	_makefile_output_variable(fp, "CPPFLAGSF", cppf);
@@ -533,7 +537,7 @@ static void _targets_cxxflags(Configure * configure, FILE * fp)
 
 	if((p = config_get(configure->config, NULL, "cxxflags_force")) != NULL)
 	{
-		_makefile_output_variable(fp, "CXX", "c++");
+		_makefile_output_variable(fp, "CXX", configure->programs.cxx);
 		fprintf(fp, "%s%s", "CXXFLAGSF= ", p);
 		if(configure->os == HO_GNU_LINUX && string_find(p, "-ansi"))
 			fprintf(fp, "%s", " -D _GNU_SOURCE");
@@ -542,7 +546,8 @@ static void _targets_cxxflags(Configure * configure, FILE * fp)
 	if((q = config_get(configure->config, NULL, "cxxflags")) != NULL)
 	{
 		if(p == NULL)
-			_makefile_output_variable(fp, "CXX", "c++");
+			_makefile_output_variable(fp, "CXX",
+					configure->programs.cxx);
 		fprintf(fp, "%s%s", "CXXFLAGS= ", q);
 		if(configure->os == HO_GNU_LINUX && string_find(q, "-ansi"))
 			fprintf(fp, "%s", " -D _GNU_SOURCE");
@@ -647,7 +652,6 @@ static void _binary_ldflags(Configure * configure, FILE * fp,
 static void _variables_library(Configure * configure, FILE * fp, char * done)
 {
 	String const * libdir;
-	String const * ccshared = "$(CC) -shared";
 	String const * p;
 
 	if(!done[TT_LIBRARY] && !done[TT_SCRIPT])
@@ -672,20 +676,17 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 		_targets_exeext(configure, fp);
 	}
 	if((p = config_get(configure->config, NULL, "ar")) == NULL)
-		_makefile_output_variable(fp, "AR", "ar");
+		_makefile_output_variable(fp, "AR", configure->programs.ar);
 	else
 		_makefile_output_variable(fp, "AR", p);
 	if((p = config_get(configure->config, NULL, "ranlib")) == NULL)
-		_makefile_output_variable(fp, "RANLIB", "ranlib");
+		_makefile_output_variable(fp, "RANLIB",
+				configure->programs.ranlib);
 	else
 		_makefile_output_variable(fp, "RANLIB", p);
 	if((p = config_get(configure->config, NULL, "ld")) == NULL)
-	{
-		if(configure->os == HO_WIN32)
-			ccshared = "$(CC) -shared -Wl,-no-undefined"
-				" -Wl,--enable-runtime-pseudo-reloc";
-		_makefile_output_variable(fp, "CCSHARED", ccshared);
-	}
+		_makefile_output_variable(fp, "CCSHARED",
+				configure->programs.ccshared);
 	else
 		_makefile_output_variable(fp, "CCSHARED", p);
 }
@@ -698,7 +699,8 @@ static void _variables_libtool(Configure * configure, FILE * fp, char * done)
 	if(!done[TT_LIBTOOL])
 	{
 		if((p = config_get(configure->config, NULL, "libtool")) == NULL)
-			_makefile_output_variable(fp, "LIBTOOL", "libtool");
+			_makefile_output_variable(fp, "LIBTOOL",
+					configure->programs.libtool);
 		else
 			_makefile_output_variable(fp, "LIBTOOL", p);
 	}
