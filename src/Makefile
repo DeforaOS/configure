@@ -55,7 +55,7 @@ distclean: clean
 
 install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 0755 -- configure $(DESTDIR)$(BINDIR)/configure
+	$(INSTALL) -m 0755 configure $(DESTDIR)$(BINDIR)/configure
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(BINDIR)/configure

@@ -64,13 +64,13 @@ dist:
 install:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) install) || exit; done
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
-	$(INSTALL) -m 0644 -- BUGS $(DESTDIR)$(PREFIX)/share/doc/configure/BUGS
+	$(INSTALL) -m 0644 BUGS $(DESTDIR)$(PREFIX)/share/doc/configure/BUGS
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
-	$(INSTALL) -m 0644 -- CHANGES $(DESTDIR)$(PREFIX)/share/doc/configure/CHANGES
+	$(INSTALL) -m 0644 CHANGES $(DESTDIR)$(PREFIX)/share/doc/configure/CHANGES
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
-	$(INSTALL) -m 0644 -- INSTALL $(DESTDIR)$(PREFIX)/share/doc/configure/INSTALL
+	$(INSTALL) -m 0644 INSTALL $(DESTDIR)$(PREFIX)/share/doc/configure/INSTALL
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
-	$(INSTALL) -m 0644 -- README $(DESTDIR)$(PREFIX)/share/doc/configure/README
+	$(INSTALL) -m 0644 README $(DESTDIR)$(PREFIX)/share/doc/configure/README
 
 uninstall:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) uninstall) || exit; done
