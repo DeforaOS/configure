@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2006-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2006-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Devel configure */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1825,7 +1825,7 @@ static void _install_target_binary(Configure * configure, FILE * fp,
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0755 -- ", target,
+	fprintf(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0755 ", target,
 			" $(DESTDIR)", path, target);
 }
 
@@ -1841,7 +1841,7 @@ static int _install_target_library(Configure * configure, FILE * fp,
 		return 0;
 	soext = configure_get_soext(configure);
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0644 -- ", target,
+	fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0644 ", target,
 			".a $(DESTDIR)", path, target, ".a\n");
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
@@ -1849,7 +1849,7 @@ static int _install_target_library(Configure * configure, FILE * fp,
 		soname = string_new_append(target, soext, ".0", NULL);
 	if(soname == NULL)
 		return 1;
-	fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 -- ", soname,
+	fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 ", soname,
 			".0 $(DESTDIR)", path, soname, ".0\n");
 	fprintf(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
 			".0 $(DESTDIR)", path, soname, "\n");
@@ -1881,7 +1881,7 @@ static void _install_target_object(Configure * configure, FILE * fp,
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 -- ", target,
+	fprintf(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 ", target,
 			" $(DESTDIR)", path, target);
 }
 
@@ -1895,7 +1895,7 @@ static void _install_target_plugin(Configure * configure, FILE * fp,
 		return;
 	soext = configure_get_soext(configure);
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%s%s%s%s/%s%s%s", "\t$(INSTALL) -m 0644 -- ", target,
+	fprintf(fp, "%s%s%s%s%s/%s%s%s", "\t$(INSTALL) -m 0644 ", target,
 			soext, " $(DESTDIR)", path, target, soext, "\n");
 }
 
@@ -1953,7 +1953,7 @@ static int _install_include(Config * config, FILE * fp, String const * include)
 	if((install = config_get(config, include, "install")) == NULL)
 		install = "$(INCLUDEDIR)";
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", install);
-	fprintf(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 -- ", include,
+	fprintf(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 ", include,
 			" $(DESTDIR)", install, include);
 	return 0;
 }
@@ -1989,7 +1989,7 @@ static int _install_dist(Configure * configure, FILE * fp)
 		{
 			fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", d);
 			fprintf(fp, "%s%s%s%s%s%s/%s\n", "\t$(INSTALL) -m ", m,
-					" -- ", dist, " $(DESTDIR)", d, dist);
+					" ", dist, " $(DESTDIR)", d, dist);
 		}
 		if(c == '\0')
 			break;
