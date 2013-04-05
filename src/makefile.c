@@ -90,11 +90,11 @@ static int _makefile_write(Configure * configure, FILE * fp, configArray * ca,
 		return 1;
 	if(!(configure->prefs->flags & PREFS_n))
 		fprintf(fp, "%s%s%s%s%s", "\n.PHONY: all",
-				config_get(config, "", "subdirs") != NULL
+				config_get(config, NULL, "subdirs") != NULL
 				? " subdirs" : "",
 				" clean distclean",
-				config_get(config, "", "package") != NULL
-				&& config_get(config, "", "version") != NULL
+				config_get(config, NULL, "package") != NULL
+				&& config_get(config, NULL, "version") != NULL
 				? " dist" : "",
 				" install uninstall\n");
 	return 0;
@@ -115,7 +115,7 @@ static int _write_variables(Configure * configure, FILE * fp)
 	int ret = 0;
 	String const * directory;
 	
-	directory = config_get(configure->config, "", "directory");
+	directory = config_get(configure->config, NULL, "directory");
 	ret |= _variables_package(configure, fp, directory);
 	ret |= _variables_print(configure, fp, "subdirs", "SUBDIRS");
 	ret |= _variables_dist(configure, fp);
@@ -134,11 +134,11 @@ static int _variables_package(Configure * configure, FILE * fp,
 	String const * version;
 	String const * p;
 
-	if((package = config_get(configure->config, "", "package")) == NULL)
+	if((package = config_get(configure->config, NULL, "package")) == NULL)
 		return 0;
 	if(configure->prefs->flags & PREFS_v)
 		printf("%s%s", "Package: ", package);
-	if((version = config_get(configure->config, "", "version")) == NULL)
+	if((version = config_get(configure->config, NULL, "version")) == NULL)
 	{
 		if(configure->prefs->flags & PREFS_v)
 			fputc('\n', stdout);
@@ -150,7 +150,7 @@ static int _variables_package(Configure * configure, FILE * fp,
 		printf(" %s\n", version);
 	_makefile_output_variable(fp, "PACKAGE", package);
 	_makefile_output_variable(fp, "VERSION", version);
-	if((p = config_get(configure->config, "", "config")) != NULL)
+	if((p = config_get(configure->config, NULL, "config")) != NULL)
 		return settings(configure->prefs, configure->config, directory,
 			       	package, version);
 	return 0;
@@ -167,7 +167,7 @@ static int _variables_print(Configure * configure, FILE * fp,
 
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
-	if((p = config_get(configure->config, "", input)) == NULL)
+	if((p = config_get(configure->config, NULL, input)) == NULL)
 		return 0;
 	if((prints = string_new(p)) == NULL)
 		return 1;
@@ -203,7 +203,7 @@ static int _variables_dist(Configure * configure, FILE * fp)
 
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
-	if((p = config_get(configure->config, "", "dist")) == NULL)
+	if((p = config_get(configure->config, NULL, "dist")) == NULL)
 		return 0;
 	if((dist = string_new(p)) == NULL)
 		return 1;
@@ -217,7 +217,8 @@ static int _variables_dist(Configure * configure, FILE * fp)
 		if(config_get(configure->config, dist, "install") != NULL)
 		{
 			/* FIXME may still need to be output */
-			if(config_get(configure->config, "", "targets") == NULL)
+			if(config_get(configure->config, NULL, "targets")
+					== NULL)
 			{
 				_makefile_output_variable(fp, "PREFIX",
 						configure->prefs->prefix);
@@ -252,7 +253,7 @@ static int _variables_targets(Configure * configure, FILE * fp)
 
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
-	if((p = config_get(configure->config, "", "targets")) == NULL)
+	if((p = config_get(configure->config, NULL, "targets")) == NULL)
 		return 0;
 	if((prints = string_new(p)) == NULL)
 		return 1;
@@ -338,9 +339,9 @@ static int _variables_executables(Configure * configure, FILE * fp)
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
 	memset(&done, 0, sizeof(done));
-	targets = config_get(configure->config, "", "targets");
-	includes = config_get(configure->config, "", "includes");
-	package = config_get(configure->config, "", "package");
+	targets = config_get(configure->config, NULL, "targets");
+	includes = config_get(configure->config, NULL, "includes");
+	package = config_get(configure->config, NULL, "package");
 	if(targets != NULL)
 	{
 		if((p = string_new(targets)) == NULL)
@@ -481,8 +482,8 @@ static void _targets_asflags(Configure * configure, FILE * fp)
 	String const * as;
 	String const * asf;
 
-	as = config_get(configure->config, "", "as");
-	asf = config_get(configure->config, "", "asflags");
+	as = config_get(configure->config, NULL, "as");
+	asf = config_get(configure->config, NULL, "asflags");
 	if(as != NULL || asf != NULL)
 	{
 		_makefile_output_variable(fp, "AS", (as != NULL) ? as : "as");
@@ -499,11 +500,11 @@ static void _targets_cflags(Configure * configure, FILE * fp)
 	String const * cpp;
 	String * p;
 
-	cppf = config_get(configure->config, "", "cppflags_force");
-	cpp = config_get(configure->config, "", "cppflags");
-	cff = config_get(configure->config, "", "cflags_force");
-	cf = config_get(configure->config, "", "cflags");
-	cc = config_get(configure->config, "", "cc");
+	cppf = config_get(configure->config, NULL, "cppflags_force");
+	cpp = config_get(configure->config, NULL, "cppflags");
+	cff = config_get(configure->config, NULL, "cflags_force");
+	cf = config_get(configure->config, NULL, "cflags");
+	cc = config_get(configure->config, NULL, "cc");
 	if(cppf == NULL && cpp == NULL && cff == NULL && cf == NULL
 			&& cc == NULL)
 		return;
@@ -530,7 +531,7 @@ static void _targets_cxxflags(Configure * configure, FILE * fp)
 	String const * p;
 	String const * q;
 
-	if((p = config_get(configure->config, "", "cxxflags_force")) != NULL)
+	if((p = config_get(configure->config, NULL, "cxxflags_force")) != NULL)
 	{
 		_makefile_output_variable(fp, "CXX", "c++");
 		fprintf(fp, "%s%s", "CXXFLAGSF= ", p);
@@ -538,7 +539,7 @@ static void _targets_cxxflags(Configure * configure, FILE * fp)
 			fprintf(fp, "%s", " -D _GNU_SOURCE");
 		fputc('\n', fp);
 	}
-	if((q = config_get(configure->config, "", "cxxflags")) != NULL)
+	if((q = config_get(configure->config, NULL, "cxxflags")) != NULL)
 	{
 		if(p == NULL)
 			_makefile_output_variable(fp, "CXX", "c++");
@@ -559,13 +560,13 @@ static void _targets_ldflags(Configure * configure, FILE * fp)
 {
 	String const * p;
 
-	if((p = config_get(configure->config, "", "ldflags_force")) != NULL)
+	if((p = config_get(configure->config, NULL, "ldflags_force")) != NULL)
 	{
 		fputs("LDFLAGSF=", fp);
 		_binary_ldflags(configure, fp, p);
 		fputc('\n', fp);
 	}
-	if((p = config_get(configure->config, "", "ldflags")) != NULL)
+	if((p = config_get(configure->config, NULL, "ldflags")) != NULL)
 	{
 		fputs("LDFLAGS\t=", fp);
 		_binary_ldflags(configure, fp, p);
@@ -656,7 +657,7 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 		_makefile_output_variable(fp, "DESTDIR",
 				configure->prefs->destdir);
 	}
-	if((libdir = config_get(configure->config, "", "libdir")) == NULL)
+	if((libdir = config_get(configure->config, NULL, "libdir")) == NULL)
 		libdir = configure->prefs->libdir;
 	if(libdir[0] == '/')
 		_makefile_output_variable(fp, "LIBDIR", libdir);
@@ -670,15 +671,15 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 		_targets_ldflags(configure, fp);
 		_targets_exeext(configure, fp);
 	}
-	if((p = config_get(configure->config, "", "ar")) == NULL)
+	if((p = config_get(configure->config, NULL, "ar")) == NULL)
 		_makefile_output_variable(fp, "AR", "ar");
 	else
 		_makefile_output_variable(fp, "AR", p);
-	if((p = config_get(configure->config, "", "ranlib")) == NULL)
+	if((p = config_get(configure->config, NULL, "ranlib")) == NULL)
 		_makefile_output_variable(fp, "RANLIB", "ranlib");
 	else
 		_makefile_output_variable(fp, "RANLIB", p);
-	if((p = config_get(configure->config, "", "ld")) == NULL)
+	if((p = config_get(configure->config, NULL, "ld")) == NULL)
 	{
 		if(configure->os == HO_WIN32)
 			ccshared = "$(CC) -shared -Wl,-no-undefined"
@@ -696,7 +697,7 @@ static void _variables_libtool(Configure * configure, FILE * fp, char * done)
 	_variables_library(configure, fp, done);
 	if(!done[TT_LIBTOOL])
 	{
-		if((p = config_get(configure->config, "", "libtool")) == NULL)
+		if((p = config_get(configure->config, NULL, "libtool")) == NULL)
 			_makefile_output_variable(fp, "LIBTOOL", "libtool");
 		else
 			_makefile_output_variable(fp, "LIBTOOL", p);
@@ -718,7 +719,7 @@ static int _variables_includes(Configure * configure, FILE * fp)
 {
 	String const * includes;
 
-	if((includes = config_get(configure->config, "", "includes")) == NULL)
+	if((includes = config_get(configure->config, NULL, "includes")) == NULL)
 		return 0;
 	if(fp == NULL)
 		return 0;
@@ -747,7 +748,7 @@ static int _write_targets(Configure * configure, FILE * fp)
 	if(_targets_all(configure, fp) != 0
 			|| _targets_subdirs(configure, fp) != 0)
 		return 1;
-	if((p = config_get(configure->config, "", "targets")) == NULL)
+	if((p = config_get(configure->config, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -773,9 +774,9 @@ static int _targets_all(Configure * configure, FILE * fp)
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
 	fprintf(fp, "%s", "\nall:");
-	if(config_get(configure->config, "", "subdirs") != NULL)
+	if(config_get(configure->config, NULL, "subdirs") != NULL)
 		fprintf(fp, "%s", " subdirs");
-	if(config_get(configure->config, "", "targets") != NULL)
+	if(config_get(configure->config, NULL, "targets") != NULL)
 		fprintf(fp, "%s", " $(TARGETS)");
 	fprintf(fp, "%s", "\n");
 	return 0;
@@ -787,7 +788,7 @@ static int _targets_subdirs(Configure * configure, FILE * fp)
 
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
-	if((subdirs = config_get(configure->config, "", "subdirs")) != NULL)
+	if((subdirs = config_get(configure->config, NULL, "subdirs")) != NULL)
 		fprintf(fp, "%s", "\nsubdirs:\n\t@for i in $(SUBDIRS); do"
 				" (cd \"$$i\" && $(MAKE)) || exit; done\n");
 	return 0;
@@ -1250,7 +1251,7 @@ static int _write_objects(Configure * configure, FILE * fp)
 	size_t i;
 	int ret = 0;
 
-	if((p = config_get(configure->config, "", "targets")) == NULL)
+	if((p = config_get(configure->config, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -1518,7 +1519,7 @@ static int _write_clean(Configure * configure, FILE * fp)
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
 	fputs("\nclean:\n", fp);
-	if(config_get(configure->config, "", "subdirs") != NULL)
+	if(config_get(configure->config, NULL, "subdirs") != NULL)
 		fputs("\t@for i in $(SUBDIRS); do (cd \"$$i\" && $(MAKE) clean)"
 				" || exit; done\n", fp);
 	return _clean_targets(configure->config, fp);
@@ -1532,7 +1533,7 @@ static int _clean_targets(Config * config, FILE * fp)
 	size_t i;
 	char c;
 
-	if((p = config_get(config, "", "targets")) == NULL)
+	if((p = config_get(config, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -1584,7 +1585,7 @@ static int _write_distclean(Configure * configure, FILE * fp)
 		return 0;
 	fputs("\ndistclean:", fp);
 	/* only depend on the "clean" target if we do not have subfolders */
-	if((subdirs = config_get(configure->config, "", "subdirs")) == NULL)
+	if((subdirs = config_get(configure->config, NULL, "subdirs")) == NULL)
 		fputs(" clean\n", fp);
 	else
 	{
@@ -1593,7 +1594,7 @@ static int _write_distclean(Configure * configure, FILE * fp)
 		_clean_targets(configure->config, fp);
 	}
 	/* FIXME do not erase targets that need be distributed */
-	if(config_get(configure->config, "", "targets") != NULL)
+	if(config_get(configure->config, NULL, "targets") != NULL)
 		fputs("\t$(RM) -- $(TARGETS)\n", fp);
 	return 0;
 }
@@ -1609,8 +1610,8 @@ static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
-	package = config_get(configure->config, "", "package");
-	version = config_get(configure->config, "", "version");
+	package = config_get(configure->config, NULL, "package");
+	version = config_get(configure->config, NULL, "version");
 	if(package == NULL || version == NULL)
 		return 0;
 	fputs("\ndist:\n\t$(RM) -r -- $(PACKAGE)-$(VERSION)\n"
@@ -1646,13 +1647,13 @@ static int _dist_subdir(Config * config, FILE * fp, Config * subdir)
 	size_t i;
 	char c;
 
-	path = config_get(config, "", "directory");
+	path = config_get(config, NULL, "directory");
 	len = string_length(path);
-	path = config_get(subdir, "", "directory");
+	path = config_get(subdir, NULL, "directory");
 	path = &path[len];
 	if(path[0] == '/')
 		path++;
-	if((p = config_get(subdir, "", "targets")) != NULL)
+	if((p = config_get(subdir, NULL, "targets")) != NULL)
 	{
 		/* FIXME unique SOURCES */
 		if((targets = string_new(p)) == NULL)
@@ -1674,9 +1675,9 @@ static int _dist_subdir(Config * config, FILE * fp, Config * subdir)
 		}
 		string_delete(q);
 	}
-	if((includes = config_get(subdir, "", "includes")) != NULL)
+	if((includes = config_get(subdir, NULL, "includes")) != NULL)
 		_dist_subdir_dist(fp, path, includes);
-	if((dist = config_get(subdir, "", "dist")) != NULL)
+	if((dist = config_get(subdir, NULL, "dist")) != NULL)
 		_dist_subdir_dist(fp, path, dist);
 	fprintf(fp, "%s%s%s%s%s", "\t\t$(PACKAGE)-$(VERSION)/", path,
 			path[0] == '\0' ? "" : "/", PROJECT_CONF,
@@ -1724,10 +1725,10 @@ static int _write_install(Configure * configure, FILE * fp)
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
 	fputs("\ninstall:", fp);
-	if(config_get(configure->config, "", "targets") != NULL)
+	if(config_get(configure->config, NULL, "targets") != NULL)
 		fputs(" $(TARGETS)", fp);
 	fputc('\n', fp);
-	if(config_get(configure->config, "", "subdirs") != NULL)
+	if(config_get(configure->config, NULL, "subdirs") != NULL)
 		fputs("\t@for i in $(SUBDIRS); do (cd \"$$i\""
 				" && $(MAKE) install)"
 				" || exit; done\n", fp);
@@ -1748,7 +1749,7 @@ static int _install_targets(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	if((p = config_get(configure->config, "", "targets")) == NULL)
+	if((p = config_get(configure->config, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -1923,7 +1924,7 @@ static int _install_includes(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	if((p = config_get(configure->config, "", "includes")) == NULL)
+	if((p = config_get(configure->config, NULL, "includes")) == NULL)
 		return 0;
 	if((includes = string_new(p)) == NULL)
 		return 1;
@@ -1970,7 +1971,7 @@ static int _install_dist(Configure * configure, FILE * fp)
 	String const * d;
 	String const * m;
 
-	if((p = config_get(configure->config, "", "dist")) == NULL)
+	if((p = config_get(configure->config, NULL, "dist")) == NULL)
 		return 0;
 	if((dist = string_new(p)) == NULL)
 		return 1;
@@ -2046,10 +2047,10 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
 	fputs("\nuninstall:\n", fp);
-	if(config_get(configure->config, "", "subdirs") != NULL)
+	if(config_get(configure->config, NULL, "subdirs") != NULL)
 		fputs("\t@for i in $(SUBDIRS); do (cd \"$$i\" &&"
 				" $(MAKE) uninstall) || exit; done\n", fp);
-	if((p = config_get(configure->config, "", "targets")) != NULL)
+	if((p = config_get(configure->config, NULL, "targets")) != NULL)
 	{
 		if((targets = string_new(p)) == NULL)
 			return 1;
@@ -2068,7 +2069,7 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 		}
 		string_delete(q);
 	}
-	if((p = config_get(configure->config, "", "includes")) != NULL)
+	if((p = config_get(configure->config, NULL, "includes")) != NULL)
 	{
 		if((includes = string_new(p)) == NULL)
 			return 1;
@@ -2088,7 +2089,7 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 		}
 		string_delete(q);
 	}
-	if((p = config_get(configure->config, "", "dist")) != NULL)
+	if((p = config_get(configure->config, NULL, "dist")) != NULL)
 	{
 		if((dist = string_new(p)) == NULL)
 			return 1;
