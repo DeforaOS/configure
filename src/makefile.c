@@ -13,8 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* TODO:
- * - only check the PREFS_n flags inside a wrapper around fputs()/fprintf()
- * - use "$(RM)" instead of "$(RM) --" on NetBSD < 5.0  */
+ * - only check the PREFS_n flags inside a wrapper around fputs()/fprintf() */
 
 
 
