@@ -532,24 +532,30 @@ static void _targets_cflags(Configure * configure, FILE * fp)
 
 static void _targets_cxxflags(Configure * configure, FILE * fp)
 {
-	String const * p;
-	String const * q;
+	String const * cxx;
+	String const * cxxff;
+	String const * cxxf;
 
-	if((p = config_get(configure->config, NULL, "cxxflags_force")) != NULL)
+	cxx = config_get(configure->config, NULL, "cxx");
+	cxxff = config_get(configure->config, NULL, "cxxflags_force");
+	cxxf = config_get(configure->config, NULL, "cxxflags");
+	if(cxx != NULL || cxxff != NULL || cxxf != NULL)
 	{
-		_makefile_output_variable(fp, "CXX", configure->programs.cxx);
-		fprintf(fp, "%s%s", "CXXFLAGSF= ", p);
-		if(configure->os == HO_GNU_LINUX && string_find(p, "-ansi"))
+		if(cxx == NULL)
+			cxx = configure->programs.cxx;
+		_makefile_output_variable(fp, "CXX", cxx);
+	}
+	if(cxxff != NULL)
+	{
+		fprintf(fp, "%s%s", "CXXFLAGSF= ", cxxff);
+		if(configure->os == HO_GNU_LINUX && string_find(cxxff, "-ansi"))
 			fprintf(fp, "%s", " -D _GNU_SOURCE");
 		fputc('\n', fp);
 	}
-	if((q = config_get(configure->config, NULL, "cxxflags")) != NULL)
+	if(cxxf != NULL)
 	{
-		if(p == NULL)
-			_makefile_output_variable(fp, "CXX",
-					configure->programs.cxx);
-		fprintf(fp, "%s%s", "CXXFLAGS= ", q);
-		if(configure->os == HO_GNU_LINUX && string_find(q, "-ansi"))
+		fprintf(fp, "%s%s", "CXXFLAGS= ", cxxf);
+		if(configure->os == HO_GNU_LINUX && string_find(cxxf, "-ansi"))
 			fprintf(fp, "%s", " -D _GNU_SOURCE");
 		fputc('\n', fp);
 	}
