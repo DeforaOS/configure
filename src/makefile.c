@@ -1654,6 +1654,7 @@ static int _dist_subdir(Config * config, FILE * fp, Config * subdir)
 	String const * dist;
 	size_t i;
 	char c;
+	String const * quote;
 
 	path = config_get(config, NULL, "directory");
 	len = string_length(path);
@@ -1687,8 +1688,9 @@ static int _dist_subdir(Config * config, FILE * fp, Config * subdir)
 		_dist_subdir_dist(fp, path, includes);
 	if((dist = config_get(subdir, NULL, "dist")) != NULL)
 		_dist_subdir_dist(fp, path, dist);
-	fprintf(fp, "%s%s%s%s%s", "\t\t$(PACKAGE)-$(VERSION)/", path,
-			path[0] == '\0' ? "" : "/", PROJECT_CONF,
+	quote = (strchr(path, ' ') != NULL) ? "\"" : "";
+	fprintf(fp, "%s%s%s%s%s%s%s%s", "\t\t", quote, "$(PACKAGE)-$(VERSION)/",
+			path, path[0] == '\0' ? "" : "/", PROJECT_CONF, quote,
 			path[0] == '\0' ? "\n" : " \\\n");
 	return 0;
 }
@@ -1700,6 +1702,7 @@ static int _dist_subdir_dist(FILE * fp, String const * path,
 	String * p;
 	size_t i;
 	char c;
+	String const * quote;
 
 	if((d = string_new(dist)) == NULL)
 		return 1;
@@ -1710,9 +1713,13 @@ static int _dist_subdir_dist(FILE * fp, String const * path,
 			continue;
 		c = d[i];
 		d[i] = '\0';
-		fprintf(fp, "%s%s%s%s%s", "\t\t$(PACKAGE)-$(VERSION)/",
-				path[0] == '\0' ? "" : path,
-				path[0] == '\0' ? "" : "/", d, " \\\n");
+		quote = (strchr(path, ' ') != NULL || strchr(d, ' ') != NULL)
+			? "\"" : "";
+		fprintf(fp, "%s%s%s%s%s%s%s%s", "\t\t", quote,
+				"$(PACKAGE)-$(VERSION)/",
+				(path[0] == '\0') ? "" : path,
+				(path[0] == '\0') ? "" : "/",
+				d, quote, " \\\n");
 		if(c == '\0')
 			break;
 		d[i] = c;
