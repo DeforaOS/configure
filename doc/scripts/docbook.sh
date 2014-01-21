@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2012-2013 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2012-2014 Pierre Pronchery <khorben@defora.org>
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
@@ -123,7 +123,7 @@ while [ $# -gt 0 ]; do
 	#install
 	if [ "$install" -eq 1 ]; then
 		$DEBUG $MKDIR -- "$instdir"			|| exit 2
-		$DEBUG $INSTALL -- "$target" "$instdir/$target"	|| exit 2
+		$DEBUG $INSTALL "$target" "$instdir/$target"	|| exit 2
 		continue
 	fi
 
