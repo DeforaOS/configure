@@ -26,7 +26,7 @@
 
 #variables
 PREFIX="/usr/local"
-. "../config.sh"
+[ -f "../config.sh" ] && . "../config.sh"
 #executables
 DEBUG="_debug"
 INSTALL="install -m 0644"
@@ -41,6 +41,14 @@ _debug()
 {
 	echo "$@" 1>&2
 	"$@"
+}
+
+
+#error
+_error()
+{
+	echo "docbook.sh: $@" 1>&2
+	return 2
 }
 
 
@@ -81,6 +89,12 @@ done
 shift $((OPTIND - 1))
 if [ $# -eq 0 ]; then
 	_usage
+	exit $?
+fi
+
+#check the variables
+if [ -z "$PACKAGE" ]; then
+	_error "The PACKAGE variable needs to be set"
 	exit $?
 fi
 
