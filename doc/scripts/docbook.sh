@@ -29,6 +29,7 @@ PREFIX="/usr/local"
 [ -f "../config.sh" ] && . "../config.sh"
 #executables
 DEBUG="_debug"
+FOP="fop"
 INSTALL="install -m 0644"
 MKDIR="mkdir -m 0755 -p"
 RM="rm -f"
@@ -57,6 +58,13 @@ _docbook()
 			XSL="http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl"
 			[ -f "${target%.*}.xsl" ] && XSL="${target%.*}.xsl"
 			$DEBUG $XSLTPROC -o "$target" "$XSL" "$source"
+			;;
+		pdf)
+			XSL="http://docbook.sourceforge.net/release/xsl/current/fo/docbook.xsl"
+			[ -f "${target%.*}.xsl" ] && XSL="${target%.*}.xsl"
+			$DEBUG $XSLTPROC -o "${target%.*}.fo" "$XSL" "$source" &&
+			$DEBUG $FOP -fo "${target%.*}.fo" -pdf "$target"
+			$RM -- "${target%.*}.fo"
 			;;
 		1|2|3|4|5|6|7|8|9)
 			XSL="http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl"
@@ -141,7 +149,7 @@ while [ $# -gt 0 ]; do
 	ext="${target##*.}"
 	ext="${ext##.}"
 	case "$ext" in
-		html)
+		html|pdf)
 			instdir="$DATADIR/doc/$ext/$PACKAGE"
 			;;
 		1|2|3|4|5|6|7|8|9)
