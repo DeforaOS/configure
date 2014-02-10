@@ -44,6 +44,38 @@ _debug()
 }
 
 
+#docbook
+_docbook()
+{
+	target="$1"
+
+	source="${target%.*}.xml"
+	ext="${target##*.}"
+	ext="${ext##.}"
+	case "$ext" in
+		html)
+			XSL="http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl"
+			[ -f "${target%.*}.xsl" ] && XSL="${target%.*}.xsl"
+			$DEBUG $XSLTPROC -o "$target" "$XSL" "$source"
+			;;
+		1|2|3|4|5|6|7|8|9)
+			XSL="http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl"
+			$DEBUG $XSLTPROC -o "$target" "$XSL" "$source"
+			;;
+		*)
+			echo "$0: $target: Unknown type" 1>&2
+			return 2
+			;;
+	esac
+
+	if [ $? -ne 0 ]; then
+		echo "$0: $target: Could not create page" 1>&2
+		$RM -- "$target"
+		return 2
+	fi
+}
+
+
 #error
 _error()
 {
@@ -103,7 +135,6 @@ fi
 
 while [ $# -gt 0 ]; do
 	target="$1"
-	source="${target%.*}.xml"
 	shift
 
 	#determine the type
@@ -111,12 +142,9 @@ while [ $# -gt 0 ]; do
 	ext="${ext##.}"
 	case "$ext" in
 		html)
-			XSL="http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl"
-			[ -f "${target%.*}.xsl" ] && XSL="${target%.*}.xsl"
 			instdir="$DATADIR/doc/$ext/$PACKAGE"
 			;;
 		1|2|3|4|5|6|7|8|9)
-			XSL="http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl"
 			instdir="$MANDIR/man$ext"
 			;;
 		*)
@@ -142,11 +170,6 @@ while [ $# -gt 0 ]; do
 	fi
 
 	#create
-	$DEBUG $XSLTPROC -o "$target" "$XSL" "$source"
 	#XXX ignore errors
-	if [ $? -ne 0 ]; then
-		echo "$0: $target: Could not create page" 1>&2
-		$RM -- "$target"
-		break
-	fi
+	_docbook "$target"					|| break
 done
