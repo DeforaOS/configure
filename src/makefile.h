@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2009 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2006-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Devel configure */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,6 @@
 
 # include <System.h>
 # include "configure.h"
-
-
-/* types */
-/* FIXME should be:
-ARRAY(Config *, config);
-but it can't be included multiple times */
-typedef Array configArray;
-extern configArray * configarray_new(void);
 
 
 /* functions */
