@@ -16,13 +16,13 @@ subdirs:
 configure.1: configure.xml
 	./docbook.sh -P "$(PREFIX)" -- "configure.1"
 
-configure.html: configure.xml
+configure.html: configure.css.xml configure.xml manual.css.xml
 	./docbook.sh -P "$(PREFIX)" -- "configure.html"
 
 project.conf.5: project.conf.xml
 	./docbook.sh -P "$(PREFIX)" -- "project.conf.5"
 
-project.conf.html: project.conf.xml
+project.conf.html: project.conf.css.xml project.conf.xml manual.css.xml
 	./docbook.sh -P "$(PREFIX)" -- "project.conf.html"
 
 clean:

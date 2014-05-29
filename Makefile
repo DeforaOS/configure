@@ -28,7 +28,10 @@ dist:
 	@$(TAR) $(PACKAGE)-$(VERSION).tar.gz -- \
 		$(PACKAGE)-$(VERSION)/doc/Makefile \
 		$(PACKAGE)-$(VERSION)/doc/docbook.sh \
+		$(PACKAGE)-$(VERSION)/doc/configure.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/configure.xml \
+		$(PACKAGE)-$(VERSION)/doc/manual.css.xml \
+		$(PACKAGE)-$(VERSION)/doc/project.conf.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/project.conf.xml \
 		$(PACKAGE)-$(VERSION)/doc/project.conf \
 		$(PACKAGE)-$(VERSION)/doc/scripts/Makefile \
@@ -37,6 +40,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/doc/scripts/gettext.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/gtkdoc.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/pkgconfig.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/manual.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/scripts/subst.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/project.conf \
 		$(PACKAGE)-$(VERSION)/src/configure.c \
