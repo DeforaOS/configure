@@ -60,6 +60,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/CHANGES \
 		$(PACKAGE)-$(VERSION)/COPYING \
 		$(PACKAGE)-$(VERSION)/config.h \
+		$(PACKAGE)-$(VERSION)/config.sh \
 		$(PACKAGE)-$(VERSION)/INSTALL \
 		$(PACKAGE)-$(VERSION)/README \
 		$(PACKAGE)-$(VERSION)/project.conf
