@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <libgen.h>
 #include "settings.h"
 #include "configure.h"
 #include "../config.h"
@@ -1973,6 +1974,9 @@ static int _install_include(Config * config, FILE * fp, String const * include)
 
 static int _dist_check(Configure * configure, char const * target,
 		char const * mode);
+static int _dist_install(Configure * configure, FILE * fp,
+		char const * directory, char const * mode,
+		char const * filename);
 static int _install_dist(Configure * configure, FILE * fp)
 {
 	int ret = 0;
@@ -1982,7 +1986,7 @@ static int _install_dist(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 	String const * d;
-	String const * m;
+	String const * mode;
 
 	if((p = config_get(configure->config, NULL, "dist")) == NULL)
 		return 0;
@@ -1995,15 +1999,11 @@ static int _install_dist(Configure * configure, FILE * fp)
 			continue;
 		c = dist[i];
 		dist[i] = '\0';
-		if((m = config_get(configure->config, dist, "mode")) == NULL)
-			m = "0644";
-		ret |= _dist_check(configure, dist, m);
+		if((mode = config_get(configure->config, dist, "mode")) == NULL)
+			mode = "0644";
+		ret |= _dist_check(configure, dist, mode);
 		if((d = config_get(configure->config, dist, "install")) != NULL)
-		{
-			fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", d);
-			fprintf(fp, "%s%s%s%s%s%s/%s\n", "\t$(INSTALL) -m ", m,
-					" ", dist, " $(DESTDIR)", d, dist);
-		}
+			_dist_install(configure, fp, d, mode, dist);
 		if(c == '\0')
 			break;
 		dist += i + 1;
@@ -2038,6 +2038,30 @@ static int _dist_check(Configure * configure, char const * target,
 	if((configure->prefs->flags & PREFS_S) && (m & 0002))
 		error_set_print(PACKAGE, 0, "%s: %s", target,
 				"Installed as a writable file");
+	return 0;
+}
+
+static int _dist_install(Configure * configure, FILE * fp,
+		char const * directory, char const * mode,
+		char const * filename)
+{
+	char sep = (configure->os != HO_WIN32) ? '/' : '\\';
+	String * p;
+	char const * q;
+
+	if(strchr(filename, sep) != NULL)
+	{
+		if((p = string_new(filename)) == NULL)
+			return -1;
+		q = dirname(p);
+		fprintf(fp, "%s%s%c%s\n", "\t$(MKDIR) $(DESTDIR)", directory,
+				sep, q);
+		string_delete(p);
+	}
+	else
+		fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", directory);
+	fprintf(fp, "%s%s%s%s%s%s%c%s\n", "\t$(INSTALL) -m ", mode, " ",
+			filename, " $(DESTDIR)", directory, sep, filename);
 	return 0;
 }
 
