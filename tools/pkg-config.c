@@ -39,6 +39,9 @@
 #ifndef __unused
 # define __unused
 #endif
+#ifndef MAXPATHLEN
+# define MAXPATHLEN	1024 /* XXX */
+#endif
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
 #endif
@@ -691,7 +694,8 @@ static FILE * _pkgconfig_open(PkgConfig *pc, char const * pkg)
 #endif
 	for (i = 0; i < pc->pc_dirs->len; i++)
 	{
-		snprintf(path, MAXPATHLEN, "%s/%s.pc", (char *)_pkglist_get(pc->pc_dirs, i), pkg);
+		snprintf(path, sizeof(path), "%s/%s.pc",
+				(char *)_pkglist_get(pc->pc_dirs, i), pkg);
 		if ((fp = fopen(path, "r")) != NULL) {
 			p = _pkg_new(&p, pkg);
 			_pkglist_append(pc->pkgs, p, _pkg_delete);
