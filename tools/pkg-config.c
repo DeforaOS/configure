@@ -1324,4 +1324,5 @@ static int _main_option_version(__unused PkgConfig * pc)
 {
 	puts("0.26");
 	exit(0);
+	return -1;
 }
