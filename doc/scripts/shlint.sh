@@ -16,7 +16,6 @@
 
 
 #variables
-DEVNULL="/dev/null"
 #executables
 DEBUG="_debug"
 FIND="find"
