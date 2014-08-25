@@ -25,7 +25,11 @@ install:
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 manual.css.xml $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/manual.css.xml
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
+	$(INSTALL) -m 0644 shlint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/shlint.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 subst.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/subst.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
+	$(INSTALL) -m 0644 xmllint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/xmllint.sh
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/appbroker.sh
@@ -34,6 +38,8 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/gtkdoc.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/pkgconfig.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/manual.css.xml
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/shlint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/subst.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/xmllint.sh
 
 .PHONY: all clean distclean install uninstall

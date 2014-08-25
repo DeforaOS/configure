@@ -41,7 +41,9 @@ dist:
 		$(PACKAGE)-$(VERSION)/doc/scripts/gtkdoc.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/pkgconfig.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/manual.css.xml \
+		$(PACKAGE)-$(VERSION)/doc/scripts/shlint.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/subst.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/xmllint.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/project.conf \
 		$(PACKAGE)-$(VERSION)/src/configure.c \
 		$(PACKAGE)-$(VERSION)/src/settings.c \
