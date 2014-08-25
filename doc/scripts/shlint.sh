@@ -73,6 +73,6 @@ target="$1"
 ret=0
 > "$target"
 for i in $($FIND "../doc" "../src" "../tests" "../tools" -name '*.sh'); do
-	$DEBUG $SHLINT "$i" > "$DEVNULL" 2>> "$target"		|| ret=2
+	$DEBUG $SHLINT "$i" 2>> "$target"			|| ret=2
 done
 exit $ret
