@@ -71,8 +71,7 @@ target="$1"
 [ $clean -ne 0 ] && return 0
 
 ret=0
-> "$target"
 for i in $($FIND "../src" "../tools" -name '*.xml' -o -name '*.xsl'); do
-	$DEBUG $XMLLINT "$i" > "$DEVNULL" 2>> "$target"		|| ret=2
-done
+	$DEBUG $XMLLINT "$i" > "$DEVNULL"			|| ret=2
+done 2> "$target"
 exit $ret
