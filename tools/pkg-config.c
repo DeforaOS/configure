@@ -136,9 +136,6 @@ static void * _pkglist_get(PkgList *list, size_t i);
 static void _pkglist_append(PkgList *list, void *data, void (*freefn)(void *));
 
 /* string */
-static char * _string_new(char const * string);
-static char * _string_new_append(char const * string, ...);
-static void _string_delete(char * string);
 static int _string_append(char ** string, char const * append);
 static int _string_append_length(char ** string, char const * append,
 		size_t length);
@@ -594,94 +591,6 @@ static int _pkgconfig(PkgConfig * pc, int pkgc, char * pkgv[])
 	return ret;
 }
 
-/* see http://fedoraproject.org/wiki/Tools/RPM/VersionComparison */ 
-static int version_cmp(char const *v1, char const *v2)
-{
-	const char *ver1, *ver2;
-	int v1t = 0;
-	int v2t = 0;
-	int ret = 0;
-
-	if (strcmp(v1, v2) == 0)
-		return 0;
-
-	/* start as the first alpha numeric value */
-	while (*v1 != '\0' && *v2 != '\0') {
-		v1t = 0;
-		v2t = 0;
-		while(*v1 != '\0' && !isalnum((unsigned char)*v1))
-			v1++;
-		while(*v2 != '\0' && !isalnum((unsigned char)*v2))
-			v2++;
-
-		if (v1 == '\0' && v2 == '\0')
-			return 0;
-
-		if (v1 == '\0')
-			return -1;
-
-		if (v2 == '\0')
-			return 1;
-
-		ver1 = v1;
-		ver2 = v2;
-
-		if (isdigit((unsigned char)*ver1)) {
-			v1t = 1;
-			while(*v1 != '\0' && isdigit((unsigned char)*v1))
-				v1++;
-		} else {
-			v1t = 2;
-			while(*v1 != '\0' && isalpha((unsigned char)*v1))
-				v1++;
-		}
-
-		if (isdigit((unsigned char)*ver2)) {
-			v2t = 1;
-			while(*v2 != '\0' && isdigit((unsigned char)*v2))
-				v2++;
-		} else {
-			v2t = 2;
-			while(*v2 != '\0' && isalpha((unsigned char)*v2))
-				v2++;
-
-		}
-		/* v1 is alpha and v2 is num then v2 GT v1) */
-		if (v1t < v2t)
-			return -1;
-
-		/* v1 is num and v2 is alpha then v1 GT v2) */
-		if (v2t > v1t)
-			return 1;
-
-		if (v1t == 1) {
-			ret = strtol(ver1, NULL, 10) - strtol(ver2, NULL, 10);
-			if (ret != 0)
-				return ret;
-		} else {
-			while (*ver1 != *v1 && *ver2 != *v2) {
-				if (*ver1 == *ver2) {
-					ver1++;
-					ver2++;
-					continue;
-				}
-				break;
-			}
-			if (*ver1 == *v1 && *ver2 != *v2)
-				return -1;
-			if (*ver1 != *v1 && *ver2 == *v2)
-				return 1;
-			if (*ver1 > *ver2)
-				return 1;
-			if (*ver1 < *ver2)
-				return -1;
-		}
-		v1++;
-		v2++;
-	}
-	return 0;
-}
-
 static FILE * _pkgconfig_open(PkgConfig *pc, char const * pkg)
 {
 	FILE * fp;
@@ -875,7 +784,7 @@ static int _pkgconfig_parse_requires_generic(PkgConfig *pc, Pkg * pkg, char * re
 		walk += next + 1;
 		next = strlen(walk);
 	}
-	_string_delete(p);
+	free(p);
 	return ret;
 }
 
@@ -992,42 +901,6 @@ static int _pkgconfig_error(int ret, char const * format, ...)
 	va_end(ap);
 	fputc('\n', stderr);
 	return ret;
-}
-
-
-/* string */
-/* string_new */
-static char * _string_new(char const * string)
-{
-	return strdup(string);
-}
-
-
-/* string_new_append */
-static char * _string_new_append(char const * string, ...)
-{
-	char * ret;
-	va_list ap;
-	char const * q;
-
-	if(string == NULL || (ret = _string_new(string)) == NULL)
-		return NULL;
-	va_start(ap, string);
-	while((q = va_arg(ap, char const *)) != NULL)
-		if(_string_append(&ret, q) != 0)
-		{
-			_string_delete(ret);
-			return NULL;
-		}
-	va_end(ap);
-	return ret;
-}
-
-
-/* string_delete */
-static void _string_delete(char * string)
-{
-	free(string);
 }
 
 
