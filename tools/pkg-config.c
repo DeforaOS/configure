@@ -45,6 +45,9 @@
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
 #endif
+#ifndef PROGNAME
+# define PROGNAME	"pkg-config"
+#endif
 
 #define PKG_CFLAGS		(1 << 0)
 #define PKG_CFLAGS_ONLY_I	(1 << 1)
@@ -485,7 +488,7 @@ static int _pkgconfig(PkgConfig * pc, int pkgc, char * pkgv[])
 	PkgList *printed = NULL;
 	char out = '\0';
 
-	char const format[] = "Package %s was not found in the pkg-config"
+	char const format[] = "Package %s was not found in the " PROGNAME
 		" search path.\n"
 		"Perhaps you should add the directory containing `%s.pc'\n"
 		"to the PKG_CONFIG_PATH environment variable\n"
@@ -895,7 +898,7 @@ static int _pkgconfig_error(int ret, char const * format, ...)
 {
 	va_list ap;
 
-	fputs("pkg-config: ", stderr);
+	fputs(PROGNAME ": ", stderr);
 	va_start(ap, format);
 	vfprintf(stderr, format, ap);
 	va_end(ap);
@@ -1007,10 +1010,10 @@ static void  _pkglist_append(PkgList *pkglist, void *data, void (*freefn)(void *
 static int _usage(int brief)
 {
 	if(brief)
-		fputs("Usage: pkg-config [-?] [--version] [--modversion]\n",
+		fputs("Usage: " PROGNAME " [-?] [--version] [--modversion]\n",
 				stderr);
 	else
-		fputs("Usage: pkg-config [OPTIONS...] [PACKAGES...]\n"
+		fputs("Usage: " PROGNAME " [OPTIONS...] [PACKAGES...]\n"
 "  --cflags			Output all pre-processor and compiler flags\n"
 "  --cflags-only-I		Output -I flags\n"
 "  --cflags-only-other		Output non -I flags\n"
@@ -1022,7 +1025,7 @@ static int _usage(int brief)
 "  --print-requires		Output the requires packages\n"
 "  --print-requires_private	Output the requires private packages\n"
 "  --static			Output linker flags for static linking\n"
-"  --version			Output version of pkg-config\n"
+"  --version			Output version of " PROGNAME "\n"
 "\n"
 "Help options:\n"
 "  -?, --help		Show this help message\n"
