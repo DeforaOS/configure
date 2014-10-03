@@ -1040,6 +1040,7 @@ static int _main_option_cflags(PkgConfig * pc);
 static int _main_option_cflags_only_I(PkgConfig * pc);
 static int _main_option_cflags_only_other(PkgConfig * pc);
 static int _main_option_exists(PkgConfig * pc);
+static int _main_option_help(PkgConfig * pc);
 static int _main_option_libs(PkgConfig * pc);
 static int _main_option_libs_only_l(PkgConfig * pc);
 static int _main_option_libs_only_L(PkgConfig * pc);
@@ -1059,6 +1060,7 @@ static struct
 	{ "cflags-only-I",		_main_option_cflags_only_I		},
 	{ "cflags-only-other",		_main_option_cflags_only_other		},
 	{ "exists",			_main_option_exists			},
+	{ "help",			_main_option_help			},
 	{ "libs",			_main_option_libs			},
 	{ "libs-only-l",		_main_option_libs_only_l		},
 	{ "libs-only-L",		_main_option_libs_only_L		},
@@ -1141,6 +1143,11 @@ static int _main_option_exists(PkgConfig * pc)
 {
 	pc->flags |= PKG_EXISTS;
 	return 0;
+}
+
+static int _main_option_help(__unused PkgConfig * pc)
+{
+	return _usage(0);
 }
 
 static int _main_option_libs(PkgConfig * pc)
