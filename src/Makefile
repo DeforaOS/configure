@@ -18,7 +18,7 @@ INSTALL	= install
 
 all: $(TARGETS)
 
-configure_OBJS = configure.o settings.o
+configure_OBJS = configure.o settings.o main.o
 configure_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 configure_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) makefile.o
 
@@ -40,6 +40,9 @@ configure.o: configure.c configure.h makefile.h ../config.h
 
 settings.o: settings.c settings.h
 	$(CC) $(configure_CFLAGS) -c settings.c
+
+main.o: main.c configure.h
+	$(CC) $(configure_CFLAGS) -c main.c
 
 makedepend.o: makedepend.c
 	$(CC) $(makedepend_CFLAGS) -c makedepend.c

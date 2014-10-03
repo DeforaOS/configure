@@ -151,6 +151,8 @@ typedef struct _Configure
 
 
 /* functions */
+int configure(Prefs * prefs, char const * directory);
+
 /* accessors */
 String const * configure_get_config(Configure * configure,
 		String const * section, String const * variable);

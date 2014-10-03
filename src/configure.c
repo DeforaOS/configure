@@ -17,7 +17,6 @@
 
 #include <System.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 #ifndef __WIN32__
 # include <sys/utsname.h>
 #endif
@@ -102,8 +101,6 @@ const struct ExtensionType * sExtensionType = _sExtensionType;
 
 
 /* prototypes */
-static void _prefs_init(Prefs * prefs);
-
 String const * _source_extension(String const * source);
 ObjectType _source_type(String const * source);
 
@@ -170,7 +167,7 @@ static int _load_subdirs_subdir(Prefs * prefs, char const * directory,
 		configArray * ca, char const * subdir);
 static int _configure_do(Configure * configure, configArray * ca);
 
-static int _configure(Prefs * prefs, char const * directory)
+int configure(Prefs * prefs, char const * directory)
 {
 	int ret;
 	Configure cfgr;
@@ -416,33 +413,6 @@ String const * configure_get_soext(Configure * configure)
 }
 
 
-/* prefs_init */
-static void _prefs_init(Prefs * prefs)
-{
-	struct stat st;
-
-	memset(prefs, 0, sizeof(*prefs));
-	prefs->destdir = "";
-	if(stat("/Apps", &st) == 0)
-	{
-		prefs->bindir = "Binaries";
-		prefs->includedir = "Includes";
-		prefs->libdir = "Libraries";
-		/* XXX needs auto-detection for the sub-directory */
-		prefs->prefix = "/Apps";
-		prefs->sbindir = "Binaries";
-	}
-	else
-	{
-		prefs->bindir = "bin";
-		prefs->includedir = "include";
-		prefs->libdir = "lib";
-		prefs->prefix = "/usr/local";
-		prefs->sbindir = "sbin";
-	}
-}
-
-
 /* source_extension */
 String const * _source_extension(String const * source)
 {
@@ -467,79 +437,4 @@ ObjectType _source_type(String const * source)
 		if(string_compare(sExtensionType[i].extension, extension) == 0)
 			return sExtensionType[i].type;
 	return OT_UNKNOWN;
-}
-
-
-/* usage */
-static int _usage(void)
-{
-	Prefs prefs;
-
-	_prefs_init(&prefs);
-	fprintf(stderr, "%s%s%s%s%s%s%s%s%s%s%s",
-"Usage: configure [-nvS][options...][directory...]\n"
-"  -n	Do not actually write Makefiles\n"
-"  -v	Verbose mode\n"
-"  -b	Binary files directory (default: \"", prefs.bindir, "\")\n"
-"  -d	Destination prefix (default: \"\")\n"
-"  -i	Include files directory (default: \"", prefs.includedir, "\")\n"
-"  -l	Library files directory (default: \"", prefs.libdir, "\")\n"
-"  -O	Force Operating System (default: auto-detected)\n"
-"  -p	Installation directory prefix (default: \"", prefs.prefix, "\")\n"
-"  -S	Warn about potential security risks\n"
-"  -s	Super-user executable files directory (default: \"", prefs.sbindir,
-"\")\n");
-	return 1;
-}
-
-
-/* main */
-int main(int argc, char * argv[])
-{
-	int ret = 0;
-	Prefs prefs;
-	int o;
-
-	_prefs_init(&prefs);
-	while((o = getopt(argc, argv, "d:i:l:nO:p:Ss:v")) != -1)
-		switch(o)
-		{
-			case 'b':
-				prefs.bindir = optarg;
-				break;
-			case 'd':
-				prefs.destdir = optarg;
-				break;
-			case 'i':
-				prefs.includedir = optarg;
-				break;
-			case 'l':
-				prefs.libdir = optarg;
-				break;
-			case 'n':
-				prefs.flags |= PREFS_n;
-				break;
-			case 'O':
-				prefs.os = optarg;
-				break;
-			case 'p':
-				prefs.prefix = optarg;
-				break;
-			case 'S':
-				prefs.flags |= PREFS_S;
-				break;
-			case 's':
-				prefs.sbindir = optarg;
-				break;
-			case 'v':
-				prefs.flags |= PREFS_v;
-				break;
-			case '?':
-				return _usage();
-		}
-	if(optind == argc)
-		return _configure(&prefs, ".");
-	for(; optind < argc; optind++)
-		ret |= _configure(&prefs, argv[optind]);
-	return (ret == 0) ? 0 : 2;
 }

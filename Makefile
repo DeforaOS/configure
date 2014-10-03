@@ -48,6 +48,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/doc/scripts/project.conf \
 		$(PACKAGE)-$(VERSION)/src/configure.c \
 		$(PACKAGE)-$(VERSION)/src/settings.c \
+		$(PACKAGE)-$(VERSION)/src/main.c \
 		$(PACKAGE)-$(VERSION)/src/makedepend.c \
 		$(PACKAGE)-$(VERSION)/src/makefile.c \
 		$(PACKAGE)-$(VERSION)/src/Makefile \
