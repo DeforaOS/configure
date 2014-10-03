@@ -47,7 +47,7 @@ _debug()
 #usage
 _usage()
 {
-	echo "Usage: shlint.sh target" 1>&2
+	echo "Usage: shlint.sh [-c] target" 1>&2
 	return 1
 }
 
