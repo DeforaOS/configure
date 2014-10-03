@@ -54,7 +54,7 @@ _usage()
 
 #main
 clean=0
-while getopts "cP:" "name"; do
+while getopts "cP:" name; do
 	case "$name" in
 		c)
 			clean=1
