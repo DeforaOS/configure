@@ -1,1 +1,8 @@
-Pierre Pronchery <khorben@defora.org>
+configure:
+
+  * Pierre Pronchery <khorben@defora.org>
+
+pkg-config:
+
+  * Baptiste Daroussin <bapt@FreeBSD.org>
+  * Pierre Pronchery <khorben@defora.org>
