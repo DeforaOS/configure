@@ -1,6 +1,7 @@
 03/10/2014 - 0.1.0
 ------------------
 
+  * updated the license terms to BSD
   * introduced helper scripts for AppBroker(1), DocBook, gettext(1), gtkdoc...
   * manual page for configure(1) and project.conf(5)
   * in-tree implementation of pkg-config(1) (by bapt)
