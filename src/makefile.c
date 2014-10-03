@@ -26,6 +26,10 @@
 #include "configure.h"
 #include "../config.h"
 
+#ifndef PROGNAME
+# define PROGNAME PACKAGE
+#endif
+
 
 /* prototypes */
 static int _makefile_output_variable(FILE * fp, char const * name,
@@ -141,7 +145,7 @@ static int _variables_package(Configure * configure, FILE * fp,
 	{
 		if(configure->prefs->flags & PREFS_v)
 			fputc('\n', stdout);
-		fprintf(stderr, "%s%s%s", PACKAGE ": ", directory,
+		fprintf(stderr, "%s%s%s", PROGNAME ": ", directory,
 				": \"package\" needs \"version\"\n");
 		return 1;
 	}
@@ -823,7 +827,7 @@ static int _targets_target(Configure * configure, FILE * fp,
 
 	if((type = config_get(configure->config, target, "type")) == NULL)
 	{
-		fprintf(stderr, "%s%s%s", PACKAGE ": ", target,
+		fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
 				": no type defined for target\n");
 		return 1;
 	}
@@ -843,7 +847,7 @@ static int _targets_target(Configure * configure, FILE * fp,
 		case TT_SCRIPT:
 			return _target_script(configure, fp, target);
 		case TT_UNKNOWN:
-			fprintf(stderr, "%s%s%s", PACKAGE ": ", target,
+			fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
 					": unknown type for target\n");
 			return 1;
 	}
@@ -900,7 +904,7 @@ static int _objs_source(Prefs * prefs, FILE * fp, String * source,
 
 	if((extension = _source_extension(source)) == NULL)
 	{
-		fprintf(stderr, "%s%s%s", PACKAGE ": ", source,
+		fprintf(stderr, "%s%s%s", PROGNAME ": ", source,
 				": no extension for source\n");
 		return 1;
 	}
@@ -918,7 +922,7 @@ static int _objs_source(Prefs * prefs, FILE * fp, String * source,
 			break;
 		case OT_UNKNOWN:
 			ret = 1;
-			fprintf(stderr, "%s%s%s", PACKAGE ": ", source,
+			fprintf(stderr, "%s%s%s", PROGNAME ": ", source,
 					": unknown extension for source\n");
 			break;
 	}
@@ -948,7 +952,7 @@ static int _target_binary(Configure * configure, FILE * fp,
 				|| string_replace(&q, ",", " ") != 0)
 		{
 			string_delete(q);
-			return error_print(PACKAGE);
+			return error_print(PROGNAME);
 		}
 		fprintf(fp, " %s", q);
 		string_delete(q);
@@ -1163,13 +1167,13 @@ static int _target_object(Configure * configure, FILE * fp,
 
 	if((p = config_get(configure->config, target, "sources")) == NULL)
 	{
-		fprintf(stderr, "%s%s%s", PACKAGE ": ", target,
+		fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
 				": No sources for target\n");
 		return 1;
 	}
 	if(strchr(p, ',') != NULL)
 	{
-		fprintf(stderr, "%s%s%s", PACKAGE ": ", target,
+		fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
 				": An object can have only one source file\n");
 		return 1;
 	}
@@ -1209,7 +1213,7 @@ static int _target_object(Configure * configure, FILE * fp,
 			fputc('\n', fp);
 			break;
 		case OT_UNKNOWN:
-			fprintf(stderr, "%s%s%s", PACKAGE ": ", target,
+			fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
 					": Unknown source type for object\n");
 			return 1;
 	}
@@ -1287,12 +1291,12 @@ static int _target_script(Configure * configure, FILE * fp,
 
 	if((script = config_get(configure->config, target, "script")) == NULL)
 	{
-		fprintf(stderr, "%s%s%s", PACKAGE ": ", target,
+		fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
 				": No script for target\n");
 		return 1;
 	}
 	if(configure->prefs->flags & PREFS_S)
-		error_set_print(PACKAGE, 0, "%s: %s%s%s", target, "The \"",
+		error_set_print(PROGNAME, 0, "%s: %s%s%s", target, "The \"",
 				script,
 				"\" script is executed while compiling");
 	if(configure->prefs->flags & PREFS_n)
@@ -1482,7 +1486,7 @@ static int _target_source(Configure * configure, FILE * fp,
 			fputc('\n', fp);
 			break;
 		case OT_UNKNOWN:
-			fprintf(stderr, "%s%s%s", PACKAGE ": ", target,
+			fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
 					": Unknown source type for object\n");
 			ret = 1;
 			break;
@@ -2021,22 +2025,22 @@ static int _dist_check(Configure * configure, char const * target,
 
 	m = strtol(mode, &p, 8);
 	if(mode[0] == '\0' || *p != '\0')
-		return error_set_print(PACKAGE, 1, "%s: %s%s%s", target,
+		return error_set_print(PROGNAME, 1, "%s: %s%s%s", target,
 				"Invalid permissions \"", mode, "\"");
 	if((configure->prefs->flags & PREFS_S) && (m & 04000))
-		error_set_print(PACKAGE, 0, "%s: %s", target,
+		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a SUID file");
 	if((configure->prefs->flags & PREFS_S) && (m & 04000))
-		error_set_print(PACKAGE, 0, "%s: %s", target,
+		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a SGID file");
 	if((configure->prefs->flags & PREFS_S) && (m & 0111))
-		error_set_print(PACKAGE, 0, "%s: %s", target,
+		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as an executable file");
 	if((configure->prefs->flags & PREFS_S) && (m & 0020))
-		error_set_print(PACKAGE, 0, "%s: %s", target,
+		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a group-writable file");
 	if((configure->prefs->flags & PREFS_S) && (m & 0002))
-		error_set_print(PACKAGE, 0, "%s: %s", target,
+		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a writable file");
 	return 0;
 }

@@ -29,6 +29,10 @@
 #include "configure.h"
 #include "../config.h"
 
+#ifndef PROGNAME
+# define PROGNAME PACKAGE
+#endif
+
 
 /* configure */
 /* constants */
@@ -108,7 +112,7 @@ ObjectType _source_type(String const * source);
 /* configure_error */
 int configure_error(char const * message, int ret)
 {
-	fputs(PACKAGE ": ", stderr);
+	fputs(PROGNAME ": ", stderr);
 	perror(message);
 	return ret;
 }
@@ -176,7 +180,7 @@ static int _configure(Prefs * prefs, char const * directory)
 	Config * p;
 
 	if((ca = configarray_new()) == NULL)
-		return error_print(PACKAGE);
+		return error_print(PROGNAME);
 	cfgr.prefs = prefs;
 	_configure_detect(&cfgr);
 	_configure_detect_programs(&cfgr);
@@ -308,7 +312,7 @@ static int _configure_load(Prefs * prefs, String const * directory,
 	if(prefs->flags & PREFS_v)
 		printf("%s%s%s", "Loading project file ", path, "\n");
 	if(config_load(config, path) != 0)
-		ret = error_print(PACKAGE);
+		ret = error_print(PROGNAME);
 	else
 	{
 		array_append(ca, &config);
