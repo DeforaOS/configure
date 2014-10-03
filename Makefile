@@ -1,5 +1,5 @@
 PACKAGE	= configure
-VERSION	= 0.0.7
+VERSION	= 0.1.0
 SUBDIRS	= doc src tools
 PREFIX	= /usr/local
 DESTDIR	=
