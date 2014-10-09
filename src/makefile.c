@@ -1578,6 +1578,7 @@ static int _clean_targets(Config * config, FILE * fp)
 		i = 0;
 	}
 	fputc('\n', fp);
+	targets = q;
 	/* let each scripted target remove the relevant object files */
 	for(i = 0;; i++)
 	{
