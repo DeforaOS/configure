@@ -28,11 +28,17 @@ project.conf.html: project.conf.css.xml project.conf.xml manual.css.xml
 clean:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) clean) || exit; done
 	$(RM) -- $(configure.1_OBJS) $(configure.html_OBJS) $(project.conf.5_OBJS) $(project.conf.html_OBJS)
+	./docbook.sh -c -P "$(PREFIX)" -- "configure.1"
+	./docbook.sh -c -P "$(PREFIX)" -- "configure.html"
+	./docbook.sh -c -P "$(PREFIX)" -- "project.conf.5"
 	./docbook.sh -c -P "$(PREFIX)" -- "project.conf.html"
 
 distclean:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) distclean) || exit; done
 	$(RM) -- $(configure.1_OBJS) $(configure.html_OBJS) $(project.conf.5_OBJS) $(project.conf.html_OBJS)
+	./docbook.sh -c -P "$(PREFIX)" -- "configure.1"
+	./docbook.sh -c -P "$(PREFIX)" -- "configure.html"
+	./docbook.sh -c -P "$(PREFIX)" -- "project.conf.5"
 	./docbook.sh -c -P "$(PREFIX)" -- "project.conf.html"
 	$(RM) -- $(TARGETS)
 
