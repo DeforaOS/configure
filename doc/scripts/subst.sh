@@ -156,18 +156,18 @@ while [ $# -gt 0 ]; do
 	fi
 
 	#create
-	$DEBUG $SED -e "s,@PACKAGE@,$PACKAGE," \
-		-e "s,@VERSION@,$VERSION," \
-		-e "s,@PREFIX@,$PREFIX," \
-		-e "s,@BINDIR@,$BINDIR," \
-		-e "s,@DATADIR@,$DATADIR," \
-		-e "s,@INCLUDEDIR@,$INCLUDEDIR," \
-		-e "s,@LDSO@,$LDSO," \
-		-e "s,@LIBDIR@,$LIBDIR," \
-		-e "s,@LIBEXECDIR@,$LIBEXECDIR," \
-		-e "s,@MANDIR@,$MANDIR," \
-		-e "s,@SYSCONFDIR@,$SYSCONFDIR," \
-		-e "s,@PWD@,$PWD," \
+	$DEBUG $SED -e "s,@PACKAGE@,$PACKAGE,g" \
+		-e "s,@VERSION@,$VERSION,g" \
+		-e "s,@PREFIX@,$PREFIX,g" \
+		-e "s,@BINDIR@,$BINDIR,g" \
+		-e "s,@DATADIR@,$DATADIR,g" \
+		-e "s,@INCLUDEDIR@,$INCLUDEDIR,g" \
+		-e "s,@LDSO@,$LDSO,g" \
+		-e "s,@LIBDIR@,$LIBDIR,g" \
+		-e "s,@LIBEXECDIR@,$LIBEXECDIR,g" \
+		-e "s,@MANDIR@,$MANDIR,g" \
+		-e "s,@SYSCONFDIR@,$SYSCONFDIR,g" \
+		-e "s,@PWD@,$PWD,g" \
 		-- "$target.in" > "$target"
 	if [ $? -ne 0 ]; then
 		$RM -- "$target" 2> "$DEVNULL"
