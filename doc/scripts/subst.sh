@@ -40,6 +40,9 @@ SYSCONFDIR=
 [ -z "$INCLUDEDIR" ] && INCLUDEDIR="$PREFIX/include"
 if [ -z "$LDSO" ]; then
 	case "$(uname -s)" in
+		FreeBSD)
+			LDSO="/libexec/ld-elf.so.1"
+			;;
 		Linux)
 			LDSO="/lib/ld-linux-$(uname -p).so.2"
 			;;
