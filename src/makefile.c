@@ -293,24 +293,25 @@ static int _variables_targets(Configure * configure, FILE * fp)
 			switch(enum_string(TT_LAST, sTargetType, type))
 			{
 				case TT_BINARY:
-					fprintf(fp, " %s", prints);
+					fprintf(fp, " $(OBJDIR)%s", prints);
 					if(configure->os == HO_WIN32)
 						fputs("$(EXEEXT)", fp);
 					break;
 				case TT_OBJECT:
 				case TT_SCRIPT:
 				case TT_UNKNOWN:
-					fprintf(fp, " %s", prints);
+					fprintf(fp, " $(OBJDIR)%s", prints);
 					break;
 				case TT_LIBRARY:
 					ret |= _variables_targets_library(
 							configure, fp, prints);
 					break;
 				case TT_LIBTOOL:
-					fprintf(fp, " %s%s", prints, ".la");
+					fprintf(fp, " $(OBJDIR)%s%s", prints,
+							".la");
 					break;
 				case TT_PLUGIN:
-					fprintf(fp, " %s%s", prints, soext);
+					fprintf(fp, " $(OBJDIR)%s%s", prints, soext);
 					break;
 			}
 		if(c == '\0')
@@ -932,8 +933,8 @@ static int _objs_source(Prefs * prefs, FILE * fp, String * source,
 		case OT_CXX_SOURCE:
 			if(prefs->flags & PREFS_n)
 				break;
-			fprintf(fp, " %s%s", source, tt == TT_LIBTOOL ? ".lo"
-					: ".o");
+			fprintf(fp, " $(OBJDIR)%s%s", source,
+					(tt == TT_LIBTOOL) ? ".lo" : ".o");
 			break;
 		case OT_UNKNOWN:
 			ret = 1;
@@ -959,8 +960,9 @@ static int _target_binary(Configure * configure, FILE * fp,
 		return 0;
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
-	fprintf(fp, "\n%s%s%s%s%s", target, (configure->os == HO_WIN32)
-			? "$(EXEEXT)" : "", ": $(", target, "_OBJS)");
+	fprintf(fp, "\n%s%s%s%s%s%s", "$(OBJDIR)", target,
+			(configure->os == HO_WIN32) ? "$(EXEEXT)" : "",
+			": $(", target, "_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL)
 	{
 		if((q = string_new(p)) == NULL
@@ -972,7 +974,7 @@ static int _target_binary(Configure * configure, FILE * fp,
 		fprintf(fp, " %s", q);
 		string_delete(q);
 	}
-	fprintf(fp, "%s%s%s%s%s%s%s%s", "\n\t$(CC) -o ", target,
+	fprintf(fp, "%s%s%s%s%s%s%s%s", "\n\t$(CC) -o $(OBJDIR)", target,
 			(configure->os == HO_WIN32) ? "$(EXEEXT)" : "", " $(",
 			target, "_OBJS) $(", target, "_LDFLAGS)");
 	fputc('\n', fp);
@@ -1107,12 +1109,13 @@ static int _target_library(Configure * configure, FILE * fp,
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
 	soext = configure_get_soext(configure);
-	fprintf(fp, "\n%s%s%s%s", target, ".a: $(", target, "_OBJS)");
+	fprintf(fp, "\n%s%s%s%s%s", "$(OBJDIR)", target, ".a: $(", target,
+			"_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL)
 		fprintf(fp, " %s", p);
 	fputc('\n', fp);
-	fprintf(fp, "%s%s%s%s%s", "\t$(AR) -rc ", target, ".a $(", target,
-			"_OBJS)");
+	fprintf(fp, "%s%s%s%s%s", "\t$(AR) -rc $(OBJDIR)", target, ".a $(",
+			target, "_OBJS)");
 	if((q = malloc(strlen(target) + strlen(soext) + 3)) != NULL)
 	{
 		sprintf(q, "%s.a", target);
@@ -1120,19 +1123,19 @@ static int _target_library(Configure * configure, FILE * fp,
 			_binary_ldflags(configure, fp, p);
 	}
 	fputc('\n', fp);
-	fprintf(fp, "%s%s%s", "\t$(RANLIB) ", target, ".a\n");
+	fprintf(fp, "%s%s%s", "\t$(RANLIB) $(OBJDIR)", target, ".a\n");
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
 	else
 		soname = string_new_append(target, soext, ".0", NULL);
 	if(soname == NULL)
 		return 1;
-	fprintf(fp, "\n%s%s%s%s%s%s%s%s%s", soname, ".0 ", soname, " ", target,
-			soext, ": $(", target, "_OBJS)");
+	fprintf(fp, "\n%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", soname, ".0 ",
+			soname, " ", target, soext, ": $(", target, "_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL)
 		fprintf(fp, " %s", p);
 	fputc('\n', fp);
-	fprintf(fp, "%s%s%s", "\t$(CCSHARED) -o ", soname, ".0");
+	fprintf(fp, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname, ".0");
 	/* soname is not available on MacOS X */
 	if(configure->os != HO_MACOSX)
 		fprintf(fp, "%s%s", " -Wl,-soname,", soname);
@@ -1146,10 +1149,10 @@ static int _target_library(Configure * configure, FILE * fp,
 		free(q);
 	}
 	fputc('\n', fp);
-	fprintf(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname, ".0 ", soname,
-			"\n");
-	fprintf(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname, ".0 ", target,
-			soext, "\n");
+	fprintf(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname, ".0 $(OBJDIR)",
+			soname, "\n");
+	fprintf(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname, ".0 $(OBJDIR)",
+			target, soext, "\n");
 	string_delete(soname);
 	return 0;
 }
@@ -1165,9 +1168,10 @@ static int _target_libtool(Configure * configure, FILE * fp,
 		return 0;
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
-	fprintf(fp, "\n%s%s%s%s", target, ".la: $(", target, "_OBJS)\n");
-	fprintf(fp, "%s%s%s%s%s", "\t$(LIBTOOL) --mode=link $(CC) -o ", target,
-			".la $(", target, "_OBJS)");
+	fprintf(fp, "\n%s%s%s%s%s", "$(OBJDIR)", target, ".la: $(", target,
+			"_OBJS)\n");
+	fprintf(fp, "%s%s%s%s%s", "\t$(LIBTOOL) --mode=link $(CC) -o $(OBJDIR)",
+			target, ".la $(", target, "_OBJS)");
 	if((p = config_get(configure->config, target, "ldflags")) != NULL)
 		_binary_ldflags(configure, fp, p);
 	fprintf(fp, "%s%s%s", " -rpath $(LIBDIR) $(", target, "_LDFLAGS)\n");
@@ -1199,8 +1203,8 @@ static int _target_object(Configure * configure, FILE * fp,
 	switch(_source_type(extension))
 	{
 		case OT_ASM_SOURCE:
-			fprintf(fp, "\n%s%s%s\n%s%s", target, "_OBJS = ",
-					target, target, "_ASFLAGS ="
+			fprintf(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
+					"$(OBJDIR)", target, target, "_ASFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS) $(ASFLAGS)");
 			if((p = config_get(configure->config, target,
 							"asflags")) != NULL)
@@ -1208,8 +1212,8 @@ static int _target_object(Configure * configure, FILE * fp,
 			fputc('\n', fp);
 			break;
 		case OT_C_SOURCE:
-			fprintf(fp, "\n%s%s%s\n%s%s", target, "_OBJS = ",
-					target, target, "_CFLAGS ="
+			fprintf(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
+					"$(OBJDIR)", target, target, "_CFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF)"
 					" $(CFLAGS)");
 			if((p = config_get(configure->config, target, "cflags"))
@@ -1218,8 +1222,8 @@ static int _target_object(Configure * configure, FILE * fp,
 			fputc('\n', fp);
 			break;
 		case OT_CXX_SOURCE:
-			fprintf(fp, "\n%s%s%s\n%s%s", target, "_OBJS = ",
-					target, target, "_CXXFLAGS ="
+			fprintf(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
+					"$(OBJDIR)", target, target, "_CXXFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS)"
 					" $(CXXFLAGS)");
 			if((p = config_get(configure->config, target,
@@ -1249,12 +1253,13 @@ static int _target_plugin(Configure * configure, FILE * fp,
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
 	soext = configure_get_soext(configure);
-	fprintf(fp, "\n%s%s%s%s%s", target, soext, ": $(", target, "_OBJS)");
+	fprintf(fp, "\n%s%s%s%s%s%s", "$(OBJDIR)", target, soext, ": $(",
+			target, "_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL)
 		fprintf(fp, " %s", p);
 	fputc('\n', fp);
-	fprintf(fp, "%s%s%s%s%s%s%s%s", "\t$(CCSHARED) -o ", target, soext,
-			" $(", target, "_OBJS) $(", target, "_LDFLAGS)");
+	fprintf(fp, "%s%s%s%s%s%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", target,
+			soext, " $(", target, "_OBJS) $(", target, "_LDFLAGS)");
 	if((q = malloc(strlen(target) + strlen(soext) + 1)) != NULL)
 	{
 		sprintf(q, "%s%s", target, soext);
@@ -1316,10 +1321,11 @@ static int _target_script(Configure * configure, FILE * fp,
 				"\" script is executed while compiling");
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
-	fprintf(fp, "\n%s:", target);
+	fprintf(fp, "\n$(OBJDIR)%s:", target);
 	_script_depends(configure->config, fp, target);
 	fputc('\n', fp);
-	fprintf(fp, "\t%s -P \"$(PREFIX)\" -- \"%s\"\n", script, target);
+	fprintf(fp, "\t%s -P \"$(PREFIX)\" -- \"$(OBJDIR)%s\"\n", script,
+			target);
 	return 0;
 }
 
@@ -1411,9 +1417,9 @@ static int _target_source(Configure * configure, FILE * fp,
 			if(configure->prefs->flags & PREFS_n)
 				break;
 			if(tt == TT_OBJECT)
-				fprintf(fp, "\n%s", target);
+				fprintf(fp, "\n$(OBJDIR)%s", target);
 			else
-				fprintf(fp, "\n%s%s", source, ".o");
+				fprintf(fp, "\n$(OBJDIR)%s%s", source, ".o");
 			if(tt == TT_LIBTOOL)
 				fprintf(fp, " %s.lo", source);
 			fprintf(fp, "%s%s%s%s", ": ", source, ".", extension);
@@ -1425,20 +1431,22 @@ static int _target_source(Configure * configure, FILE * fp,
 				fputs("$(LIBTOOL) --mode=compile ", fp);
 			fprintf(fp, "%s%s%s", "$(AS) $(", target, "_ASFLAGS)");
 			if(tt == TT_OBJECT)
-				fprintf(fp, "%s%s%s%s%s%s", " -o ", target, " ",
-						source, ".", extension);
+				fprintf(fp, "%s%s%s%s%s%s", " -o $(OBJDIR)",
+						target, " ", source, ".",
+						extension);
 			else
-				fprintf(fp, "%s%s%s%s%s%s", " -o ", source,
-						".o ", source, ".", extension);
+				fprintf(fp, "%s%s%s%s%s%s", " -o $(OBJDIR)",
+						source, ".o ", source, ".",
+						extension);
 			fputc('\n', fp);
 			break;
 		case OT_C_SOURCE:
 			if(configure->prefs->flags & PREFS_n)
 				break;
 			if(tt == TT_OBJECT)
-				fprintf(fp, "\n%s", target);
+				fprintf(fp, "\n$(OBJDIR)%s", target);
 			else
-				fprintf(fp, "\n%s%s", source, ".o");
+				fprintf(fp, "\n$(OBJDIR)%s%s", source, ".o");
 			if(tt == TT_LIBTOOL)
 				fprintf(fp, " %s%s", source, ".lo");
 			fprintf(fp, "%s%s%s%s", ": ", source, ".", extension);
@@ -1462,14 +1470,11 @@ static int _target_source(Configure * configure, FILE * fp,
 					       	&& string_find(q, "-ansi"))
 					fputs(" -D _GNU_SOURCE", fp);
 			}
-			if(string_find(source, "/"))
-			{
-				if(tt == TT_OBJECT)
-					fprintf(fp, "%s%s", " -o ", target);
-				else
-					fprintf(fp, "%s%s%s", " -o ", source,
-							".o");
-			}
+			if(tt == TT_OBJECT)
+				fprintf(fp, "%s%s", " -o $(OBJDIR)", target);
+			else
+				fprintf(fp, "%s%s%s", " -o $(OBJDIR)", source,
+						".o");
 			fprintf(fp, "%s%s%s%s", " -c ", source, ".", extension);
 			fputc('\n', fp);
 			break;
@@ -1477,9 +1482,9 @@ static int _target_source(Configure * configure, FILE * fp,
 			if(configure->prefs->flags & PREFS_n)
 				break;
 			if(tt == TT_OBJECT)
-				fprintf(fp, "\n%s", target);
+				fprintf(fp, "\n$(OBJDIR)%s", target);
 			else
-				fprintf(fp, "\n%s%s", source, ".o");
+				fprintf(fp, "\n$(OBJDIR)%s%s", source, ".o");
 			fprintf(fp, "%s%s%s%s", ": ", source, ".", extension);
 			source[len] = '.'; /* FIXME ugly */
 			_source_depends(configure->config, fp, source);
@@ -1489,14 +1494,11 @@ static int _target_source(Configure * configure, FILE * fp,
 					"_CXXFLAGS)");
 			if(p != NULL)
 				fprintf(fp, " %s", p);
-			if(string_find(source, "/"))
-			{
-				if(tt == TT_OBJECT)
-					fprintf(fp, "%s%s", " -o ", target);
-				else
-					fprintf(fp, "%s%s%s", " -o ", source,
-							".o");
-			}
+			if(tt == TT_OBJECT)
+				fprintf(fp, "%s%s", " -o $(OBJDIR)", target);
+			else
+				fprintf(fp, "%s%s%s", " -o $(OBJDIR)", source,
+						".o");
 			fprintf(fp, "%s%s%s%s", " -c ", source, ".", extension);
 			fputc('\n', fp);
 			break;
