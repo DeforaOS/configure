@@ -71,6 +71,11 @@ dist:
 		$(PACKAGE)-$(VERSION)/project.conf
 	$(RM) -- $(PACKAGE)-$(VERSION)
 
+distcheck: dist
+	$(TAR) -xzvf $(PACKAGE)-$(VERSION).tar.gz
+	(cd "$(PACKAGE)-$(VERSION)" && $(MAKE) all dist)
+	$(RM) -r -- $(PACKAGE)-$(VERSION)
+
 install:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) install) || exit; done
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
@@ -92,4 +97,4 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/INSTALL
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/README
 
-.PHONY: all subdirs clean distclean dist install uninstall
+.PHONY: all subdirs clean distclean dist distcheck install uninstall
