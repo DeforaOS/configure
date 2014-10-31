@@ -34,7 +34,7 @@ $(OBJDIR)makedepend: $(makedepend_OBJS)
 	$(CC) -o $(OBJDIR)makedepend $(makedepend_OBJS) $(makedepend_LDFLAGS)
 
 makefile.o_OBJS = $(OBJDIR)makefile.o
-makefile.o_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) -o $(OBJDIR)makefile.o
+makefile.o_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 
 $(OBJDIR)configure.o: configure.c configure.h makefile.h ../config.h
 	$(CC) $(configure_CFLAGS) -o $(OBJDIR)configure.o -c configure.c
