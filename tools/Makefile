@@ -1,4 +1,4 @@
-TARGETS	= pkg-config
+TARGETS	= $(OBJDIR)pkg-config
 PREFIX	= /usr/local
 DESTDIR	=
 BINDIR	= $(PREFIX)/bin
@@ -16,15 +16,15 @@ INSTALL	= install
 
 all: $(TARGETS)
 
-pkg-config_OBJS = pkg-config.o
+pkg-config_OBJS = $(OBJDIR)pkg-config.o
 pkg-config_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 pkg-config_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-pkg-config: $(pkg-config_OBJS)
-	$(CC) -o pkg-config $(pkg-config_OBJS) $(pkg-config_LDFLAGS)
+$(OBJDIR)pkg-config: $(pkg-config_OBJS)
+	$(CC) -o $(OBJDIR)pkg-config $(pkg-config_OBJS) $(pkg-config_LDFLAGS)
 
-pkg-config.o: pkg-config.c ../config.h
-	$(CC) -D PREFIX=\"$(PREFIX)\" $(pkg-config_CFLAGS) -c pkg-config.c
+$(OBJDIR)pkg-config.o: pkg-config.c ../config.h
+	$(CC) -D PREFIX=\"$(PREFIX)\" $(pkg-config_CFLAGS) -o $(OBJDIR)pkg-config.o -c pkg-config.c
 
 clean:
 	$(RM) -- $(pkg-config_OBJS)

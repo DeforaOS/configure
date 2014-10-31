@@ -1,5 +1,5 @@
 SUBDIRS	= scripts
-TARGETS	= configure.1 configure.html project.conf.5 project.conf.html
+TARGETS	= $(OBJDIR)configure.1 $(OBJDIR)configure.html $(OBJDIR)project.conf.5 $(OBJDIR)project.conf.html
 PREFIX	= /usr/local
 DESTDIR	=
 RM	= rm -f
@@ -13,17 +13,17 @@ all: subdirs $(TARGETS)
 subdirs:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE)) || exit; done
 
-configure.1: configure.xml
-	./docbook.sh -P "$(PREFIX)" -- "configure.1"
+$(OBJDIR)configure.1: configure.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)configure.1"
 
-configure.html: configure.css.xml configure.xml manual.css.xml
-	./docbook.sh -P "$(PREFIX)" -- "configure.html"
+$(OBJDIR)configure.html: configure.css.xml configure.xml manual.css.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)configure.html"
 
-project.conf.5: project.conf.xml
-	./docbook.sh -P "$(PREFIX)" -- "project.conf.5"
+$(OBJDIR)project.conf.5: project.conf.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)project.conf.5"
 
-project.conf.html: project.conf.css.xml project.conf.xml manual.css.xml
-	./docbook.sh -P "$(PREFIX)" -- "project.conf.html"
+$(OBJDIR)project.conf.html: project.conf.css.xml project.conf.xml manual.css.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)project.conf.html"
 
 clean:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) clean) || exit; done
@@ -44,10 +44,10 @@ distclean:
 
 install: $(TARGETS)
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) install) || exit; done
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "configure.1"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "configure.html"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "project.conf.5"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "project.conf.html"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)configure.1"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)configure.html"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)project.conf.5"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)project.conf.html"
 
 uninstall:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) uninstall) || exit; done
