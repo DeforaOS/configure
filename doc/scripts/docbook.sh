@@ -27,6 +27,7 @@
 #variables
 PREFIX="/usr/local"
 [ -f "../config.sh" ] && . "../config.sh"
+PROGNAME="docbook.sh"
 #executables
 DEBUG="_debug"
 FOP="fop"
@@ -74,13 +75,13 @@ _docbook()
 			$DEBUG $XSLTPROC -o "$target" "$XSL" "$source"
 			;;
 		*)
-			echo "$0: $target: Unknown type" 1>&2
+			_error "$target: Unknown type"
 			return 2
 			;;
 	esac
 
 	if [ $? -ne 0 ]; then
-		echo "$0: $target: Could not create page" 1>&2
+		_error "$target: Could not create page"
 		$RM -- "$target"
 		return 2
 	fi
@@ -90,7 +91,7 @@ _docbook()
 #error
 _error()
 {
-	echo "docbook.sh: $@" 1>&2
+	echo "$PROGNAME: $@" 1>&2
 	return 2
 }
 
@@ -98,7 +99,7 @@ _error()
 #usage
 _usage()
 {
-	echo "Usage: docbook.sh [-c|-i|-u][-P prefix] target..." 1>&2
+	echo "Usage: $PROGNAME [-c|-i|-u][-P prefix] target..." 1>&2
 	return 1
 }
 
@@ -169,7 +170,7 @@ while [ $# -gt 0 ]; do
 			instdir="$MANDIR/man$ext"
 			;;
 		*)
-			echo "$0: $target: Unknown type" 1>&2
+			_error "$target: Unknown type"
 			exit 2
 			;;
 	esac
