@@ -1881,7 +1881,7 @@ static void _install_target_binary(Configure * configure, FILE * fp,
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0755 ", target,
+	fprintf(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0755 $(OBJDIR)", target,
 			" $(DESTDIR)", path, target);
 }
 
@@ -1897,7 +1897,7 @@ static int _install_target_library(Configure * configure, FILE * fp,
 		return 0;
 	soext = configure_get_soext(configure);
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0644 ", target,
+	fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0644 $(OBJDIR)", target,
 			".a $(DESTDIR)", path, target, ".a\n");
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
@@ -1905,7 +1905,7 @@ static int _install_target_library(Configure * configure, FILE * fp,
 		soname = string_new_append(target, soext, ".0", NULL);
 	if(soname == NULL)
 		return 1;
-	fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 ", soname,
+	fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)", soname,
 			".0 $(DESTDIR)", path, soname, ".0\n");
 	fprintf(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
 			".0 $(DESTDIR)", path, soname, "\n");
@@ -1924,8 +1924,8 @@ static void _install_target_libtool(Configure * configure, FILE * fp,
 		return;
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
 	fprintf(fp, "%s%s%s%s/%s%s", "\t$(LIBTOOL) --mode=install $(INSTALL)"
-			" -m 0755 ", target, ".la $(DESTDIR)", path, target,
-			".la\n");
+			" -m 0755 $(OBJDIR)", target, ".la $(DESTDIR)", path,
+			target, ".la\n");
 	fprintf(fp, "%s/%s\n", "\t$(LIBTOOL) --mode=finish $(DESTDIR)", path);
 }
 
@@ -1937,7 +1937,7 @@ static void _install_target_object(Configure * configure, FILE * fp,
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 ", target,
+	fprintf(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 $(OBJDIR)", target,
 			" $(DESTDIR)", path, target);
 }
 
@@ -1951,8 +1951,9 @@ static void _install_target_plugin(Configure * configure, FILE * fp,
 		return;
 	soext = configure_get_soext(configure);
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%s%s%s%s/%s%s%s", "\t$(INSTALL) -m 0644 ", target,
-			soext, " $(DESTDIR)", path, target, soext, "\n");
+	fprintf(fp, "%s%s%s%s%s/%s%s%s", "\t$(INSTALL) -m 0644 $(OBJDIR)",
+			target, soext, " $(DESTDIR)", path, target, soext,
+			"\n");
 }
 
 static void _install_target_script(Configure * configure, FILE * fp,
@@ -1966,8 +1967,8 @@ static void _install_target_script(Configure * configure, FILE * fp,
 	if((script = config_get(configure->config, target, "script")) == NULL)
 		return;
 	fprintf(fp, "\t%s%s%s%s%s%s", script, " -P \"$(DESTDIR)",
-			(path[0] != '\0') ? path : "$(PREFIX)", "\" -i -- \"",
-			target, "\"\n");
+			(path[0] != '\0') ? path : "$(PREFIX)",
+			"\" -i -- \"$(OBJDIR)", target, "\"\n");
 }
 
 static int _install_include(Config * config, FILE * fp, String const * include);
