@@ -1673,7 +1673,9 @@ static int _write_distcheck(Configure * configure, FILE * fp)
 		return 0;
 	fputs("\ndistcheck: dist\n", fp);
 	fputs("\t$(TAR) -xzvf $(PACKAGE)-$(VERSION).tar.gz\n", fp);
-	fputs("\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) all dist)\n", fp);
+	fputs("\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE))\n", fp);
+	fputs("\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) distclean)\n", fp);
+	fputs("\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) dist)\n", fp);
 	fputs("\t$(RM) -r -- $(PACKAGE)-$(VERSION)\n", fp);
 	return 0;
 }
