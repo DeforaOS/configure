@@ -1,5 +1,6 @@
 SUBDIRS	= scripts
 TARGETS	= $(OBJDIR)configure.1 $(OBJDIR)configure.html $(OBJDIR)project.conf.5 $(OBJDIR)project.conf.html
+OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 RM	= rm -f

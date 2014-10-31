@@ -1,4 +1,5 @@
 TARGETS	= $(OBJDIR)pkg-config
+OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 BINDIR	= $(PREFIX)/bin

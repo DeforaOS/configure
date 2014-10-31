@@ -1,6 +1,7 @@
 PACKAGE	= configure
 VERSION	= 0.1.0
 SUBDIRS	= doc src tools
+OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 MKDIR	= mkdir -m 0755 -p

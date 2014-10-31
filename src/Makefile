@@ -1,4 +1,5 @@
 TARGETS	= $(OBJDIR)configure $(OBJDIR)makedepend $(OBJDIR)makefile.o
+OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 BINDIR	= $(PREFIX)/bin
