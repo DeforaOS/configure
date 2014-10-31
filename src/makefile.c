@@ -88,6 +88,7 @@ static int _write_clean(Configure * configure, FILE * fp);
 static int _write_distclean(Configure * configure, FILE * fp);
 static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 	       	int from, int to);
+static int _write_distcheck(Configure * configure, FILE * fp);
 static int _write_install(Configure * configure, FILE * fp);
 static int _write_uninstall(Configure * configure, FILE * fp);
 static int _makefile_write(Configure * configure, FILE * fp, configArray * ca,
@@ -101,6 +102,7 @@ static int _makefile_write(Configure * configure, FILE * fp, configArray * ca,
 			|| _write_clean(configure, fp) != 0
 			|| _write_distclean(configure, fp) != 0
 			|| _write_dist(configure, fp, ca, from, to) != 0
+			|| _write_distcheck(configure, fp) != 0
 			|| _write_install(configure, fp) != 0
 			|| _write_uninstall(configure, fp) != 0)
 		return 1;
@@ -111,7 +113,7 @@ static int _makefile_write(Configure * configure, FILE * fp, configArray * ca,
 				" clean distclean",
 				config_get(config, NULL, "package") != NULL
 				&& config_get(config, NULL, "version") != NULL
-				? " dist" : "",
+				? " dist distcheck" : "",
 				" install uninstall\n");
 	return 0;
 }
@@ -1655,6 +1657,24 @@ static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 	else
 		return 1;
 	fputs("\t$(RM) -- $(PACKAGE)-$(VERSION)\n", fp);
+	return 0;
+}
+
+static int _write_distcheck(Configure * configure, FILE * fp)
+{
+	String const * package;
+	String const * version;
+
+	if(configure->prefs->flags & PREFS_n)
+		return 0;
+	package = config_get(configure->config, NULL, "package");
+	version = config_get(configure->config, NULL, "version");
+	if(package == NULL || version == NULL)
+		return 0;
+	fputs("\ndistcheck: dist\n", fp);
+	fputs("\t$(TAR) -xzvf $(PACKAGE)-$(VERSION).tar.gz\n", fp);
+	fputs("\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) all dist)\n", fp);
+	fputs("\t$(RM) -r -- $(PACKAGE)-$(VERSION)\n", fp);
 	return 0;
 }
 
