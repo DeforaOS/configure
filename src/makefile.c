@@ -238,6 +238,7 @@ static int _variables_dist(Configure * configure, FILE * fp)
 			if(config_get(configure->config, NULL, "targets")
 					== NULL)
 			{
+				_makefile_output_variable(fp, "OBJDIR", "");
 				_makefile_output_variable(fp, "PREFIX",
 						configure->prefs->prefix);
 				_makefile_output_variable(fp, "DESTDIR",
@@ -384,6 +385,7 @@ static int _variables_executables(Configure * configure, FILE * fp)
 	}
 	else if(includes != NULL)
 	{
+		_makefile_output_variable(fp, "OBJDIR", "");
 		_makefile_output_variable(fp, "PREFIX",
 				configure->prefs->prefix);
 		_makefile_output_variable(fp, "DESTDIR",
@@ -464,6 +466,7 @@ static void _variables_binary(Configure * configure, FILE * fp, char * done)
 
 	if(!done[TT_LIBRARY] && !done[TT_SCRIPT])
 	{
+		_makefile_output_variable(fp, "OBJDIR", "");
 		_makefile_output_variable(fp, "PREFIX",
 				configure->prefs->prefix);
 		_makefile_output_variable(fp, "DESTDIR",
@@ -681,6 +684,7 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 
 	if(!done[TT_LIBRARY] && !done[TT_SCRIPT])
 	{
+		_makefile_output_variable(fp, "OBJDIR", "");
 		_makefile_output_variable(fp, "PREFIX",
 				configure->prefs->prefix);
 		_makefile_output_variable(fp, "DESTDIR",
@@ -735,6 +739,7 @@ static void _variables_script(Configure * configure, FILE * fp, char * done)
 {
 	if(!done[TT_BINARY] && !done[TT_LIBRARY] && !done[TT_SCRIPT])
 	{
+		_makefile_output_variable(fp, "OBJDIR", "");
 		_makefile_output_variable(fp, "PREFIX",
 				configure->prefs->prefix);
 		_makefile_output_variable(fp, "DESTDIR",
