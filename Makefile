@@ -73,7 +73,9 @@ dist:
 
 distcheck: dist
 	$(TAR) -xzvf $(PACKAGE)-$(VERSION).tar.gz
-	(cd "$(PACKAGE)-$(VERSION)" && $(MAKE) all dist)
+	(cd "$(PACKAGE)-$(VERSION)" && $(MAKE))
+	(cd "$(PACKAGE)-$(VERSION)" && $(MAKE) distclean)
+	(cd "$(PACKAGE)-$(VERSION)" && $(MAKE) dist)
 	$(RM) -r -- $(PACKAGE)-$(VERSION)
 
 install:
