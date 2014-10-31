@@ -338,8 +338,8 @@ static int _variables_targets_library(Configure * configure, FILE * fp,
 		soname = string_new_append(target, soext, ".0", NULL);
 	if(soname == NULL)
 		return 1;
-	fprintf(fp, " %s%s%s%s%s%s%s%s", target, ".a ", soname, ".0 ", soname,
-			" ", target, soext);
+	fprintf(fp, " %s%s%s%s%s%s%s%s%s", "$(OBJDIR)", target, ".a $(OBJDIR)",
+			soname, ".0 ", soname, " ", target, soext);
 	string_delete(soname);
 	return 0;
 }
