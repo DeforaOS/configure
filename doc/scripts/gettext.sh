@@ -87,7 +87,6 @@ _gettext_po()
 	potfile="$3"
 	pofile="$4"
 
-	echo "potfile=$potfile pofile=$pofile"
 	if [ -f "$pofile" ]; then
 		$DEBUG $MSGMERGE -U "$pofile" "$potfile"	|| return 1
 	else
