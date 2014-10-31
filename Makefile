@@ -8,7 +8,7 @@ INSTALL	= install
 RM	= rm -f
 RM	= rm -f
 LN	= ln -f
-TAR	= tar -czvf
+TAR	= tar
 
 
 all: subdirs
@@ -25,7 +25,7 @@ distclean:
 dist:
 	$(RM) -r -- $(PACKAGE)-$(VERSION)
 	$(LN) -s -- . $(PACKAGE)-$(VERSION)
-	@$(TAR) $(PACKAGE)-$(VERSION).tar.gz -- \
+	@$(TAR) -czvf $(PACKAGE)-$(VERSION).tar.gz -- \
 		$(PACKAGE)-$(VERSION)/doc/Makefile \
 		$(PACKAGE)-$(VERSION)/doc/docbook.sh \
 		$(PACKAGE)-$(VERSION)/doc/configure.css.xml \
