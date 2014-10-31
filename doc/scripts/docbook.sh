@@ -52,19 +52,25 @@ _docbook()
 {
 	target="$1"
 
-	source="${target#$OBJDIR}"
-	source="${source%.*}.xml"
+	source="${target%.*}.xml"
+	[ -f "$source" ] || source="${source#$OBJDIR}"
 	ext="${target##*.}"
 	ext="${ext##.}"
 	case "$ext" in
 		html)
 			XSL="http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl"
+			[ -f "${source%.*}.xsl" ] && XSL="${source%.*}.xsl"
 			[ -f "${target%.*}.xsl" ] && XSL="${target%.*}.xsl"
-			[ -f "${target%.*}.css.xml" ] && XSLTPROC="$XSLTPROC --param custom.css.source \"${target%.*}.css.xml\" --param generate.css.header 1"
+			if [ -f "${target%.*}.css.xml" ]; then
+				XSLTPROC="$XSLTPROC --param custom.css.source \"${target%.*}.css.xml\" --param generate.css.header 1"
+			elif [ -f "${source%.*}.css.xml" ]; then
+				XSLTPROC="$XSLTPROC --param custom.css.source \"${source%.*}.css.xml\" --param generate.css.header 1"
+			fi
 			$DEBUG $XSLTPROC -o "$target" "$XSL" "$source"
 			;;
 		pdf)
 			XSL="http://docbook.sourceforge.net/release/xsl/current/fo/docbook.xsl"
+			[ -f "${source%.*}.xsl" ] && XSL="${source%.*}.xsl"
 			[ -f "${target%.*}.xsl" ] && XSL="${target%.*}.xsl"
 			$DEBUG $XSLTPROC -o "${target%.*}.fo" "$XSL" "$source" &&
 			$DEBUG $FOP -fo "${target%.*}.fo" -pdf "$target"
