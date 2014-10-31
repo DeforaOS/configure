@@ -1641,7 +1641,7 @@ static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 		return 0;
 	fputs("\ndist:\n\t$(RM) -r -- $(PACKAGE)-$(VERSION)\n"
 			"\t$(LN) -s -- . $(PACKAGE)-$(VERSION)\n"
-			"\t@$(TAR) $(PACKAGE)-$(VERSION).tar.gz -- \\\n", fp);
+			"\t@$(TAR) -czvf $(PACKAGE)-$(VERSION).tar.gz -- \\\n", fp);
 	for(i = from + 1; i < to; i++)
 	{
 		array_get_copy(ca, i, &p);

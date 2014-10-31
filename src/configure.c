@@ -287,7 +287,7 @@ static void _configure_detect_programs(Configure * configure)
 	configure->programs.mkdir = "mkdir -m 0755 -p";
 	configure->programs.ranlib = "ranlib";
 	configure->programs.rm = "rm -f";
-	configure->programs.tar = "tar -czvf";
+	configure->programs.tar = "tar";
 	/* platform-specific */
 	switch(configure->os)
 	{
