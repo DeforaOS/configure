@@ -1671,6 +1671,16 @@ static int _write_distcheck(Configure * configure, FILE * fp)
 {
 	String const * package;
 	String const * version;
+	const char pretarget[] = "\ndistcheck: dist\n"
+		"\t$(TAR) -xzvf $(PACKAGE)-$(VERSION).tar.gz\n"
+		"\t$(MKDIR) -- $(PACKAGE)-$(VERSION)/objdir\n"
+		"\t$(MKDIR) -- $(PACKAGE)-$(VERSION)/destdir\n";
+	const char target[] = "\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) OBJDIR=\"$$PWD/objdir/\")\n"
+		"\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) OBJDIR=\"$$PWD/objdir/\" DESTDIR=\"$$PWD/destdir\" install)\n"
+		"\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) OBJDIR=\"$$PWD/objdir/\" DESTDIR=\"$$PWD/destdir\" uninstall)\n"
+		"\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) OBJDIR=\"$$PWD/objdir/\" distclean)\n"
+		"\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) dist)\n";
+	const char posttarget[] = "\t$(RM) -r -- $(PACKAGE)-$(VERSION)\n";
 
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
@@ -1678,12 +1688,9 @@ static int _write_distcheck(Configure * configure, FILE * fp)
 	version = config_get(configure->config, NULL, "version");
 	if(package == NULL || version == NULL)
 		return 0;
-	fputs("\ndistcheck: dist\n", fp);
-	fputs("\t$(TAR) -xzvf $(PACKAGE)-$(VERSION).tar.gz\n", fp);
-	fputs("\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE))\n", fp);
-	fputs("\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) distclean)\n", fp);
-	fputs("\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) dist)\n", fp);
-	fputs("\t$(RM) -r -- $(PACKAGE)-$(VERSION)\n", fp);
+	fputs(pretarget, fp);
+	fputs(target, fp);
+	fputs(posttarget, fp);
 	return 0;
 }
 
