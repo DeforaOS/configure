@@ -397,11 +397,16 @@ static int _variables_executables(Configure * configure, FILE * fp)
 		_makefile_output_variable(fp, "LN", configure->programs.ln);
 	}
 	if(package != NULL)
-		_makefile_output_variable(fp, "TAR", configure->programs.tar);
-	if(targets != NULL || includes != NULL)
 	{
+		_makefile_output_variable(fp, "TAR", configure->programs.tar);
 		_makefile_output_variable(fp, "MKDIR",
 				configure->programs.mkdir);
+	}
+	if(targets != NULL || includes != NULL)
+	{
+		if(package == NULL)
+			_makefile_output_variable(fp, "MKDIR",
+					configure->programs.mkdir);
 		_makefile_output_variable(fp, "INSTALL",
 				configure->programs.install);
 	}
