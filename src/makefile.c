@@ -1149,6 +1149,9 @@ static int _target_library(Configure * configure, FILE * fp,
 	/* soname is not available on MacOS X */
 	if(configure->os != HO_MACOSX)
 		fprintf(fp, "%s%s", " -Wl,-soname,", soname);
+	else if((p = config_get(configure->config, target, "install")) != NULL)
+		fprintf(fp, "%s%s%s%s%s", " -install_name ", p, "/", target,
+				configure_get_soext(configure));
 	fprintf(fp, "%s%s%s%s%s", " $(", target, "_OBJS) $(", target,
 			"_LDFLAGS)");
 	if(q != NULL)
