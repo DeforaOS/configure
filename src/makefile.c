@@ -350,12 +350,12 @@ static int _variables_targets_library(Configure * configure, FILE * fp,
 		return 1;
 	if(configure->os == HO_MACOSX)
 		fprintf(fp, " %s%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", target,
-				".a $(OBJDIR)", soname, " ", target, ".0",
-				soext, " ", target, soext);
+				".a $(OBJDIR)", soname, " $(OBJDIR)", target,
+				".0", soext, " $(OBJDIR)", target, soext);
 	else
 		fprintf(fp, " %s%s%s%s%s%s%s%s%s", "$(OBJDIR)", target,
-				".a $(OBJDIR)", soname, ".0 ", soname, " ",
-				target, soext);
+				".a $(OBJDIR)", soname, ".0 $(OBJDIR)", soname,
+				" $(OBJDIR)", target, soext);
 	string_delete(soname);
 	return 0;
 }
@@ -1164,12 +1164,12 @@ static int _target_library(Configure * configure, FILE * fp,
 		return 1;
 	if(configure->os != HO_MACOSX)
 		fprintf(fp, "\n%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", soname,
-				".0 ", soname, " ", target, soext, ": $(",
-				target, "_OBJS)");
+				".0 $(OBJDIR)", soname, " $(OBJDIR)", target,
+				soext, ": $(", target, "_OBJS)");
 	else
 		fprintf(fp, "\n%s%s%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", soname,
-				" ", target, ".0", soext, " ", target, soext,
-				": $(", target, "_OBJS)");
+				" $(OBJDIR)", target, ".0", soext, " $(OBJDIR)",
+				target, soext, ": $(", target, "_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL)
 		fprintf(fp, " %s", p);
 	fputc('\n', fp);

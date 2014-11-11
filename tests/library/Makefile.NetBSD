@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)libtest.a $(OBJDIR)libtest.so.0.0 libtest.so.0 libtest.so
+TARGETS	= $(OBJDIR)libtest.a $(OBJDIR)libtest.so.0.0 $(OBJDIR)libtest.so.0 $(OBJDIR)libtest.so
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -22,7 +22,7 @@ $(OBJDIR)libtest.a: $(libtest_OBJS)
 	$(AR) -rc $(OBJDIR)libtest.a $(libtest_OBJS)
 	$(RANLIB) $(OBJDIR)libtest.a
 
-$(OBJDIR)libtest.so.0.0 libtest.so.0 libtest.so: $(libtest_OBJS)
+$(OBJDIR)libtest.so.0.0 $(OBJDIR)libtest.so.0 $(OBJDIR)libtest.so: $(libtest_OBJS)
 	$(CCSHARED) -o $(OBJDIR)libtest.so.0.0 -Wl,-soname,libtest.so.0 $(libtest_OBJS) $(libtest_LDFLAGS)
 	$(LN) -s -- libtest.so.0.0 $(OBJDIR)libtest.so.0
 	$(LN) -s -- libtest.so.0.0 $(OBJDIR)libtest.so
