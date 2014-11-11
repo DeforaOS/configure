@@ -1,0 +1,41 @@
+TARGETS	= $(OBJDIR)test
+OBJDIR	=
+PREFIX	= /usr/local
+DESTDIR	=
+BINDIR	= $(PREFIX)/bin
+SBINDIR	= $(PREFIX)/sbin
+RM	= rm -f
+LN	= ln -f
+MKDIR	= mkdir -m 0755 -p
+INSTALL	= install
+
+
+all: $(TARGETS)
+
+test_OBJS = $(OBJDIR)test.o $(OBJDIR)main.o
+test_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+test_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+
+$(OBJDIR)test: $(test_OBJS)
+	$(CC) -o $(OBJDIR)test $(test_OBJS) $(test_LDFLAGS)
+
+$(OBJDIR)test.o: test.c
+	$(CC) $(test_CFLAGS) -o $(OBJDIR)test.o -c test.c
+
+$(OBJDIR)main.o: main.c
+	$(CC) $(test_CFLAGS) -o $(OBJDIR)main.o -c main.c
+
+clean:
+	$(RM) -- $(test_OBJS)
+
+distclean: clean
+	$(RM) -- $(TARGETS)
+
+install: $(TARGETS)
+	$(MKDIR) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m 0755 $(OBJDIR)test $(DESTDIR)$(BINDIR)/test
+
+uninstall:
+	$(RM) -- $(DESTDIR)$(BINDIR)/test
+
+.PHONY: all clean distclean install uninstall
