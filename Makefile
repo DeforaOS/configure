@@ -10,6 +10,7 @@ RM	= rm -f
 RM	= rm -f
 LN	= ln -f
 TAR	= tar
+MKDIR	= mkdir -m 0755 -p
 
 
 all: subdirs
