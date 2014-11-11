@@ -2284,7 +2284,7 @@ static int _uninstall_target(Configure * configure, FILE * fp,
 	String const * exeext;
 	String const * soext;
 	TargetType tt;
-	const String * rm_destdir = "$(RM) -- $(DESTDIR)";
+	const String rm_destdir[] = "$(RM) -- $(DESTDIR)";
 
 	if((type = config_get(configure->config, target, "type")) == NULL)
 		return 1;
