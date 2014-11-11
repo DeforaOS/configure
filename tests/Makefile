@@ -9,7 +9,7 @@ INSTALL	= install
 
 all: $(TARGETS)
 
-tests.log: ../src/configure library/project.conf library/Makefile.Darwin library/Makefile.NetBSD tests.sh
+tests.log: ../src/configure library/project.conf library/Makefile.Darwin library/Makefile.NetBSD plugin/Makefile.Darwin plugin/Makefile.NetBSD tests.sh
 	./tests.sh -P "$(PREFIX)" -- "tests.log"
 
 clean:

@@ -1,0 +1,39 @@
+TARGETS	= test.so
+PREFIX	= /usr/local
+DESTDIR	=
+LIBDIR	= $(PREFIX)/lib
+AR	= ar
+RANLIB	= ranlib
+CCSHARED= $(CC) -shared
+RM	= rm -f
+LN	= ln -f
+MKDIR	= mkdir -m 0755 -p
+INSTALL	= install
+
+
+all: $(TARGETS)
+
+test_OBJS = test.o
+test_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+test_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+
+test.so: $(test_OBJS)
+	$(CCSHARED) -o test.so $(test_OBJS) $(test_LDFLAGS)
+
+test.o: test.c
+	$(CC) $(test_CFLAGS) -c test.c
+
+clean:
+	$(RM) -- $(test_OBJS)
+
+distclean: clean
+	$(RM) -- $(TARGETS)
+
+install: $(TARGETS)
+	$(MKDIR) $(DESTDIR)$(LIBDIR)/configure
+	$(INSTALL) -m 0755 test.so $(DESTDIR)$(LIBDIR)/configure/test.so
+
+uninstall:
+	$(RM) -- $(DESTDIR)$(LIBDIR)/configure/test.so
+
+.PHONY: all clean distclean install uninstall
