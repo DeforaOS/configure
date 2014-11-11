@@ -1933,12 +1933,14 @@ static void _install_target_binary(Configure * configure, FILE * fp,
 		String const * target)
 {
 	String const * path;
+	String const * exeext;
 
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
+	exeext = (configure->os == HO_WIN32) ? "$(EXEEXT)" : "";
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0755 $(OBJDIR)", target,
-			" $(DESTDIR)", path, target);
+	fprintf(fp, "%s%s%s%s%s/%s%s\n", "\t$(INSTALL) -m 0755 $(OBJDIR)",
+			target, exeext, " $(DESTDIR)", path, target, exeext);
 }
 
 static int _install_target_library(Configure * configure, FILE * fp,
@@ -2279,6 +2281,7 @@ static int _uninstall_target(Configure * configure, FILE * fp,
 {
 	String const * type;
 	String const * path;
+	String const * exeext;
 	String const * soext;
 	TargetType tt;
 	const String * rm_destdir = "$(RM) -- $(DESTDIR)";
@@ -2287,12 +2290,14 @@ static int _uninstall_target(Configure * configure, FILE * fp,
 		return 1;
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return 0;
+	exeext = (configure->os == HO_WIN32) ? "$(EXEEXT)" : "";
 	soext = configure_get_soext(configure);
 	tt = enum_string(TT_LAST, sTargetType, type);
 	switch(tt)
 	{
 		case TT_BINARY:
-			fprintf(fp, "\t%s%s/%s\n", rm_destdir, path, target);
+			fprintf(fp, "\t%s%s/%s%s\n", rm_destdir, path, target,
+					exeext);
 			break;
 		case TT_LIBRARY:
 			if(_uninstall_target_library(configure, fp, target,
