@@ -1,4 +1,4 @@
-TARGETS	= libtest.a libtest.dylib.0.0 libtest.dylib.0 libtest.dylib
+TARGETS	= libtest.a libtest.0.0.dylib libtest.0.dylib libtest.dylib
 PREFIX	= /usr/local
 DESTDIR	=
 LIBDIR	= $(PREFIX)/lib
@@ -21,10 +21,10 @@ libtest.a: $(libtest_OBJS)
 	$(AR) -rc libtest.a $(libtest_OBJS)
 	$(RANLIB) libtest.a
 
-libtest.dylib.0.0 libtest.dylib.0 libtest.dylib: $(libtest_OBJS)
-	$(CCSHARED) -o libtest.dylib.0.0 $(libtest_OBJS) $(libtest_LDFLAGS)
-	$(LN) -s -- libtest.dylib.0.0 libtest.dylib.0
-	$(LN) -s -- libtest.dylib.0.0 libtest.dylib
+libtest.0.0.dylib libtest.0.dylib libtest.dylib: $(libtest_OBJS)
+	$(CCSHARED) -o libtest.0.0.dylib $(libtest_OBJS) $(libtest_LDFLAGS)
+	$(LN) -s -- libtest.0.0.dylib libtest.0.dylib
+	$(LN) -s -- libtest.0.0.dylib libtest.dylib
 
 test.o: test.c
 	$(CC) $(libtest_CFLAGS) -c test.c
