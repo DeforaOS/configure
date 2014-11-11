@@ -31,6 +31,7 @@
 
 
 #include <System.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -45,8 +46,13 @@
 
 
 /* prototypes */
+static int _makefile_link(FILE * fp, int symlink, char const * link,
+		char const * path);
 static int _makefile_output_variable(FILE * fp, char const * name,
 		char const * value);
+static int _makefile_remove(FILE * fp, int recursive, ...);
+static int _makefile_subdirs(FILE * fp, char const * target);
+static int _makefile_target(FILE * fp, char const * target, ...);
 
 
 /* functions */
@@ -817,14 +823,16 @@ static int _write_targets(Configure * configure, FILE * fp)
 
 static int _targets_all(Configure * configure, FILE * fp)
 {
+	char const * depends[] = { NULL, NULL };
+	size_t i = 0;
+
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
-	fprintf(fp, "%s", "\nall:");
 	if(config_get(configure->config, NULL, "subdirs") != NULL)
-		fprintf(fp, "%s", " subdirs");
+		depends[i++] = "subdirs";
 	if(config_get(configure->config, NULL, "targets") != NULL)
-		fprintf(fp, "%s", " $(TARGETS)");
-	fprintf(fp, "%s", "\n");
+		depends[i++] = "$(TARGETS)";
+	_makefile_target(fp, "all", depends[0], depends[1], NULL);
 	return 0;
 }
 
@@ -835,8 +843,10 @@ static int _targets_subdirs(Configure * configure, FILE * fp)
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
 	if((subdirs = config_get(configure->config, NULL, "subdirs")) != NULL)
-		fprintf(fp, "%s", "\nsubdirs:\n\t@for i in $(SUBDIRS); do"
-				" (cd \"$$i\" && $(MAKE)) || exit; done\n");
+	{
+		_makefile_target(fp, "subdirs", NULL);
+		_makefile_subdirs(fp, NULL);
+	}
 	return 0;
 }
 
@@ -1588,10 +1598,9 @@ static int _write_clean(Configure * configure, FILE * fp)
 {
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
-	fputs("\nclean:\n", fp);
+	_makefile_target(fp, "clean", NULL);
 	if(config_get(configure->config, NULL, "subdirs") != NULL)
-		fputs("\t@for i in $(SUBDIRS); do (cd \"$$i\" && $(MAKE) clean)"
-				" || exit; done\n", fp);
+		_makefile_subdirs(fp, "clean");
 	return _clean_targets(configure->config, fp);
 }
 
@@ -1654,19 +1663,18 @@ static int _write_distclean(Configure * configure, FILE * fp)
 
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
-	fputs("\ndistclean:", fp);
 	/* only depend on the "clean" target if we do not have subfolders */
 	if((subdirs = config_get(configure->config, NULL, "subdirs")) == NULL)
-		fputs(" clean\n", fp);
+		_makefile_target(fp, "distclean", "clean", NULL);
 	else
 	{
-		fputs("\n\t@for i in $(SUBDIRS); do (cd \"$$i\""
-				" && $(MAKE) distclean) || exit; done\n", fp);
+		_makefile_target(fp, "distclean", NULL);
+		_makefile_subdirs(fp, "distclean");
 		_clean_targets(configure->config, fp);
 	}
 	/* FIXME do not erase targets that need be distributed */
 	if(config_get(configure->config, NULL, "targets") != NULL)
-		fputs("\t$(RM) -- $(TARGETS)\n", fp);
+		_makefile_remove(fp, 0, "$(TARGETS)", NULL);
 	return 0;
 }
 
@@ -1685,9 +1693,10 @@ static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 	version = config_get(configure->config, NULL, "version");
 	if(package == NULL || version == NULL)
 		return 0;
-	fputs("\ndist:\n\t$(RM) -r -- $(PACKAGE)-$(VERSION)\n"
-			"\t$(LN) -s -- . $(PACKAGE)-$(VERSION)\n"
-			"\t@$(TAR) -czvf $(PACKAGE)-$(VERSION).tar.gz -- \\\n", fp);
+	_makefile_target(fp, "dist", NULL);
+	_makefile_remove(fp, 1, "$(PACKAGE)-$(VERSION)", NULL);
+	_makefile_link(fp, 1, ".", "$(PACKAGE)-$(VERSION)");
+	fputs("\t@$(TAR) -czvf $(PACKAGE)-$(VERSION).tar.gz -- \\\n", fp);
 	for(i = from + 1; i < to; i++)
 	{
 		array_get_copy(ca, i, &p);
@@ -1700,7 +1709,7 @@ static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 	}
 	else
 		return 1;
-	fputs("\t$(RM) -- $(PACKAGE)-$(VERSION)\n", fp);
+	_makefile_remove(fp, 0, "$(PACKAGE)-$(VERSION)", NULL);
 	return 0;
 }
 
@@ -1826,17 +1835,15 @@ static int _install_dist(Configure * configure, FILE * fp);
 static int _write_install(Configure * configure, FILE * fp)
 {
 	int ret = 0;
+	char const * targets;
 
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
-	fputs("\ninstall:", fp);
-	if(config_get(configure->config, NULL, "targets") != NULL)
-		fputs(" $(TARGETS)", fp);
-	fputc('\n', fp);
+	targets = config_get(configure->config, NULL, "targets");
+	_makefile_target(fp, "install", (targets != NULL) ? "$(TARGETS)" : NULL,
+			NULL);
 	if(config_get(configure->config, NULL, "subdirs") != NULL)
-		fputs("\t@for i in $(SUBDIRS); do (cd \"$$i\""
-				" && $(MAKE) install)"
-				" || exit; done\n", fp);
+		_makefile_subdirs(fp, "install");
 	ret |= _install_targets(configure, fp);
 	ret |= _install_includes(configure, fp);
 	ret |= _install_dist(configure, fp);
@@ -1995,14 +2002,23 @@ static void _install_target_plugin(Configure * configure, FILE * fp,
 {
 	String const * path;
 	String const * soext;
+	String const * mode;
+	mode_t m = 0755;
+	String * p;
 
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
 	soext = configure_get_soext(configure);
+	if((mode = config_get(configure->config, target, "mode")) == NULL
+			/* XXX these tests are not sufficient */
+			|| mode[0] == '\0'
+			|| (m = strtol(mode, &p, 8)) == 0
+			|| *p != '\0')
+		mode = "0755";
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%s%s%s%s/%s%s%s", "\t$(INSTALL) -m 0644 $(OBJDIR)",
-			target, soext, " $(DESTDIR)", path, target, soext,
-			"\n");
+	fprintf(fp, "%s%04o%s%s%s%s%s%s%s%s%s", "\t$(INSTALL) -m ", m,
+			" $(OBJDIR)", target, soext, " $(DESTDIR)", path, "/",
+			target, soext, "\n");
 }
 
 static void _install_target_script(Configure * configure, FILE * fp,
@@ -2175,10 +2191,9 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
-	fputs("\nuninstall:\n", fp);
+	_makefile_target(fp, "uninstall", NULL);
 	if(config_get(configure->config, NULL, "subdirs") != NULL)
-		fputs("\t@for i in $(SUBDIRS); do (cd \"$$i\" &&"
-				" $(MAKE) uninstall) || exit; done\n", fp);
+		_makefile_subdirs(fp, "uninstall");
 	if((p = config_get(configure->config, NULL, "targets")) != NULL)
 	{
 		if((targets = string_new(p)) == NULL)
@@ -2345,6 +2360,15 @@ static int _uninstall_dist(Config * config, FILE * fp, String const * dist)
 }
 
 
+/* makefile_link */
+static int _makefile_link(FILE * fp, int symlink, char const * link,
+		char const * path)
+{
+	fprintf(fp, "\t$(LN)%s -- %s %s\n", symlink ? " -s" : "", link, path);
+	return 0;
+}
+
+
 /* makefile_output_variable */
 static int _makefile_output_variable(FILE * fp, char const * name,
 		char const * value)
@@ -2363,4 +2387,52 @@ static int _makefile_output_variable(FILE * fp, char const * name,
 	equals = (strlen(value) > 0) ? "= " : "=";
 	res = fprintf(fp, "%s%s%s%s\n", name, align, equals, value);
 	return (res >= 0) ? 0 : -1;
+}
+
+
+/* makefile_remove */
+static int _makefile_remove(FILE * fp, int recursive, ...)
+{
+	va_list ap;
+	char const * sep = " -- ";
+	char const * p;
+
+	fprintf(fp, "\t$(RM)%s", recursive ? " -r" : "");
+	va_start(ap, recursive);
+	while((p = va_arg(ap, char const * )) != NULL)
+	{
+		fprintf(fp, "%s%s", sep, p);
+		sep = " ";
+	}
+	va_end(ap);
+	fputc('\n', fp);
+	return 0;
+}
+
+
+/* makefile_subdirs */
+static int _makefile_subdirs(FILE * fp, char const * target)
+{
+	fprintf(fp, "\t@for i in $(SUBDIRS); do (cd \"$$i\" && $(MAKE)%s%s)"
+			" || exit; done\n",
+			(target != NULL) ? " " : "",
+			(target != NULL) ? target : "");
+	return 0;
+}
+
+
+/* makefile_target */
+static int _makefile_target(FILE * fp, char const * target, ...)
+{
+	va_list ap;
+	char const * sep = " ";
+	char const * p;
+
+	fprintf(fp, "\n%s:", target);
+	va_start(ap, target);
+	while((p = va_arg(ap, char const *)) != NULL)
+		fprintf(fp, "%s%s", sep, p);
+	va_end(ap);
+	fputc('\n', fp);
+	return 0;
 }
