@@ -97,6 +97,6 @@ fi
 target="$1"
 ($DATE
 _test "Darwin" "library"
-_test "NetBSD" "library"
 _test "Darwin" "plugin"
+_test "NetBSD" "library"
 _test "NetBSD" "plugin") > "$target"
