@@ -36,7 +36,16 @@ distclean: clean
 	$(RM) -- $(TARGETS)
 
 install: $(TARGETS)
+	$(MKDIR) $(DESTDIR)$(LIBDIR)
+	$(INSTALL) -m 0644 libtest.a $(DESTDIR)$(LIBDIR)/libtest.a
+	$(INSTALL) -m 0755 libtest.so.0.0 $(DESTDIR)$(LIBDIR)/libtest.so.0.0
+	$(LN) -s -- libtest.so.0.0 $(DESTDIR)$(LIBDIR)/libtest.so.0
+	$(LN) -s -- libtest.so.0.0 $(DESTDIR)$(LIBDIR)/libtest.so
 
 uninstall:
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.a
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.so.0.0
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.so.0
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.so
 
 .PHONY: all clean distclean install uninstall
