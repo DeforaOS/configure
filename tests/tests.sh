@@ -27,6 +27,7 @@
 #variables
 #executables
 CONFIGURE="../src/configure"
+[ -n "$OBJDIR" ] && configure="${OBJDIR}configure"
 DATE="date"
 DIFF="diff"
 
