@@ -1173,7 +1173,7 @@ static int _target_library(Configure * configure, FILE * fp,
 	if((p = config_get(configure->config, target, "depends")) != NULL)
 		fprintf(fp, " %s", p);
 	fputc('\n', fp);
-	fprintf(fp, "%s%s%s", "\t$(CCSHARED) -o ", soname,
+	fprintf(fp, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname,
 			(configure->os != HO_MACOSX) ? ".0" : "");
 	/* soname is not available on MacOS X */
 	if(configure->os != HO_MACOSX)
@@ -1200,10 +1200,10 @@ static int _target_library(Configure * configure, FILE * fp,
 	}
 	else
 	{
-		fprintf(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
-				".0 $(OBJDIR)", soname, "\n");
+		fprintf(fp, "%s%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+				" $(OBJDIR)", target, ".0", soext, "\n");
 		fprintf(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
-				".0 $(OBJDIR)", target, soext, "\n");
+				" $(OBJDIR)", target, soext, "\n");
 	}
 	string_delete(soname);
 	return 0;
@@ -1975,8 +1975,8 @@ static int _install_target_library(Configure * configure, FILE * fp,
 	}
 	else
 	{
-		fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 ", soname,
-				".0 $(DESTDIR)", path, soname, ".0\n");
+		fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
+				soname, ".0 $(DESTDIR)", path, soname, ".0\n");
 		fprintf(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
 				".0 $(DESTDIR)", path, soname, "\n");
 		fprintf(fp, "%s%s%s%s/%s%s%s", "\t$(LN) -s -- ", soname,

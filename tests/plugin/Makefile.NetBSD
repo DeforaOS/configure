@@ -1,4 +1,5 @@
-TARGETS	= test.so
+TARGETS	= $(OBJDIR)test.so
+OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 LIBDIR	= $(PREFIX)/lib
@@ -13,15 +14,15 @@ INSTALL	= install
 
 all: $(TARGETS)
 
-test_OBJS = test.o
+test_OBJS = $(OBJDIR)test.o
 test_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 test_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-test.so: $(test_OBJS)
-	$(CCSHARED) -o test.so $(test_OBJS) $(test_LDFLAGS)
+$(OBJDIR)test.so: $(test_OBJS)
+	$(CCSHARED) -o $(OBJDIR)test.so $(test_OBJS) $(test_LDFLAGS)
 
-test.o: test.c
-	$(CC) $(test_CFLAGS) -c test.c
+$(OBJDIR)test.o: test.c
+	$(CC) $(test_CFLAGS) -o $(OBJDIR)test.o -c test.c
 
 clean:
 	$(RM) -- $(test_OBJS)
@@ -31,7 +32,7 @@ distclean: clean
 
 install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/configure
-	$(INSTALL) -m 0755 test.so $(DESTDIR)$(LIBDIR)/configure/test.so
+	$(INSTALL) -m 0755 $(OBJDIR)test.so $(DESTDIR)$(LIBDIR)/configure/test.so
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(LIBDIR)/configure/test.so

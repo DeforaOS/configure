@@ -1,4 +1,5 @@
-TARGETS	= libtest.a libtest.so.0.0 libtest.so.0 libtest.so
+TARGETS	= $(OBJDIR)libtest.a $(OBJDIR)libtest.so.0.0 libtest.so.0 libtest.so
+OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 LIBDIR	= $(PREFIX)/lib
@@ -13,21 +14,21 @@ INSTALL	= install
 
 all: $(TARGETS)
 
-libtest_OBJS = test.o
+libtest_OBJS = $(OBJDIR)test.o
 libtest_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 libtest_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-libtest.a: $(libtest_OBJS)
-	$(AR) -rc libtest.a $(libtest_OBJS)
-	$(RANLIB) libtest.a
+$(OBJDIR)libtest.a: $(libtest_OBJS)
+	$(AR) -rc $(OBJDIR)libtest.a $(libtest_OBJS)
+	$(RANLIB) $(OBJDIR)libtest.a
 
-libtest.so.0.0 libtest.so.0 libtest.so: $(libtest_OBJS)
-	$(CCSHARED) -o libtest.so.0.0 -Wl,-soname,libtest.so.0 $(libtest_OBJS) $(libtest_LDFLAGS)
-	$(LN) -s -- libtest.so.0.0 libtest.so.0
-	$(LN) -s -- libtest.so.0.0 libtest.so
+$(OBJDIR)libtest.so.0.0 libtest.so.0 libtest.so: $(libtest_OBJS)
+	$(CCSHARED) -o $(OBJDIR)libtest.so.0.0 -Wl,-soname,libtest.so.0 $(libtest_OBJS) $(libtest_LDFLAGS)
+	$(LN) -s -- libtest.so.0.0 $(OBJDIR)libtest.so.0
+	$(LN) -s -- libtest.so.0.0 $(OBJDIR)libtest.so
 
-test.o: test.c
-	$(CC) $(libtest_CFLAGS) -c test.c
+$(OBJDIR)test.o: test.c
+	$(CC) $(libtest_CFLAGS) -o $(OBJDIR)test.o -c test.c
 
 clean:
 	$(RM) -- $(libtest_OBJS)
@@ -37,8 +38,8 @@ distclean: clean
 
 install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
-	$(INSTALL) -m 0644 libtest.a $(DESTDIR)$(LIBDIR)/libtest.a
-	$(INSTALL) -m 0755 libtest.so.0.0 $(DESTDIR)$(LIBDIR)/libtest.so.0.0
+	$(INSTALL) -m 0644 $(OBJDIR)libtest.a $(DESTDIR)$(LIBDIR)/libtest.a
+	$(INSTALL) -m 0755 $(OBJDIR)libtest.so.0.0 $(DESTDIR)$(LIBDIR)/libtest.so.0.0
 	$(LN) -s -- libtest.so.0.0 $(DESTDIR)$(LIBDIR)/libtest.so.0
 	$(LN) -s -- libtest.so.0.0 $(DESTDIR)$(LIBDIR)/libtest.so
 

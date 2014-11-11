@@ -1,4 +1,5 @@
-TARGETS	= libtest.a libtest.0.0.dylib libtest.0.dylib libtest.dylib
+TARGETS	= $(OBJDIR)libtest.a $(OBJDIR)libtest.0.0.dylib libtest.0.dylib libtest.dylib
+OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 LIBDIR	= $(PREFIX)/lib
@@ -13,21 +14,21 @@ INSTALL	= install
 
 all: $(TARGETS)
 
-libtest_OBJS = test.o
+libtest_OBJS = $(OBJDIR)test.o
 libtest_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 libtest_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-libtest.a: $(libtest_OBJS)
-	$(AR) -rc libtest.a $(libtest_OBJS)
-	$(RANLIB) libtest.a
+$(OBJDIR)libtest.a: $(libtest_OBJS)
+	$(AR) -rc $(OBJDIR)libtest.a $(libtest_OBJS)
+	$(RANLIB) $(OBJDIR)libtest.a
 
-libtest.0.0.dylib libtest.0.dylib libtest.dylib: $(libtest_OBJS)
-	$(CCSHARED) -o libtest.0.0.dylib -install_name $(LIBDIR)/libtest.0.dylib $(libtest_OBJS) $(libtest_LDFLAGS)
-	$(LN) -s -- libtest.0.0.dylib libtest.0.dylib
-	$(LN) -s -- libtest.0.0.dylib libtest.dylib
+$(OBJDIR)libtest.0.0.dylib libtest.0.dylib libtest.dylib: $(libtest_OBJS)
+	$(CCSHARED) -o $(OBJDIR)libtest.0.0.dylib -install_name $(LIBDIR)/libtest.0.dylib $(libtest_OBJS) $(libtest_LDFLAGS)
+	$(LN) -s -- libtest.0.0.dylib $(OBJDIR)libtest.0.dylib
+	$(LN) -s -- libtest.0.0.dylib $(OBJDIR)libtest.dylib
 
-test.o: test.c
-	$(CC) $(libtest_CFLAGS) -c test.c
+$(OBJDIR)test.o: test.c
+	$(CC) $(libtest_CFLAGS) -o $(OBJDIR)test.o -c test.c
 
 clean:
 	$(RM) -- $(libtest_OBJS)
@@ -37,8 +38,8 @@ distclean: clean
 
 install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
-	$(INSTALL) -m 0644 libtest.a $(DESTDIR)$(LIBDIR)/libtest.a
-	$(INSTALL) -m 0755 libtest.0.0.dylib $(DESTDIR)$(LIBDIR)/libtest.0.0.dylib
+	$(INSTALL) -m 0644 $(OBJDIR)libtest.a $(DESTDIR)$(LIBDIR)/libtest.a
+	$(INSTALL) -m 0755 $(OBJDIR)libtest.0.0.dylib $(DESTDIR)$(LIBDIR)/libtest.0.0.dylib
 	$(LN) -s -- libtest.0.0.dylib $(DESTDIR)$(LIBDIR)/libtest.0.dylib
 	$(LN) -s -- libtest.0.0.dylib $(DESTDIR)$(LIBDIR)/libtest.dylib
 
