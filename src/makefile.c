@@ -2270,7 +2270,7 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 	return ret;
 }
 
-static void _uninstall_target_library(Configure * configure, FILE * fp,
+static int _uninstall_target_library(Configure * configure, FILE * fp,
 		String const * target, String const * path);
 static void _uninstall_target_script(Configure * configure, FILE * fp,
 		String const * target, String const * path);
@@ -2295,7 +2295,9 @@ static int _uninstall_target(Configure * configure, FILE * fp,
 			fprintf(fp, "\t%s%s/%s\n", rm_destdir, path, target);
 			break;
 		case TT_LIBRARY:
-			_uninstall_target_library(configure, fp, target, path);
+			if(_uninstall_target_library(configure, fp, target,
+						path) != 0)
+				return 1;
 			break;
 		case TT_LIBTOOL:
 			fprintf(fp, "\t%s%s%s/%s%s", "$(LIBTOOL)"
@@ -2318,27 +2320,40 @@ static int _uninstall_target(Configure * configure, FILE * fp,
 	return 0;
 }
 
-static void _uninstall_target_library(Configure * configure, FILE * fp,
+static int _uninstall_target_library(Configure * configure, FILE * fp,
 		String const * target, String const * path)
 {
 	String const * soext;
-	String const * soname;
-	const String * format = "\t%s%s/%s%s%s";
-	const String * rm_destdir = "$(RM) -- $(DESTDIR)";
+	String * soname;
+	String const * p;
+	const String format[] = "\t%s%s/%s%s%s%s";
+	const String rm_destdir[] = "$(RM) -- $(DESTDIR)";
 
 	soext = configure_get_soext(configure);
-	fprintf(fp, format, rm_destdir, path, target, ".a\n", "");
-	if((soname = config_get(configure->config, target, "soname")) == NULL)
+	fprintf(fp, format, rm_destdir, path, target, ".a\n", "", "");
+	if((p = config_get(configure->config, target, "soname")) != NULL)
+		soname = string_new(p);
+	else if(configure->os == HO_MACOSX)
+		/* versioning is different on MacOS X */
+		soname = string_new_append(target, ".0.0", soext, NULL);
+	else
+		soname = string_new_append(target, soext, ".0", NULL);
+	if(soname == NULL)
+		return 1;
+	if(configure->os == HO_MACOSX)
 	{
-		fprintf(fp, format, rm_destdir, path, target, soext, ".0.0\n");
-		fprintf(fp, format, rm_destdir, path, target, soext, ".0\n");
+		fprintf(fp, format, rm_destdir, path, soname, "\n", "", "");
+		fprintf(fp, format, rm_destdir, path, target, ".0", soext,
+				"\n");
 	}
 	else
 	{
-		fprintf(fp, format, rm_destdir, path, soname, ".0\n", "");
-		fprintf(fp, format, rm_destdir, path, soname, "\n", "");
+		fprintf(fp, format, rm_destdir, path, soname, ".0\n", "", "");
+		fprintf(fp, format, rm_destdir, path, soname, "\n", "", "");
 	}
-	fprintf(fp, format, rm_destdir, path, target, soext, "\n");
+	fprintf(fp, format, rm_destdir, path, target, soext, "\n", "");
+	string_delete(soname);
+	return 0;
 }
 
 static void _uninstall_target_script(Configure * configure, FILE * fp,
