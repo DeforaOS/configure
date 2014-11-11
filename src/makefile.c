@@ -335,12 +335,21 @@ static int _variables_targets_library(Configure * configure, FILE * fp,
 	soext = configure_get_soext(configure);
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
+	else if(configure->os == HO_MACOSX)
+		/* versioning is different on MacOS X */
+		soname = string_new_append(target, ".0.0", soext, NULL);
 	else
 		soname = string_new_append(target, soext, ".0", NULL);
 	if(soname == NULL)
 		return 1;
-	fprintf(fp, " %s%s%s%s%s%s%s%s%s", "$(OBJDIR)", target, ".a $(OBJDIR)",
-			soname, ".0 ", soname, " ", target, soext);
+	if(configure->os == HO_MACOSX)
+		fprintf(fp, " %s%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", target,
+				".a $(OBJDIR)", soname, " ", target, ".0",
+				soext, " ", target, soext);
+	else
+		fprintf(fp, " %s%s%s%s%s%s%s%s%s", "$(OBJDIR)", target,
+				".a $(OBJDIR)", soname, ".0 ", soname, " ",
+				target, soext);
 	string_delete(soname);
 	return 0;
 }
@@ -1136,22 +1145,32 @@ static int _target_library(Configure * configure, FILE * fp,
 	fprintf(fp, "%s%s%s", "\t$(RANLIB) $(OBJDIR)", target, ".a\n");
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
+	else if(configure->os == HO_MACOSX)
+		/* versioning is different on MacOS X */
+		soname = string_new_append(target, ".0.0", soext, NULL);
 	else
 		soname = string_new_append(target, soext, ".0", NULL);
 	if(soname == NULL)
 		return 1;
-	fprintf(fp, "\n%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", soname, ".0 ",
-			soname, " ", target, soext, ": $(", target, "_OBJS)");
+	if(configure->os != HO_MACOSX)
+		fprintf(fp, "\n%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", soname,
+				".0 ", soname, " ", target, soext, ": $(",
+				target, "_OBJS)");
+	else
+		fprintf(fp, "\n%s%s%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", soname,
+				" ", target, ".0", soext, " ", target, soext,
+				": $(", target, "_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL)
 		fprintf(fp, " %s", p);
 	fputc('\n', fp);
-	fprintf(fp, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname, ".0");
+	fprintf(fp, "%s%s%s", "\t$(CCSHARED) -o ", soname,
+			(configure->os != HO_MACOSX) ? ".0" : "");
 	/* soname is not available on MacOS X */
 	if(configure->os != HO_MACOSX)
 		fprintf(fp, "%s%s", " -Wl,-soname,", soname);
 	else if((p = config_get(configure->config, target, "install")) != NULL)
-		fprintf(fp, "%s%s%s%s%s", " -install_name ", p, "/", target,
-				soext);
+		fprintf(fp, "%s%s%s%s%s%s", " -install_name ", p, "/", target,
+				".0", soext);
 	fprintf(fp, "%s%s%s%s%s", " $(", target, "_OBJS) $(", target,
 			"_LDFLAGS)");
 	if(q != NULL)
@@ -1162,10 +1181,20 @@ static int _target_library(Configure * configure, FILE * fp,
 		free(q);
 	}
 	fputc('\n', fp);
-	fprintf(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname, ".0 $(OBJDIR)",
-			soname, "\n");
-	fprintf(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname, ".0 $(OBJDIR)",
-			target, soext, "\n");
+	if(configure->os != HO_MACOSX)
+	{
+		fprintf(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+				".0 $(OBJDIR)", soname, "\n");
+		fprintf(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+				".0 $(OBJDIR)", target, soext, "\n");
+	}
+	else
+	{
+		fprintf(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+				".0 $(OBJDIR)", soname, "\n");
+		fprintf(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+				".0 $(OBJDIR)", target, soext, "\n");
+	}
 	string_delete(soname);
 	return 0;
 }
