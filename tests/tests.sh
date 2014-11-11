@@ -84,6 +84,7 @@ fi
 
 [ "$clean" -ne 0 ] && exit 0
 
+target="$1"
 ($DATE
 echo
-_test "NetBSD" "library") > "tests.log"
+_test "NetBSD" "library") > "$target"
