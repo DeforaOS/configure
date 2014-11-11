@@ -22,7 +22,7 @@ libtest.a: $(libtest_OBJS)
 	$(RANLIB) libtest.a
 
 libtest.0.0.dylib libtest.0.dylib libtest.dylib: $(libtest_OBJS)
-	$(CCSHARED) -o libtest.0.0.dylib $(libtest_OBJS) $(libtest_LDFLAGS)
+	$(CCSHARED) -o libtest.0.0.dylib -install_name $(LIBDIR)/libtest.0.dylib $(libtest_OBJS) $(libtest_LDFLAGS)
 	$(LN) -s -- libtest.0.0.dylib libtest.0.dylib
 	$(LN) -s -- libtest.0.0.dylib libtest.dylib
 
@@ -36,7 +36,16 @@ distclean: clean
 	$(RM) -- $(TARGETS)
 
 install: $(TARGETS)
+	$(MKDIR) $(DESTDIR)$(LIBDIR)
+	$(INSTALL) -m 0644 libtest.a $(DESTDIR)$(LIBDIR)/libtest.a
+	$(INSTALL) -m 0755 libtest.0.0.dylib $(DESTDIR)$(LIBDIR)/libtest.0.0.dylib
+	$(LN) -s -- libtest.0.0.dylib $(DESTDIR)$(LIBDIR)/libtest.0.dylib
+	$(LN) -s -- libtest.0.0.dylib $(DESTDIR)$(LIBDIR)/libtest.dylib
 
 uninstall:
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.a
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.0.0.dylib
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.0.dylib
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.dylib
 
 .PHONY: all clean distclean install uninstall
