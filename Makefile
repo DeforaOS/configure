@@ -1,6 +1,6 @@
 PACKAGE	= configure
 VERSION	= 0.1.0
-SUBDIRS	= doc src tools
+SUBDIRS	= doc src tests tools
 PREFIX	= /usr/local
 DESTDIR	=
 MKDIR	= mkdir -m 0755 -p
@@ -56,6 +56,11 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/makefile.h \
 		$(PACKAGE)-$(VERSION)/src/settings.h \
 		$(PACKAGE)-$(VERSION)/src/project.conf \
+		$(PACKAGE)-$(VERSION)/tests/Makefile \
+		$(PACKAGE)-$(VERSION)/tests/tests.sh \
+		$(PACKAGE)-$(VERSION)/tests/library/project.conf \
+		$(PACKAGE)-$(VERSION)/tests/library/Makefile.NetBSD \
+		$(PACKAGE)-$(VERSION)/tests/project.conf \
 		$(PACKAGE)-$(VERSION)/tools/pkg-config.c \
 		$(PACKAGE)-$(VERSION)/tools/Makefile \
 		$(PACKAGE)-$(VERSION)/tools/project.conf \
