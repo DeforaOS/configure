@@ -1,0 +1,41 @@
+TARGETS	= $(OBJDIR)libtest.dll
+OBJDIR	=
+PREFIX	= /usr/local
+DESTDIR	=
+LIBDIR	= $(PREFIX)/lib
+EXEEXT	= .exe
+AR	= ar
+RANLIB	= ranlib
+CCSHARED= $(CC) -shared -Wl,-no-undefined -Wl,--enable-runtime-pseudo-reloc
+RM	= rm -f
+LN	= ln -f
+MKDIR	= mkdir -m 0755 -p
+INSTALL	= install
+
+
+all: $(TARGETS)
+
+libtest_OBJS = $(OBJDIR)test.o
+libtest_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+libtest_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+
+$(OBJDIR)libtest.dll: $(libtest_OBJS)
+	$(CCSHARED) -o $(OBJDIR)libtest.dll $(libtest_OBJS) $(libtest_LDFLAGS)
+
+$(OBJDIR)test.o: test.c
+	$(CC) $(libtest_CFLAGS) -o $(OBJDIR)test.o -c test.c
+
+clean:
+	$(RM) -- $(libtest_OBJS)
+
+distclean: clean
+	$(RM) -- $(TARGETS)
+
+install: $(TARGETS)
+	$(MKDIR) $(DESTDIR)$(LIBDIR)
+	$(INSTALL) -m 0755 $(OBJDIR)libtest.dll $(DESTDIR)$(LIBDIR)/libtest.dll
+
+uninstall:
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.dll
+
+.PHONY: all clean distclean install uninstall
