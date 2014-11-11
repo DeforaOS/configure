@@ -1,0 +1,42 @@
+TARGETS	= libtest.a libtest.dylib.0.0 libtest.dylib.0 libtest.dylib
+PREFIX	= /usr/local
+DESTDIR	=
+LIBDIR	= $(PREFIX)/lib
+AR	= ar
+RANLIB	= ranlib
+CCSHARED= $(CC) -shared
+RM	= rm -f
+LN	= ln -f
+MKDIR	= mkdir -m 0755 -p
+INSTALL	= install
+
+
+all: $(TARGETS)
+
+libtest_OBJS = test.o
+libtest_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+libtest_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+
+libtest.a: $(libtest_OBJS)
+	$(AR) -rc libtest.a $(libtest_OBJS)
+	$(RANLIB) libtest.a
+
+libtest.dylib.0.0 libtest.dylib.0 libtest.dylib: $(libtest_OBJS)
+	$(CCSHARED) -o libtest.dylib.0.0 $(libtest_OBJS) $(libtest_LDFLAGS)
+	$(LN) -s -- libtest.dylib.0.0 libtest.dylib.0
+	$(LN) -s -- libtest.dylib.0.0 libtest.dylib
+
+test.o: test.c
+	$(CC) $(libtest_CFLAGS) -c test.c
+
+clean:
+	$(RM) -- $(libtest_OBJS)
+
+distclean: clean
+	$(RM) -- $(TARGETS)
+
+install: $(TARGETS)
+
+uninstall:
+
+.PHONY: all clean distclean install uninstall
