@@ -1957,16 +1957,31 @@ static int _install_target_library(Configure * configure, FILE * fp,
 			".a $(DESTDIR)", path, target, ".a\n");
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
+	else if(configure->os == HO_MACOSX)
+		/* versioning is different on MacOS X */
+		soname = string_new_append(target, ".0.0", soext, NULL);
 	else
 		soname = string_new_append(target, soext, ".0", NULL);
 	if(soname == NULL)
 		return 1;
-	fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)", soname,
-			".0 $(DESTDIR)", path, soname, ".0\n");
-	fprintf(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
-			".0 $(DESTDIR)", path, soname, "\n");
-	fprintf(fp, "%s%s%s%s/%s%s%s", "\t$(LN) -s -- ", soname,
-			".0 $(DESTDIR)", path, target, soext, "\n");
+	if(configure->os == HO_MACOSX)
+	{
+		fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
+				soname, " $(DESTDIR)", path, soname, "\n");
+		fprintf(fp, "%s%s%s%s/%s%s%s%s", "\t$(LN) -s -- ", soname,
+				" $(DESTDIR)", path, target, ".0", soext, "\n");
+		fprintf(fp, "%s%s%s%s/%s%s%s", "\t$(LN) -s -- ", soname,
+				" $(DESTDIR)", path, target, soext, "\n");
+	}
+	else
+	{
+		fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 ", soname,
+				".0 $(DESTDIR)", path, soname, ".0\n");
+		fprintf(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
+				".0 $(DESTDIR)", path, soname, "\n");
+		fprintf(fp, "%s%s%s%s/%s%s%s", "\t$(LN) -s -- ", soname,
+				".0 $(DESTDIR)", path, target, soext, "\n");
+	}
 	string_delete(soname);
 	return 0;
 }
