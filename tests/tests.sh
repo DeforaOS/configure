@@ -39,12 +39,13 @@ _test()
 	system="$1"
 	subdir="$2"
 
+	echo
 	echo "Testing: $system $subdir"
 	$CONFIGURE -O "$system" -- "$subdir" 2>&1		|| return 2
-	$DIFF -- "$subdir/Makefile" "$subdir/Makefile.$system" 2>&1
+	$DIFF -- "$subdir/Makefile.$system" "$subdir/Makefile" 2>&1
 	res=$?
 	if [ $res -ne 0 ]; then
-		echo "Failed with error code $res"
+		echo "$system $subdir: Failed with error code $res"
 		echo "$system $subdir: FAIL" 1>&2
 	else
 		echo "$system $subdir: PASS" 1>&2
@@ -86,6 +87,5 @@ fi
 
 target="$1"
 ($DATE
-echo
 _test "Darwin" "library"
 _test "NetBSD" "library") > "$target"
