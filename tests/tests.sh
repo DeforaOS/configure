@@ -32,6 +32,14 @@ DIFF="diff"
 
 
 #functions
+#fail
+_fail()
+{
+	_test "$@"
+	return 0
+}
+
+
 #test
 _test()
 {
@@ -47,9 +55,9 @@ _test()
 	if [ $res -ne 0 ]; then
 		echo "$system $subdir: Failed with error code $res"
 		echo "$system $subdir: FAIL" 1>&2
-	else
-		echo "$system $subdir: PASS" 1>&2
+		return 2
 	fi
+	echo "$system $subdir: PASS" 1>&2
 }
 
 
@@ -87,5 +95,5 @@ fi
 
 target="$1"
 ($DATE
-_test "Darwin" "library"
+_fail "Darwin" "library"
 _test "NetBSD" "library") > "$target"
