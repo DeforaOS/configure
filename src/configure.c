@@ -291,6 +291,9 @@ static void _configure_detect_programs(Configure * configure)
 	/* platform-specific */
 	switch(configure->os)
 	{
+		case HO_MACOSX:
+			configure->programs.ccshared = "$(CC) -dynamiclib";
+			break;
 		case HO_WIN32:
 			configure->programs.ccshared = "$(CC) -shared"
 				" -Wl,-no-undefined"
