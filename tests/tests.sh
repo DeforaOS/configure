@@ -87,4 +87,5 @@ fi
 target="$1"
 ($DATE
 echo
+_test "Darwin" "library"
 _test "NetBSD" "library") > "$target"

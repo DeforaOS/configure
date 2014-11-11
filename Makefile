@@ -60,6 +60,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/Makefile \
 		$(PACKAGE)-$(VERSION)/tests/tests.sh \
 		$(PACKAGE)-$(VERSION)/tests/library/project.conf \
+		$(PACKAGE)-$(VERSION)/tests/library/Makefile.Darwin \
 		$(PACKAGE)-$(VERSION)/tests/library/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/project.conf \
 		$(PACKAGE)-$(VERSION)/tools/pkg-config.c \
