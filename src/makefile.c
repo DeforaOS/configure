@@ -1006,7 +1006,9 @@ static int _target_binary(Configure * configure, FILE * fp,
 		return 0;
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
-	fprintf(fp, "\n%s%s%s%s%s%s", "$(OBJDIR)", target,
+	fputc('\n', fp);
+	/* output the binary target */
+	fprintf(fp, "%s%s%s%s%s%s", "$(OBJDIR)", target,
 			(configure->os == HO_WIN32) ? "$(EXEEXT)" : "",
 			": $(", target, "_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL)
@@ -1020,10 +1022,11 @@ static int _target_binary(Configure * configure, FILE * fp,
 		fprintf(fp, " %s", q);
 		string_delete(q);
 	}
-	fprintf(fp, "%s%s%s%s%s%s%s%s", "\n\t$(CC) -o $(OBJDIR)", target,
-			(configure->os == HO_WIN32) ? "$(EXEEXT)" : "", " $(",
-			target, "_OBJS) $(", target, "_LDFLAGS)");
 	fputc('\n', fp);
+	/* build the binary */
+	fprintf(fp, "%s%s%s%s%s%s%s%s", "\t$(CC) -o $(OBJDIR)", target,
+			(configure->os == HO_WIN32) ? "$(EXEEXT)" : "", " $(",
+			target, "_OBJS) $(", target, "_LDFLAGS)\n");
 	return 0;
 }
 
@@ -1201,6 +1204,7 @@ static int _target_library(Configure * configure, FILE * fp,
 	if((p = config_get(configure->config, target, "depends")) != NULL)
 		fprintf(fp, " %s", p);
 	fputc('\n', fp);
+	/* build the shared library */
 	fprintf(fp, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname,
 			(configure->os != HO_MACOSX
 			 && configure->os != HO_WIN32) ? ".0" : "");
@@ -1252,7 +1256,8 @@ static int _target_libtool(Configure * configure, FILE * fp,
 		return 0;
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
-	fprintf(fp, "\n%s%s%s%s%s", "$(OBJDIR)", target, ".la: $(", target,
+	fputc('\n', fp);
+	fprintf(fp, "%s%s%s%s%s", "$(OBJDIR)", target, ".la: $(", target,
 			"_OBJS)\n");
 	fprintf(fp, "%s%s%s%s%s", "\t$(LIBTOOL) --mode=link $(CC) -o $(OBJDIR)",
 			target, ".la $(", target, "_OBJS)");
@@ -1336,12 +1341,14 @@ static int _target_plugin(Configure * configure, FILE * fp,
 		return 0;
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
+	fputc('\n', fp);
 	soext = configure_get_soext(configure);
-	fprintf(fp, "\n%s%s%s%s%s%s", "$(OBJDIR)", target, soext, ": $(",
+	fprintf(fp, "%s%s%s%s%s%s", "$(OBJDIR)", target, soext, ": $(",
 			target, "_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL)
 		fprintf(fp, " %s", p);
 	fputc('\n', fp);
+	/* build the plug-in */
 	fprintf(fp, "%s%s%s%s%s%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", target,
 			soext, " $(", target, "_OBJS) $(", target, "_LDFLAGS)");
 	if((q = malloc(strlen(target) + strlen(soext) + 1)) != NULL)
@@ -1821,8 +1828,8 @@ static int _dist_subdir(Config * config, FILE * fp, Config * subdir)
 		_dist_subdir_dist(fp, path, dist);
 	quote = (strchr(path, ' ') != NULL) ? "\"" : "";
 	fprintf(fp, "%s%s%s%s%s%s%s%s", "\t\t", quote, "$(PACKAGE)-$(VERSION)/",
-			path, path[0] == '\0' ? "" : "/", PROJECT_CONF, quote,
-			path[0] == '\0' ? "\n" : " \\\n");
+			path, (path[0] == '\0') ? "" : "/", PROJECT_CONF, quote,
+			(path[0] == '\0') ? "\n" : " \\\n");
 	return 0;
 }
 
@@ -1988,6 +1995,7 @@ static int _install_target_library(Configure * configure, FILE * fp,
 	soext = configure_get_soext(configure);
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
 	if(configure_can_library_static(configure))
+		/* install the static library */
 		fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0644 $(OBJDIR)",
 				target, ".a $(DESTDIR)", path, target, ".a\n");
 	if((p = config_get(configure->config, target, "soname")) != NULL)
@@ -2002,6 +2010,7 @@ static int _install_target_library(Configure * configure, FILE * fp,
 		soname = string_new_append(target, soext, ".0", NULL);
 	if(soname == NULL)
 		return 1;
+	/* install the shared library */
 	if(configure->os == HO_MACOSX)
 	{
 		fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
@@ -2375,6 +2384,7 @@ static int _uninstall_target_library(Configure * configure, FILE * fp,
 
 	soext = configure_get_soext(configure);
 	if(configure_can_library_static(configure))
+		/* uninstall the static library */
 		fprintf(fp, format, rm_destdir, path, target, ".a\n", "", "");
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
@@ -2388,6 +2398,7 @@ static int _uninstall_target_library(Configure * configure, FILE * fp,
 		soname = string_new_append(target, soext, ".0", NULL);
 	if(soname == NULL)
 		return 1;
+	/* uninstall the shared library */
 	if(configure->os == HO_MACOSX)
 	{
 		fprintf(fp, format, rm_destdir, path, soname, "\n", "", "");
