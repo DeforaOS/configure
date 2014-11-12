@@ -344,6 +344,9 @@ static int _variables_targets_library(Configure * configure, FILE * fp,
 	else if(configure->os == HO_MACOSX)
 		/* versioning is different on MacOS X */
 		soname = string_new_append(target, ".0.0", soext, NULL);
+	else if(configure->os == HO_WIN32)
+		/* and on Windows */
+		soname = string_new_append(target, soext, NULL);
 	else
 		soname = string_new_append(target, soext, ".0", NULL);
 	if(soname == NULL)
@@ -352,6 +355,8 @@ static int _variables_targets_library(Configure * configure, FILE * fp,
 		fprintf(fp, " %s%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", target,
 				".a $(OBJDIR)", soname, " $(OBJDIR)", target,
 				".0", soext, " $(OBJDIR)", target, soext);
+	else if(configure->os == HO_WIN32)
+		fprintf(fp, " %s%s", "$(OBJDIR)", soname);
 	else
 		fprintf(fp, " %s%s%s%s%s%s%s%s%s", "$(OBJDIR)", target,
 				".a $(OBJDIR)", soname, ".0 $(OBJDIR)", soname,
@@ -1138,49 +1143,64 @@ static int _target_library(Configure * configure, FILE * fp,
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
 	soext = configure_get_soext(configure);
-	fprintf(fp, "\n%s%s%s%s%s", "$(OBJDIR)", target, ".a: $(", target,
-			"_OBJS)");
-	if((p = config_get(configure->config, target, "depends")) != NULL)
-		fprintf(fp, " %s", p);
-	fputc('\n', fp);
-	fprintf(fp, "%s%s%s%s%s", "\t$(AR) -rc $(OBJDIR)", target, ".a $(",
-			target, "_OBJS)");
-	if((q = malloc(strlen(target) + strlen(soext) + 3)) != NULL)
+	if(configure->os != HO_WIN32)
 	{
-		sprintf(q, "%s.a", target);
-		if((p = config_get(configure->config, q, "ldflags")) != NULL)
-			_binary_ldflags(configure, fp, p);
+		/* generate a static library */
+		fprintf(fp, "\n%s%s%s%s%s", "$(OBJDIR)", target, ".a: $(", target,
+				"_OBJS)");
+		if((p = config_get(configure->config, target, "depends")) != NULL)
+			fprintf(fp, " %s", p);
+		fputc('\n', fp);
+		fprintf(fp, "%s%s%s%s%s", "\t$(AR) -rc $(OBJDIR)", target,
+				".a $(", target, "_OBJS)");
+		if((q = malloc(strlen(target) + strlen(soext) + 3)) != NULL)
+		{
+			sprintf(q, "%s.a", target);
+			if((p = config_get(configure->config, q, "ldflags"))
+					!= NULL)
+				_binary_ldflags(configure, fp, p);
+		}
+		fputc('\n', fp);
+		fprintf(fp, "%s%s%s", "\t$(RANLIB) $(OBJDIR)", target, ".a\n");
 	}
-	fputc('\n', fp);
-	fprintf(fp, "%s%s%s", "\t$(RANLIB) $(OBJDIR)", target, ".a\n");
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
 	else if(configure->os == HO_MACOSX)
 		/* versioning is different on MacOS X */
 		soname = string_new_append(target, ".0.0", soext, NULL);
+	else if(configure->os == HO_WIN32)
+		/* and on Windows */
+		soname = string_new_append(target, soext, NULL);
 	else
 		soname = string_new_append(target, soext, ".0", NULL);
 	if(soname == NULL)
 		return 1;
-	if(configure->os != HO_MACOSX)
-		fprintf(fp, "\n%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", soname,
-				".0 $(OBJDIR)", soname, " $(OBJDIR)", target,
-				soext, ": $(", target, "_OBJS)");
-	else
+	if(configure->os == HO_MACOSX)
 		fprintf(fp, "\n%s%s%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", soname,
 				" $(OBJDIR)", target, ".0", soext, " $(OBJDIR)",
 				target, soext, ": $(", target, "_OBJS)");
+	else if(configure->os == HO_WIN32)
+		fprintf(fp, "\n%s%s%s%s%s", "$(OBJDIR)", soname,
+				": $(", target, "_OBJS)");
+	else
+		fprintf(fp, "\n%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", soname,
+				".0 $(OBJDIR)", soname, " $(OBJDIR)", target,
+				soext, ": $(", target, "_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL)
 		fprintf(fp, " %s", p);
 	fputc('\n', fp);
 	fprintf(fp, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname,
-			(configure->os != HO_MACOSX) ? ".0" : "");
-	/* soname is not available on MacOS X */
-	if(configure->os != HO_MACOSX)
-		fprintf(fp, "%s%s", " -Wl,-soname,", soname);
-	else if((p = config_get(configure->config, target, "install")) != NULL)
-		fprintf(fp, "%s%s%s%s%s%s", " -install_name ", p, "/", target,
-				".0", soext);
+			(configure->os != HO_MACOSX
+			 && configure->os != HO_WIN32) ? ".0" : "");
+	if((p = config_get(configure->config, target, "install")) != NULL)
+	{
+		/* soname is not available on MacOS X */
+		if(configure->os == HO_MACOSX)
+			fprintf(fp, "%s%s%s%s%s%s", " -install_name ", p, "/",
+					target, ".0", soext);
+		else if(configure->os != HO_WIN32)
+			fprintf(fp, "%s%s", " -Wl,-soname,", soname);
+	}
 	fprintf(fp, "%s%s%s%s%s", " $(", target, "_OBJS) $(", target,
 			"_LDFLAGS)");
 	if(q != NULL)
@@ -1191,19 +1211,19 @@ static int _target_library(Configure * configure, FILE * fp,
 		free(q);
 	}
 	fputc('\n', fp);
-	if(configure->os != HO_MACOSX)
-	{
-		fprintf(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
-				".0 $(OBJDIR)", soname, "\n");
-		fprintf(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
-				".0 $(OBJDIR)", target, soext, "\n");
-	}
-	else
+	if(configure->os == HO_MACOSX)
 	{
 		fprintf(fp, "%s%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				" $(OBJDIR)", target, ".0", soext, "\n");
 		fprintf(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				" $(OBJDIR)", target, soext, "\n");
+	}
+	else if(configure->os != HO_WIN32)
+	{
+		fprintf(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+				".0 $(OBJDIR)", soname, "\n");
+		fprintf(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+				".0 $(OBJDIR)", target, soext, "\n");
 	}
 	string_delete(soname);
 	return 0;
@@ -1955,13 +1975,17 @@ static int _install_target_library(Configure * configure, FILE * fp,
 		return 0;
 	soext = configure_get_soext(configure);
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0644 $(OBJDIR)", target,
-			".a $(DESTDIR)", path, target, ".a\n");
+	if(configure->os != HO_WIN32)
+		fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0644 $(OBJDIR)",
+				target, ".a $(DESTDIR)", path, target, ".a\n");
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
 	else if(configure->os == HO_MACOSX)
 		/* versioning is different on MacOS X */
 		soname = string_new_append(target, ".0.0", soext, NULL);
+	else if(configure->os == HO_WIN32)
+		/* and on Windows */
+		soname = string_new_append(target, soext, NULL);
 	else
 		soname = string_new_append(target, soext, ".0", NULL);
 	if(soname == NULL)
@@ -1975,6 +1999,9 @@ static int _install_target_library(Configure * configure, FILE * fp,
 		fprintf(fp, "%s%s%s%s/%s%s%s", "\t$(LN) -s -- ", soname,
 				" $(DESTDIR)", path, target, soext, "\n");
 	}
+	else if(configure->os == HO_WIN32)
+		fprintf(fp, "%s%s%s%s%s%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
+				soname, " $(DESTDIR)", path, "/", soname, "\n");
 	else
 	{
 		fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
@@ -2335,12 +2362,16 @@ static int _uninstall_target_library(Configure * configure, FILE * fp,
 	const String rm_destdir[] = "$(RM) -- $(DESTDIR)";
 
 	soext = configure_get_soext(configure);
-	fprintf(fp, format, rm_destdir, path, target, ".a\n", "", "");
+	if(configure->os != HO_WIN32)
+		fprintf(fp, format, rm_destdir, path, target, ".a\n", "", "");
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
 	else if(configure->os == HO_MACOSX)
 		/* versioning is different on MacOS X */
 		soname = string_new_append(target, ".0.0", soext, NULL);
+	else if(configure->os == HO_WIN32)
+		/* and on Windows */
+		soname = string_new_append(target, soext, NULL);
 	else
 		soname = string_new_append(target, soext, ".0", NULL);
 	if(soname == NULL)
@@ -2351,7 +2382,7 @@ static int _uninstall_target_library(Configure * configure, FILE * fp,
 		fprintf(fp, format, rm_destdir, path, target, ".0", soext,
 				"\n");
 	}
-	else
+	else if(configure->os != HO_WIN32)
 	{
 		fprintf(fp, format, rm_destdir, path, soname, ".0\n", "", "");
 		fprintf(fp, format, rm_destdir, path, soname, "\n", "", "");
