@@ -410,6 +410,20 @@ static int _configure_do(Configure * configure, configArray * ca)
 }
 
 
+/* accessors */
+/* configure_can_library_static */
+int configure_can_library_static(Configure * configure)
+{
+	switch(configure->os)
+	{
+		case HO_WIN32:
+			return 0;
+		default:
+			return 1;
+	}
+}
+
+
 /* configure_get_config */
 String const * configure_get_config(Configure * configure,
 		String const * section, String const * variable)

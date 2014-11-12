@@ -167,6 +167,8 @@ typedef struct _Configure
 int configure(Prefs * prefs, char const * directory);
 
 /* accessors */
+int configure_can_library_static(Configure * configure);
+
 String const * configure_get_config(Configure * configure,
 		String const * section, String const * variable);
 String const * configure_get_soext(Configure * configure);

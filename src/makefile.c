@@ -351,16 +351,19 @@ static int _variables_targets_library(Configure * configure, FILE * fp,
 		soname = string_new_append(target, soext, ".0", NULL);
 	if(soname == NULL)
 		return 1;
+	if(configure_can_library_static(configure))
+		/* generate a static library */
+		fprintf(fp, "%s%s%s", " $(OBJDIR)", target, ".a");
 	if(configure->os == HO_MACOSX)
-		fprintf(fp, " %s%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", target,
-				".a $(OBJDIR)", soname, " $(OBJDIR)", target,
-				".0", soext, " $(OBJDIR)", target, soext);
+		fprintf(fp, "%s%s%s%s%s%s%s%s%s", " $(OBJDIR)", soname,
+				" $(OBJDIR)", target, ".0", soext, " $(OBJDIR)",
+				target, soext);
 	else if(configure->os == HO_WIN32)
-		fprintf(fp, " %s%s", "$(OBJDIR)", soname);
+		fprintf(fp, "%s%s", " $(OBJDIR)", soname);
 	else
-		fprintf(fp, " %s%s%s%s%s%s%s%s%s", "$(OBJDIR)", target,
-				".a $(OBJDIR)", soname, ".0 $(OBJDIR)", soname,
-				" $(OBJDIR)", target, soext);
+		fprintf(fp, "%s%s%s%s%s%s%s", " $(OBJDIR)", soname,
+				".0 $(OBJDIR)", soname, " $(OBJDIR)", target,
+				soext);
 	string_delete(soname);
 	return 0;
 }
@@ -1143,7 +1146,7 @@ static int _target_library(Configure * configure, FILE * fp,
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
 	soext = configure_get_soext(configure);
-	if(configure->os != HO_WIN32)
+	if(configure_can_library_static(configure))
 	{
 		/* generate a static library */
 		fprintf(fp, "\n%s%s%s%s%s", "$(OBJDIR)", target, ".a: $(", target,
@@ -1975,7 +1978,7 @@ static int _install_target_library(Configure * configure, FILE * fp,
 		return 0;
 	soext = configure_get_soext(configure);
 	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	if(configure->os != HO_WIN32)
+	if(configure_can_library_static(configure))
 		fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0644 $(OBJDIR)",
 				target, ".a $(DESTDIR)", path, target, ".a\n");
 	if((p = config_get(configure->config, target, "soname")) != NULL)
@@ -2362,7 +2365,7 @@ static int _uninstall_target_library(Configure * configure, FILE * fp,
 	const String rm_destdir[] = "$(RM) -- $(DESTDIR)";
 
 	soext = configure_get_soext(configure);
-	if(configure->os != HO_WIN32)
+	if(configure_can_library_static(configure))
 		fprintf(fp, format, rm_destdir, path, target, ".a\n", "", "");
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
