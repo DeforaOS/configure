@@ -111,6 +111,8 @@ instdir="$DATADIR/gtk-doc/html"
 
 while [ $# -gt 0 ]; do
 	target="$1"
+	#XXX ignore OBJDIR
+	target="${target#$OBJDIR}"
 	shift
 
 	#clean
