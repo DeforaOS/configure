@@ -438,6 +438,7 @@ static int _variables_executables(Configure * configure, FILE * fp)
 
 static void _variables_binary(Configure * configure, FILE * fp, char * done);
 static void _variables_library(Configure * configure, FILE * fp, char * done);
+static void _variables_library_static(Configure * configure, FILE * fp);
 static void _variables_libtool(Configure * configure, FILE * fp, char * done);
 static void _variables_script(Configure * configure, FILE * fp, char * done);
 static void _executables_variables(Configure * configure, FILE * fp,
@@ -732,6 +733,19 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 		_targets_ldflags(configure, fp);
 		_targets_exeext(configure, fp);
 	}
+	if(configure_can_library_static(configure))
+		_variables_library_static(configure, fp);
+	if((p = config_get(configure->config, NULL, "ld")) == NULL)
+		_makefile_output_variable(fp, "CCSHARED",
+				configure->programs.ccshared);
+	else
+		_makefile_output_variable(fp, "CCSHARED", p);
+}
+
+static void _variables_library_static(Configure * configure, FILE * fp)
+{
+	String const * p;
+
 	if((p = config_get(configure->config, NULL, "ar")) == NULL)
 		_makefile_output_variable(fp, "AR", configure->programs.ar);
 	else
@@ -741,11 +755,6 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 				configure->programs.ranlib);
 	else
 		_makefile_output_variable(fp, "RANLIB", p);
-	if((p = config_get(configure->config, NULL, "ld")) == NULL)
-		_makefile_output_variable(fp, "CCSHARED",
-				configure->programs.ccshared);
-	else
-		_makefile_output_variable(fp, "CCSHARED", p);
 }
 
 static void _variables_libtool(Configure * configure, FILE * fp, char * done)
