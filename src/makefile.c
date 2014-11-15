@@ -1735,7 +1735,8 @@ static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 	_makefile_target(fp, "dist", NULL);
 	_makefile_remove(fp, 1, "$(PACKAGE)-$(VERSION)", NULL);
 	_makefile_link(fp, 1, ".", "$(PACKAGE)-$(VERSION)");
-	fputs("\t@$(TAR) -czvf $(PACKAGE)-$(VERSION).tar.gz -- \\\n", fp);
+	fputs("\t@$(TAR) -czvf $(OBJDIR)$(PACKAGE)-$(VERSION).tar.gz -- \\\n",
+			fp);
 	for(i = from + 1; i < to; i++)
 	{
 		array_get_copy(ca, i, &p);
