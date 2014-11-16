@@ -1733,9 +1733,9 @@ static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 	if(package == NULL || version == NULL)
 		return 0;
 	_makefile_target(fp, "dist", NULL);
-	_makefile_remove(fp, 1, "$(PACKAGE)-$(VERSION)", NULL);
-	_makefile_link(fp, 1, ".", "$(PACKAGE)-$(VERSION)");
-	fputs("\t@$(TAR) -czvf $(OBJDIR)$(PACKAGE)-$(VERSION).tar.gz -- \\\n",
+	_makefile_remove(fp, 1, "$(OBJDIR)$(PACKAGE)-$(VERSION)", NULL);
+	_makefile_link(fp, 1, "\"$$PWD\"", "$(OBJDIR)$(PACKAGE)-$(VERSION)");
+	fputs("\t@cd $(OBJDIR). && $(TAR) -czvf $(OBJDIR)$(PACKAGE)-$(VERSION).tar.gz -- \\\n",
 			fp);
 	for(i = from + 1; i < to; i++)
 	{
@@ -1749,7 +1749,7 @@ static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 	}
 	else
 		return 1;
-	_makefile_remove(fp, 0, "$(PACKAGE)-$(VERSION)", NULL);
+	_makefile_remove(fp, 0, "$(OBJDIR)$(PACKAGE)-$(VERSION)", NULL);
 	return 0;
 }
 
@@ -1758,7 +1758,7 @@ static int _write_distcheck(Configure * configure, FILE * fp)
 	String const * package;
 	String const * version;
 	const char pretarget[] = "\ndistcheck: dist\n"
-		"\t$(TAR) -xzvf $(PACKAGE)-$(VERSION).tar.gz\n"
+		"\t$(TAR) -xzvf $(OBJDIR)$(PACKAGE)-$(VERSION).tar.gz\n"
 		"\t$(MKDIR) -- $(PACKAGE)-$(VERSION)/objdir\n"
 		"\t$(MKDIR) -- $(PACKAGE)-$(VERSION)/destdir\n";
 	const char target[] = "\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) OBJDIR=\"$$PWD/objdir/\")\n"
