@@ -53,6 +53,8 @@ static int _makefile_output_variable(FILE * fp, char const * name,
 static int _makefile_remove(FILE * fp, int recursive, ...);
 static int _makefile_subdirs(FILE * fp, char const * target);
 static int _makefile_target(FILE * fp, char const * target, ...);
+static int _makefile_targetv(FILE * fp, char const * target,
+		char const ** depends);
 
 
 /* functions */
@@ -101,6 +103,8 @@ static int _makefile_write(Configure * configure, FILE * fp, configArray * ca,
 	       	int from, int to)
 {
 	Config * config = configure->config;
+	char const * depends[9] = { "all" };
+	size_t i = 1;
 
 	if(_write_variables(configure, fp) != 0
 			|| _write_targets(configure, fp) != 0
@@ -113,14 +117,22 @@ static int _makefile_write(Configure * configure, FILE * fp, configArray * ca,
 			|| _write_uninstall(configure, fp) != 0)
 		return 1;
 	if(!(configure->prefs->flags & PREFS_n))
-		fprintf(fp, "%s%s%s%s%s", "\n.PHONY: all",
-				config_get(config, NULL, "subdirs") != NULL
-				? " subdirs" : "",
-				" clean distclean",
-				config_get(config, NULL, "package") != NULL
-				&& config_get(config, NULL, "version") != NULL
-				? " dist distcheck" : "",
-				" install uninstall\n");
+	{
+		if(config_get(config, NULL, "subdirs") != NULL)
+			depends[i++] = "subdirs";
+		depends[i++] = "clean";
+		depends[i++] = "distclean";
+		if(config_get(config, NULL, "package") != NULL
+				&& config_get(config, NULL, "version") != NULL)
+		{
+			depends[i++] = "dist";
+			depends[i++] = "distcheck";
+		}
+		depends[i++] = "install";
+		depends[i++] = "uninstall";
+		depends[i++] = NULL;
+		_makefile_targetv(fp, ".PHONY", depends);
+	}
 	return 0;
 }
 
@@ -2518,11 +2530,30 @@ static int _makefile_target(FILE * fp, char const * target, ...)
 	char const * sep = " ";
 	char const * p;
 
+	if(target == NULL)
+		return -1;
 	fprintf(fp, "\n%s:", target);
 	va_start(ap, target);
 	while((p = va_arg(ap, char const *)) != NULL)
 		fprintf(fp, "%s%s", sep, p);
 	va_end(ap);
+	fputc('\n', fp);
+	return 0;
+}
+
+
+/* makefile_targetv */
+static int _makefile_targetv(FILE * fp, char const * target,
+		char const ** depends)
+{
+	char const ** p;
+
+	if(target == NULL)
+		return -1;
+	fprintf(fp, "\n%s:", target);
+	if(depends != NULL)
+		for(p = depends; *p != NULL; p++)
+			fprintf(fp, " %s", *p);
 	fputc('\n', fp);
 	return 0;
 }
