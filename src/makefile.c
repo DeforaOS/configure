@@ -1701,7 +1701,8 @@ static int _clean_targets(Config * config, FILE * fp)
 				&& (p = config_get(config, targets, "script"))
 				!= NULL)
 		{
-			if((prefix = config_get(config, targets, "prefix")) == NULL)
+			if((prefix = config_get(config, targets, "prefix"))
+					== NULL)
 				prefix = "$(PREFIX)";
 			fprintf(fp, "\t%s%s%s%s%s%s\n", p, " -c -P \"", prefix,
 					"\" -- \"", targets, "\"");
