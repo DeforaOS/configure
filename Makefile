@@ -85,7 +85,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/config.h \
 		$(PACKAGE)-$(VERSION)/config.sh \
 		$(PACKAGE)-$(VERSION)/INSTALL \
-		$(PACKAGE)-$(VERSION)/README \
+		$(PACKAGE)-$(VERSION)/README.md \
 		$(PACKAGE)-$(VERSION)/project.conf
 	$(RM) -- $(OBJDIR)$(PACKAGE)-$(VERSION)
 
@@ -111,7 +111,7 @@ install:
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
 	$(INSTALL) -m 0644 INSTALL $(DESTDIR)$(PREFIX)/share/doc/configure/INSTALL
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
-	$(INSTALL) -m 0644 README $(DESTDIR)$(PREFIX)/share/doc/configure/README
+	$(INSTALL) -m 0644 README.md $(DESTDIR)$(PREFIX)/share/doc/configure/README.md
 
 uninstall:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) uninstall) || exit; done
@@ -119,6 +119,6 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/BUGS
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/CHANGES
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/INSTALL
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/README
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/README.md
 
 .PHONY: all subdirs clean distclean dist distcheck install uninstall
