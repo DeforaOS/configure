@@ -1410,6 +1410,7 @@ static int _script_depends(Config * config, FILE * fp, String const * target);
 static int _target_script(Configure * configure, FILE * fp,
 		String const * target)
 {
+	String const * prefix;
 	String const * script;
 
 	if((script = config_get(configure->config, target, "script")) == NULL)
@@ -1427,7 +1428,9 @@ static int _target_script(Configure * configure, FILE * fp,
 	fprintf(fp, "\n$(OBJDIR)%s:", target);
 	_script_depends(configure->config, fp, target);
 	fputc('\n', fp);
-	fprintf(fp, "\t%s -P \"$(PREFIX)\" -- \"$(OBJDIR)%s\"\n", script,
+	if((prefix = config_get(configure->config, target, "prefix")) == NULL)
+		prefix = "$(PREFIX)";
+	fprintf(fp, "\t%s -P \"%s\" -- \"$(OBJDIR)%s\"\n", script, prefix,
 			target);
 	return 0;
 }
@@ -1657,6 +1660,7 @@ static int _write_clean(Configure * configure, FILE * fp)
 
 static int _clean_targets(Config * config, FILE * fp)
 {
+	String const * prefix;
 	String const * p;
 	String * targets;
 	String * q;
@@ -1696,8 +1700,12 @@ static int _clean_targets(Config * config, FILE * fp)
 				&& strcmp(p, "script") == 0
 				&& (p = config_get(config, targets, "script"))
 				!= NULL)
-			fprintf(fp, "\t%s%s%s%s\n", p, " -c -P \"$(PREFIX)\""
-					" -- \"", targets, "\"");
+		{
+			if((prefix = config_get(config, targets, "prefix")) == NULL)
+				prefix = "$(PREFIX)";
+			fprintf(fp, "\t%s%s%s%s%s%s\n", p, " -c -P \"", prefix,
+					"\" -- \"", targets, "\"");
+		}
 		if(c == '\0')
 			break;
 		targets[i] = c;
