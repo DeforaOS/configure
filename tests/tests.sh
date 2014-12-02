@@ -63,6 +63,25 @@ _test()
 }
 
 
+_tests()
+{
+	ret=0
+
+	$DATE
+	_test "Darwin" "binary"					|| ret=2
+	_test "Darwin" "library"				|| ret=2
+	_test "Darwin" "plugin"					|| ret=2
+	_test "NetBSD" "binary"					|| ret=2
+	_test "NetBSD" "library"				|| ret=2
+	_test "NetBSD" "object"					|| ret=2
+	_test "NetBSD" "plugin"					|| ret=2
+	_test "NetBSD" "script"					|| ret=2
+	_test "Windows" "binary"				|| ret=2
+	_test "Windows" "library"				|| ret=2
+	return $ret
+}
+
+
 #usage
 _usage()
 {
@@ -96,14 +115,4 @@ fi
 [ "$clean" -ne 0 ] && exit 0
 
 target="$1"
-($DATE
-_test "Darwin" "binary"
-_test "Darwin" "library"
-_test "Darwin" "plugin"
-_test "NetBSD" "binary"
-_test "NetBSD" "library"
-_test "NetBSD" "object"
-_test "NetBSD" "plugin"
-_test "NetBSD" "script"
-_test "Windows" "binary"
-_test "Windows" "library") > "$target"
+_tests > "$target"
