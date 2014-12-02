@@ -69,6 +69,8 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/library/Makefile.Darwin \
 		$(PACKAGE)-$(VERSION)/tests/library/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/library/Makefile.Windows \
+		$(PACKAGE)-$(VERSION)/tests/object/project.conf \
+		$(PACKAGE)-$(VERSION)/tests/object/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/plugin/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/plugin/Makefile.Darwin \
 		$(PACKAGE)-$(VERSION)/tests/plugin/Makefile.NetBSD \

@@ -1,0 +1,34 @@
+TARGETS	= $(OBJDIR)object.o
+OBJDIR	=
+PREFIX	= /usr/local
+DESTDIR	=
+BINDIR	= $(PREFIX)/bin
+SBINDIR	= $(PREFIX)/sbin
+RM	= rm -f
+LN	= ln -f
+MKDIR	= mkdir -m 0755 -p
+INSTALL	= install
+
+
+all: $(TARGETS)
+
+object.o_OBJS = $(OBJDIR)object.o
+object.o_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+
+$(OBJDIR)object.o: object.c
+	$(CC) $(object.o_CFLAGS) -o $(OBJDIR)object.o -c object.c
+
+clean:
+	$(RM) -- $(object.o_OBJS)
+
+distclean: clean
+	$(RM) -- $(TARGETS)
+
+install: $(TARGETS)
+	$(MKDIR) $(DESTDIR)$(LIBDIR)
+	$(INSTALL) -m 0644 $(OBJDIR)object.o $(DESTDIR)$(LIBDIR)/object.o
+
+uninstall:
+	$(RM) -- $(DESTDIR)$(LIBDIR)/object.o
+
+.PHONY: all clean distclean install uninstall
