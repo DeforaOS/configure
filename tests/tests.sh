@@ -25,6 +25,7 @@
 
 
 #variables
+PROGNAME="tests.sh"
 #executables
 CONFIGURE="../src/configure"
 [ -n "$OBJDIR" ] && CONFIGURE="${OBJDIR}configure"
@@ -65,7 +66,7 @@ _test()
 #usage
 _usage()
 {
-	echo "Usage: test.sh target" 1>&2
+	echo "Usage: $PROGNAME target" 1>&2
 	return 1
 }
 
