@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)test
+TARGETS	= $(OBJDIR)test phony
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -13,9 +13,13 @@ all: $(TARGETS)
 $(OBJDIR)test:
 	./script.sh -P "/somewhere/else" -- "$(OBJDIR)test"
 
+phony:
+	./script.sh -P "$(PREFIX)" -- "phony"
+
 clean:
-	$(RM) -- $(test_OBJS)
+	$(RM) -- $(test_OBJS) $(phony_OBJS)
 	./script.sh -c -P "/somewhere/else" -- "test"
+	./script.sh -c -P "$(PREFIX)" -- "phony"
 
 distclean: clean
 	$(RM) -- $(TARGETS)
@@ -26,4 +30,4 @@ install: $(TARGETS)
 uninstall:
 	./script.sh -P "$(DESTDIR)/somewhere/else/again" -u -- "test"
 
-.PHONY: all clean distclean install uninstall
+.PHONY: all clean distclean install uninstall phony
