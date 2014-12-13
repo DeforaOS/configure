@@ -2124,14 +2124,17 @@ static void _install_target_script(Configure * configure, FILE * fp,
 {
 	String const * path;
 	String const * script;
+	int phony;
 
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
 	if((script = config_get(configure->config, target, "script")) == NULL)
 		return;
-	fprintf(fp, "\t%s%s%s%s%s%s", script, " -P \"$(DESTDIR)",
+	phony = _makefile_is_phony(configure, target);
+	fprintf(fp, "\t%s%s%s%s%s%s%s", script, " -P \"$(DESTDIR)",
 			(path[0] != '\0') ? path : "$(PREFIX)",
-			"\" -i -- \"$(OBJDIR)", target, "\"\n");
+			"\" -i -- \"", phony ? "" : "$(OBJDIR)", target,
+			"\"\n");
 }
 
 static int _install_include(Config * config, FILE * fp, String const * include);

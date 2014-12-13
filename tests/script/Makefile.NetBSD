@@ -26,8 +26,10 @@ distclean: clean
 
 install: $(TARGETS)
 	./script.sh -P "$(DESTDIR)/somewhere/else/again" -i -- "$(OBJDIR)test"
+	./script.sh -P "$(DESTDIR)$(PREFIX)" -i -- "phony"
 
 uninstall:
 	./script.sh -P "$(DESTDIR)/somewhere/else/again" -u -- "test"
+	./script.sh -P "$(DESTDIR)$(PREFIX)" -u -- "phony"
 
 .PHONY: all clean distclean install uninstall phony
