@@ -46,6 +46,9 @@
 
 
 /* prototypes */
+/* accessors */
+static int _makefile_is_phony(Configure * configure, char const * target);
+
 static int _makefile_link(FILE * fp, int symlink, char const * link,
 		char const * path);
 static int _makefile_output_variable(FILE * fp, char const * name,
@@ -98,6 +101,8 @@ static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 	       	int from, int to);
 static int _write_distcheck(Configure * configure, FILE * fp);
 static int _write_install(Configure * configure, FILE * fp);
+static int _write_phony(Configure * configure, FILE * fp,
+		char const ** targets);
 static int _write_uninstall(Configure * configure, FILE * fp);
 static int _makefile_write(Configure * configure, FILE * fp, configArray * ca,
 	       	int from, int to)
@@ -116,24 +121,20 @@ static int _makefile_write(Configure * configure, FILE * fp, configArray * ca,
 			|| _write_install(configure, fp) != 0
 			|| _write_uninstall(configure, fp) != 0)
 		return 1;
-	if(!(configure->prefs->flags & PREFS_n))
+	if(config_get(config, NULL, "subdirs") != NULL)
+		depends[i++] = "subdirs";
+	depends[i++] = "clean";
+	depends[i++] = "distclean";
+	if(config_get(config, NULL, "package") != NULL
+			&& config_get(config, NULL, "version") != NULL)
 	{
-		if(config_get(config, NULL, "subdirs") != NULL)
-			depends[i++] = "subdirs";
-		depends[i++] = "clean";
-		depends[i++] = "distclean";
-		if(config_get(config, NULL, "package") != NULL
-				&& config_get(config, NULL, "version") != NULL)
-		{
-			depends[i++] = "dist";
-			depends[i++] = "distcheck";
-		}
-		depends[i++] = "install";
-		depends[i++] = "uninstall";
-		depends[i++] = NULL;
-		_makefile_targetv(fp, ".PHONY", depends);
+		depends[i++] = "dist";
+		depends[i++] = "distcheck";
 	}
-	return 0;
+	depends[i++] = "install";
+	depends[i++] = "uninstall";
+	depends[i++] = NULL;
+	return _write_phony(configure, fp, depends);
 }
 
 static int _variables_package(Configure * configure, FILE * fp,
@@ -289,6 +290,7 @@ static int _variables_targets(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 	String const * type;
+	int phony;
 
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
@@ -316,11 +318,6 @@ static int _variables_targets(Configure * configure, FILE * fp)
 					if(configure->os == HO_WIN32)
 						fputs("$(EXEEXT)", fp);
 					break;
-				case TT_OBJECT:
-				case TT_SCRIPT:
-				case TT_UNKNOWN:
-					fprintf(fp, " $(OBJDIR)%s", prints);
-					break;
 				case TT_LIBRARY:
 					ret |= _variables_targets_library(
 							configure, fp, prints);
@@ -329,8 +326,20 @@ static int _variables_targets(Configure * configure, FILE * fp)
 					fprintf(fp, " $(OBJDIR)%s%s", prints,
 							".la");
 					break;
+				case TT_OBJECT:
+				case TT_UNKNOWN:
+					fprintf(fp, " $(OBJDIR)%s", prints);
+					break;
+				case TT_SCRIPT:
+					phony = _makefile_is_phony(configure,
+							prints);
+					fprintf(fp, " %s%s", phony
+							? "" : "$(OBJDIR)",
+							prints);
+					break;
 				case TT_PLUGIN:
-					fprintf(fp, " $(OBJDIR)%s%s", prints, soext);
+					fprintf(fp, " $(OBJDIR)%s%s", prints,
+							soext);
 					break;
 			}
 		if(c == '\0')
@@ -1412,6 +1421,7 @@ static int _target_script(Configure * configure, FILE * fp,
 {
 	String const * prefix;
 	String const * script;
+	int phony;
 
 	if((script = config_get(configure->config, target, "script")) == NULL)
 	{
@@ -1423,15 +1433,16 @@ static int _target_script(Configure * configure, FILE * fp,
 		error_set_print(PROGNAME, 0, "%s: %s%s%s", target, "The \"",
 				script,
 				"\" script is executed while compiling");
+	phony = _makefile_is_phony(configure, target);
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
-	fprintf(fp, "\n$(OBJDIR)%s:", target);
+	fprintf(fp, "\n%s%s:", phony ? "" : "$(OBJDIR)", target);
 	_script_depends(configure->config, fp, target);
 	fputc('\n', fp);
 	if((prefix = config_get(configure->config, target, "prefix")) == NULL)
 		prefix = "$(PREFIX)";
-	fprintf(fp, "\t%s -P \"%s\" -- \"$(OBJDIR)%s\"\n", script, prefix,
-			target);
+	fprintf(fp, "\t%s -P \"%s\" -- \"%s%s\"\n", script, prefix,
+			phony ? "" : "$(OBJDIR)", target);
 	return 0;
 }
 
@@ -2260,6 +2271,60 @@ static int _dist_install(Configure * configure, FILE * fp,
 	return 0;
 }
 
+static int _write_phony_targets(Configure * configure, FILE * fp);
+static int _write_phony(Configure * configure, FILE * fp, char const ** targets)
+{
+	size_t i;
+
+	if(configure->prefs->flags & PREFS_n)
+		return 0;
+	fprintf(fp, "\n%s:", ".PHONY");
+	for(i = 0; targets[i] != NULL; i++)
+		fprintf(fp, " %s", targets[i]);
+	if(_write_phony_targets(configure, fp) != 0)
+		return 1;
+	fprintf(fp, "\n");
+	return 0;
+}
+
+static int _write_phony_targets(Configure * configure, FILE * fp)
+{
+	String const * p;
+	String * prints;
+	String * q;
+	size_t i;
+	char c;
+	String const * type;
+
+	if((p = config_get(configure->config, NULL, "targets")) == NULL)
+		return 0;
+	if((prints = string_new(p)) == NULL)
+		return 1;
+	q = prints;
+	for(i = 0;; i++)
+	{
+		if(prints[i] != ',' && prints[i] != '\0')
+			continue;
+		c = prints[i];
+		prints[i] = '\0';
+		if((type = config_get(configure->config, prints, "type"))
+				!= NULL)
+			switch(enum_string(TT_LAST, sTargetType, type))
+			{
+				case TT_SCRIPT:
+					if(_makefile_is_phony(configure,
+								prints))
+						fprintf(fp, " %s", prints);
+					break;
+			}
+		if(c == '\0')
+			break;
+		prints += i + 1;
+		i = 0;
+	}
+	return 0;
+}
+
 static int _uninstall_target(Configure * configure, FILE * fp,
 		String const * target);
 static int _uninstall_include(Config * config, FILE * fp,
@@ -2467,6 +2532,18 @@ static int _uninstall_dist(Config * config, FILE * fp, String const * dist)
 	if((install = config_get(config, dist, "install")) == NULL)
 		return 0;
 	fprintf(fp, "%s%s/%s\n", "\t$(RM) -- $(DESTDIR)", install, dist);
+	return 0;
+}
+
+
+/* makefile_is_phony */
+static int _makefile_is_phony(Configure * configure, char const * target)
+{
+	String const * p;
+
+	if((p = config_get(configure->config, target, "phony")) != NULL
+			&& strtol(p, NULL, 10) == 1)
+		return 1;
 	return 0;
 }
 
