@@ -158,19 +158,14 @@
 		</refsect2>
 		<refsect2 id="targets_scripts">
 			<title>Script targets</title>
-			<para>
-				Scripts have to be provided by the software project itself, as
-				&package; does not provide any pre-installed set of standard
-				scripts. A few sample scripts are, however, distributed along with
-				the source code of the &package; project, and introduced here.
-			</para>
-			<para>
-				These scripts are primarily meant to allow further integration of
-				the build process, as defined by the Makefiles generated, with the
-				requirements of a software project beyond that of compiling code.
-				&package; is already known to have been successfully integrated this
-				way with:
-				<itemizedlist>
+			<para>Scripts should be provided by the software project itself, as &package;
+				does not provide a convenient set of pre-installed standard scripts. A few
+				sample scripts are, however, distributed along with the source code of the
+				&package; project, and introduced here.</para>
+			<para>These scripts are primarily meant to allow further integration of the
+				build process, as defined by the Makefiles generated, with the requirements
+				of a software project beyond that of compiling code.  &package; is already
+				known to have been successfully integrated this way with:<itemizedlist>
 					<listitem><para>AppBroker: integration with the DeforaOS distributed
 							computing framework (see appbroker.sh)</para></listitem>
 					<listitem><para><ulink url="http://www.docbook.org/">DocBook</ulink>:
