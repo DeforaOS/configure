@@ -28,6 +28,9 @@
 		</authorgroup>
 		<copyright>
 			<year>2012</year>
+			<year>2013</year>
+			<year>2014</year>
+			<year>2015</year>
 			<holder>&firstname; &surname; &lt;&email;&gt;</holder>
 		</copyright>
 		<legalnotice>
@@ -80,36 +83,47 @@
 			<para>
 				In the default section:
 				<itemizedlist>
-					<listitem><para>subdirs: subdirectories to look for too</para></listitem>
-					<listitem><para>cppflags_force: CPPFLAGS to force
+					<listitem><para><varname>subdirs</varname>: subdirectories to look for
+							too</para></listitem>
+					<listitem><para><varname>cppflags_force</varname>: CPPFLAGS to force
 							globally</para></listitem>
-					<listitem><para>cppflags: optional global CPPFLAGS</para></listitem>
-					<listitem><para>cflags_force: CFLAGS to force globally</para></listitem>
-					<listitem><para>cflags: optional global CFLAGS</para></listitem>
-					<listitem><para>ldflags_force: LDFLAGS to force globally</para></listitem>
-					<listitem><para>ldflags: optional global LDFLAGS</para></listitem>
-					<listitem><para>targets: targets to handle in the
+					<listitem><para><varname>cppflags</varname>: optional global
+							CPPFLAGS</para></listitem>
+					<listitem><para><varname>cflags_force</varname>: CFLAGS to force
+							globally</para></listitem>
+					<listitem><para><varname>cflags</varname>: optional global
+							CFLAGS</para></listitem>
+					<listitem><para><varname>ldflags_force</varname>: LDFLAGS to force
+							globally</para></listitem>
+					<listitem><para><varname>ldflags</varname>: optional global
+							LDFLAGS</para></listitem>
+					<listitem><para><varname>targets</varname>: targets to handle in the
 							Makefile</para></listitem>
-					<listitem><para>dist: additional files to include in a source
-							archive</para></listitem>
+					<listitem><para><varname>dist</varname>: additional files to include in a
+							source archive</para></listitem>
 				</itemizedlist>
 			</para>
 			<para>In subsequent sections, respectively named after the target
 				they define:
 				<itemizedlist>
-					<listitem><para>type (mandatory): type of the target (eg "binary",
-							"library", "object", ...)</para></listitem>
-					<listitem><para>cppflags: additional CPPFLAGS for this
+					<listitem><para><varname>type</varname> (mandatory): type of the target (eg
+							<emphasis>binary</emphasis>, <emphasis>library</emphasis>,
+							<emphasis>object</emphasis>, ...)</para></listitem>
+					<listitem><para><varname>cppflags</varname>: additional CPPFLAGS for this
 							target</para></listitem>
-					<listitem><para>cflags: additional CFLAGS for this
+					<listitem><para><varname>cflags</varname>: additional CFLAGS for this
 							target</para></listitem>
-					<listitem><para>ldflags: additional LDFLAGS for this
+					<listitem><para><varname>ldflags</varname>: additional LDFLAGS for this
 							target</para></listitem>
-					<listitem><para>sources: source files to compile</para></listitem>
-					<listitem><para>depends: a list of files (or other targets) that this
-							target depends on</para></listitem>
-					<listitem><para>install: the destination path for
+					<listitem><para><varname>sources</varname>: source files to
+							compile</para></listitem>
+					<listitem><para><varname>depends</varname>: a list of files (or other
+							targets) that this target depends on</para></listitem>
+					<listitem><para><varname>install</varname>: the destination path for
 							installation</para></listitem>
+					<listitem><para><varname>phony</varname>: determines if the target defined
+							should always be built, regardless of the presence of a file of a same
+							name (possible values: 0, 1)</para></listitem>
 				</itemizedlist>
 			</para>
 		</refsect2>
@@ -121,19 +135,24 @@
 			<para>
 				The following target types are currently supported:
 				<itemizedlist>
-					<listitem><para>"binary": produces binary files, linked from every object
-							file produced with their source files.</para></listitem>
-					<listitem><para>"library": produces a static and a shared version of the
-							target, linked from every object file produced with their source files,
-							and respectively appending ".a" and ".so" extensions to the target name;
-							the shared object are also assigned a version number.</para></listitem>
-					<listitem><para>"object": produces a binary object file from the given
-							source.</para></listitem>
-					<listitem><para>"plugin": produces a shared version of the target, linked
-							from every object file produced with their source files, and appending
-							the ".so" extension to the target name.</para></listitem>
-					<listitem><para>"script": runs the given script, expecting the target
-							file to be generated from the sources defined.</para></listitem>
+					<listitem><para><emphasis>binary</emphasis>: produces binary files, linked
+							from every object file produced with their source
+							files.</para></listitem>
+					<listitem><para><emphasis>library</emphasis>: produces a static and a
+							shared version of the target, linked from every object file produced with
+							their source files, and respectively appending ".a" and ".so" extensions
+							to the target name; the shared object are also assigned a version
+							number.</para></listitem>
+					<listitem><para><emphasis>libtool</emphasis>: uses the <ulink url="http://www.gnu.org/software/libtool/">libtool</ulink> project to generate libraries, as supported by the project on the underlying platform.</para></listitem>
+					<listitem><para><emphasis>object</emphasis>: produces a binary object file
+							from the given source.</para></listitem>
+					<listitem><para><emphasis>plugin</emphasis>: produces a shared version of
+							the target, linked from every object file produced with their source
+							files, and appending the ".so" extension to the target
+							name.</para></listitem>
+					<listitem><para><emphasis>script</emphasis>: runs the given script,
+							expecting the target file to be generated from the sources
+							defined.</para></listitem>
 				</itemizedlist>
 			</para>
 		</refsect2>
