@@ -160,15 +160,15 @@
 			<title>Script targets</title>
 			<para>
 				Scripts have to be provided by the software project itself, as
-				configure does not provide any pre-installed set of standard
+				&package; does not provide any pre-installed set of standard
 				scripts. A few sample scripts are, however, distributed along with
-				the source code of the configure project, and introduced here.
+				the source code of the &package; project, and introduced here.
 			</para>
 			<para>
 				These scripts are primarily meant to allow further integration of
 				the build process, as defined by the Makefiles generated, with the
 				requirements of a software project beyond that of compiling code.
-				configure is already known to have been successfully integrated this
+				&package; is already known to have been successfully integrated this
 				way with:
 				<itemizedlist>
 					<listitem><para>AppBroker: integration with the DeforaOS distributed
@@ -195,7 +195,7 @@
 			<refsect3>
 				<title>Writing scripts</title>
 				<para>
-					It is naturally possible to write scripts for integration with configure.
+					It is naturally possible to write scripts for integration with &package;.
 					<!-- FIXME complete this section -->
 				</para>
 			</refsect3>
