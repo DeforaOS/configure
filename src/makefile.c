@@ -147,11 +147,12 @@ static int _variables_targets_library(Configure * configure, FILE * fp,
 		char const * target);
 static int _variables_executables(Configure * configure, FILE * fp);
 static int _variables_includes(Configure * configure, FILE * fp);
+static int _variables_subdirs(Configure * configure, FILE * fp);
 static int _write_variables(Configure * configure, FILE * fp)
 {
 	int ret = 0;
 	String const * directory;
-	
+
 	directory = config_get(configure->config, NULL, "directory");
 	ret |= _variables_package(configure, fp, directory);
 	ret |= _variables_print(configure, fp, "subdirs", "SUBDIRS");
@@ -159,6 +160,7 @@ static int _write_variables(Configure * configure, FILE * fp)
 	ret |= _variables_targets(configure, fp);
 	ret |= _variables_executables(configure, fp);
 	ret |= _variables_includes(configure, fp);
+	ret |= _variables_subdirs(configure, fp);
 	if(!(configure->prefs->flags & PREFS_n))
 		fputc('\n', fp);
 	return ret;
@@ -820,6 +822,36 @@ static int _variables_includes(Configure * configure, FILE * fp)
 		fprintf(fp, "%s%s\n", "INCLUDEDIR= $(PREFIX)/",
 				configure->prefs->includedir);
 	return 0;
+}
+
+static int _variables_subdirs(Configure * configure, FILE * fp)
+{
+	Config * config = configure->config;
+	String const * sections[] = { "dist" };
+	size_t i;
+	String * p;
+	String const * q;
+
+	if(config_get(config, NULL, "subdirs") == NULL
+			|| config_get(config, NULL, "package") != NULL
+			|| config_get(config, NULL, "targets") != NULL
+			|| config_get(config, NULL, "includes") != NULL)
+		return 0;
+	for(i = 0; i < sizeof(sections) / sizeof(*sections); i++)
+	{
+		if((q = config_get(config, NULL, sections[i])) == NULL)
+			continue;
+		if((p = strdup(q)) == NULL)
+			return -1;
+		for(q = strtok(p, ","); q != NULL; q = strtok(NULL, ","))
+			if(config_get(config, q, "install") != NULL)
+				break;
+		free(p);
+		if(q != NULL)
+			return 0;
+	}
+	return _makefile_output_variable(fp, "MKDIR",
+			configure->programs.mkdir);
 }
 
 static int _targets_all(Configure * configure, FILE * fp);
@@ -1510,6 +1542,7 @@ static int _objects_target(Configure * configure, FILE * fp,
 }
 
 static int _source_depends(Config * config, FILE * fp, String const * source);
+static int _source_subdir(FILE * fp, String * source);
 static int _target_source(Configure * configure, FILE * fp,
 		String const * target, String * source)
 	/* FIXME check calls to _source_depends() */
@@ -1544,6 +1577,8 @@ static int _target_source(Configure * configure, FILE * fp,
 			_source_depends(configure->config, fp, source);
 			source[len] = '\0';
 			fputs("\n\t", fp);
+			if(strchr(source, '/') != NULL)
+				ret = _source_subdir(fp, source);
 			if(tt == TT_LIBTOOL)
 				fputs("$(LIBTOOL) --mode=compile ", fp);
 			fprintf(fp, "%s%s%s", "$(AS) $(", target, "_ASFLAGS)");
@@ -1569,11 +1604,13 @@ static int _target_source(Configure * configure, FILE * fp,
 			fprintf(fp, "%s%s%s%s", ": ", source, ".", extension);
 			source[len] = '.'; /* FIXME ugly */
 			_source_depends(configure->config, fp, source);
+			fputs("\n\t", fp);
+			if(strchr(source, '/') != NULL)
+				ret = _source_subdir(fp, source);
 			/* FIXME do both wherever also relevant */
 			p = config_get(configure->config, source, "cppflags");
 			q = config_get(configure->config, source, "cflags");
 			source[len] = '\0';
-			fputs("\n\t", fp);
 			if(tt == TT_LIBTOOL)
 				fputs("$(LIBTOOL) --mode=compile ", fp);
 			fputs("$(CC)", fp);
@@ -1607,7 +1644,10 @@ static int _target_source(Configure * configure, FILE * fp,
 			_source_depends(configure->config, fp, source);
 			p = config_get(configure->config, source, "cxxflags");
 			source[len] = '\0';
-			fprintf(fp, "%s%s%s", "\n\t$(CXX) $(", target,
+			fputs("\n\t", fp);
+			if(strchr(source, '/') != NULL)
+				ret = _source_subdir(fp, source);
+			fprintf(fp, "%s%s%s", "$(CXX) $(", target,
 					"_CXXFLAGS)");
 			if(p != NULL)
 				fprintf(fp, " %s", p);
@@ -1616,8 +1656,8 @@ static int _target_source(Configure * configure, FILE * fp,
 			else
 				fprintf(fp, "%s%s%s", " -o $(OBJDIR)", source,
 						".o");
-			fprintf(fp, "%s%s%s%s", " -c ", source, ".", extension);
-			fputc('\n', fp);
+			fprintf(fp, "%s%s%s%s\n", " -c ", source, ".",
+					extension);
 			break;
 		case OT_UNKNOWN:
 			fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
@@ -1655,6 +1695,20 @@ static int _source_depends(Config * config, FILE * fp, String const * target)
 		i = 0;
 	}
 	string_delete(q);
+	return 0;
+}
+
+static int _source_subdir(FILE * fp, String * source)
+{
+	char * p;
+	char const * q;
+
+	if((p = strdup(source)) == NULL)
+		return 1;
+	q = dirname(p);
+	fprintf(fp, "@[ -d \"%s%s\" ] || $(MKDIR) -- \"%s%s\"\n\t",
+			"$(OBJDIR)", q, "$(OBJDIR)", q);
+	free(p);
 	return 0;
 }
 
@@ -2604,10 +2658,17 @@ static int _makefile_remove(FILE * fp, int recursive, ...)
 /* makefile_subdirs */
 static int _makefile_subdirs(FILE * fp, char const * target)
 {
-	fprintf(fp, "\t@for i in $(SUBDIRS); do (cd \"$$i\" && $(MAKE)%s%s)"
-			" || exit; done\n",
-			(target != NULL) ? " " : "",
-			(target != NULL) ? target : "");
+	if(target != NULL)
+		fprintf(fp, "\t@for i in $(SUBDIRS); do"
+				" (cd \"$$i\" && $(MAKE) %s) || exit; done\n",
+				target);
+	else
+		fputs("\t@for i in $(SUBDIRS); do (cd \"$$i\" && \\\n"
+				"\t\tif [ -n \"$(OBJDIR)\" ]; then \\\n"
+				"\t\t([ -d \"$(OBJDIR)$$i\" ]"
+				" || $(MKDIR) -- \"$(OBJDIR)$$i\") && \\\n"
+				"\t\t$(MAKE) OBJDIR=\"$(OBJDIR)$$i/\"; \\\n"
+				"\t\telse $(MAKE); fi) || exit; done\n", fp);
 	return 0;
 }
 
