@@ -666,8 +666,8 @@ static void _binary_ldflags(Configure * configure, FILE * fp,
 		"ws2_32", NULL };
 	char const * libs_deforaos[] = { "ossaudio", "resolv", "ssl", "ws2_32",
 		NULL };
-	char const * libs_gnu[] = { "ossaudio", "resolv", "socket", "ws2_32",
-		NULL };
+	char const * libs_gnu[] = { "intl", "ossaudio", "resolv", "socket",
+		"ws2_32", NULL };
 	char const * libs_macosx[] = { "crypt", "ossaudio", "socket", "ws2_32",
 		NULL };
 	char const * libs_netbsd[] = { "dl", "resolv", "socket", "ws2_32",
