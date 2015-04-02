@@ -71,6 +71,7 @@ _tests()
 	_test "Darwin" "binary"					|| ret=2
 	_test "Darwin" "library"				|| ret=2
 	_test "Darwin" "plugin"					|| ret=2
+	_test "Linux" "library"					|| ret=2
 	_test "NetBSD" "binary"					|| ret=2
 	_test "NetBSD" "library"				|| ret=2
 	_test "NetBSD" "object"					|| ret=2

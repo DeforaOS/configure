@@ -71,6 +71,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/binary/Makefile.Windows \
 		$(PACKAGE)-$(VERSION)/tests/library/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/library/Makefile.Darwin \
+		$(PACKAGE)-$(VERSION)/tests/library/Makefile.Linux \
 		$(PACKAGE)-$(VERSION)/tests/library/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/library/Makefile.Windows \
 		$(PACKAGE)-$(VERSION)/tests/object/project.conf \

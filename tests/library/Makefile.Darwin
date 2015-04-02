@@ -3,6 +3,7 @@ OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 LIBDIR	= $(PREFIX)/lib
+LDFLAGS	= -ldl -lintl  -ltest 
 AR	= ar
 RANLIB	= ranlib
 CCSHARED= $(CC) -dynamiclib
