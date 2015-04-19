@@ -25,6 +25,7 @@
 
 
 #variables
+CONFIGSH="${0%/subst.sh}/../config.sh"
 PREFIX="/usr/local"
 BINDIR=
 DATADIR=
@@ -34,7 +35,7 @@ LIBDIR=
 LIBEXECDIR=
 MANDIR=
 SYSCONFDIR=
-[ -f "../config.sh" ] && . "../config.sh"
+[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 [ -z "$BINDIR" ] && BINDIR="$PREFIX/bin"
 [ -z "$DATADIR" ] && DATADIR="$PREFIX/share"
 [ -z "$INCLUDEDIR" ] && INCLUDEDIR="$PREFIX/include"
