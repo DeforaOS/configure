@@ -161,8 +161,7 @@ static int _write_variables(Configure * configure, FILE * fp)
 	ret |= _variables_executables(configure, fp);
 	ret |= _variables_includes(configure, fp);
 	ret |= _variables_subdirs(configure, fp);
-	if(!(configure->prefs->flags & PREFS_n))
-		_makefile_print(fp, "%c", '\n');
+	_makefile_print(fp, "%c", '\n');
 	return ret;
 }
 
@@ -204,8 +203,6 @@ static int _variables_print(Configure * configure, FILE * fp,
 	unsigned long i;
 	char c;
 
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	if((p = config_get(configure->config, NULL, input)) == NULL)
 		return 0;
 	if((prints = string_new(p)) == NULL)
@@ -240,8 +237,6 @@ static int _variables_dist(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	if((p = config_get(configure->config, NULL, "dist")) == NULL)
 		return 0;
 	if((dist = string_new(p)) == NULL)
@@ -294,8 +289,6 @@ static int _variables_targets(Configure * configure, FILE * fp)
 	String const * type;
 	int phony;
 
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	if((p = config_get(configure->config, NULL, "targets")) == NULL)
 		return 0;
 	if((prints = string_new(p)) == NULL)
@@ -408,8 +401,6 @@ static int _variables_executables(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	memset(&done, 0, sizeof(done));
 	targets = config_get(configure->config, NULL, "targets");
 	includes = config_get(configure->config, NULL, "includes");
@@ -900,8 +891,6 @@ static int _targets_all(Configure * configure, FILE * fp)
 	char const * depends[] = { NULL, NULL };
 	size_t i = 0;
 
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	if(config_get(configure->config, NULL, "subdirs") != NULL)
 		depends[i++] = "subdirs";
 	if(config_get(configure->config, NULL, "targets") != NULL)
@@ -914,8 +903,6 @@ static int _targets_subdirs(Configure * configure, FILE * fp)
 {
 	String const * subdirs;
 
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	if((subdirs = config_get(configure->config, NULL, "subdirs")) != NULL)
 	{
 		_makefile_target(fp, "subdirs", NULL);
@@ -993,8 +980,7 @@ static int _target_objs(Configure * configure, FILE * fp,
 	if((sources = string_new(p)) == NULL)
 		return 1;
 	q = sources;
-	if(!(configure->prefs->flags & PREFS_n))
-		_makefile_print(fp, "%s%s%s", "\n", target, "_OBJS =");
+	_makefile_print(fp, "%s%s%s", "\n", target, "_OBJS =");
 	for(i = 0; ret == 0; i++)
 	{
 		if(sources[i] != ',' && sources[i] != '\0')
@@ -1007,8 +993,7 @@ static int _target_objs(Configure * configure, FILE * fp,
 		sources += i + 1;
 		i = 0;
 	}
-	if(!(configure->prefs->flags & PREFS_n))
-		_makefile_print(fp, "%c", '\n');
+	_makefile_print(fp, "%c", '\n');
 	string_delete(q);
 	return ret;
 }
@@ -1034,8 +1019,6 @@ static int _objs_source(FILE * fp, String * source, TargetType tt)
 		case OT_CXX_SOURCE:
 		case OT_OBJC_SOURCE:
 		case OT_OBJCXX_SOURCE:
-			if(prefs->flags & PREFS_n)
-				break;
 			_makefile_print(fp, "%s%s%s", " $(OBJDIR)", source,
 					(tt == TT_LIBTOOL) ? ".lo" : ".o");
 			break;
@@ -1059,8 +1042,6 @@ static int _target_binary(Configure * configure, FILE * fp,
 
 	if(_target_objs(configure, fp, target) != 0)
 		return 1;
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
 	_makefile_print(fp, "%c", '\n');
@@ -1218,8 +1199,6 @@ static int _target_library(Configure * configure, FILE * fp,
 
 	if(_target_objs(configure, fp, target) != 0)
 		return 1;
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
 	soext = configure_get_soext(configure);
@@ -1318,8 +1297,6 @@ static int _target_libtool(Configure * configure, FILE * fp,
 
 	if(_target_objs(configure, fp, target) != 0)
 		return 1;
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
 	_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target, ".la: $(",
@@ -1352,8 +1329,6 @@ static int _target_object(Configure * configure, FILE * fp,
 				": An object can have only one source file\n");
 		return 1;
 	}
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	if((extension = _source_extension(p)) == NULL)
 		return 1;
 	switch(_source_type(extension))
@@ -1406,8 +1381,6 @@ static int _target_plugin(Configure * configure, FILE * fp,
 
 	if(_target_objs(configure, fp, target) != 0)
 		return 1;
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
 	soext = configure_get_soext(configure);
@@ -1581,8 +1554,6 @@ static int _target_source(Configure * configure, FILE * fp,
 	switch((ot = _source_type(extension)))
 	{
 		case OT_ASM_SOURCE:
-			if(configure->prefs->flags & PREFS_n)
-				break;
 			if(tt == TT_OBJECT)
 				_makefile_print(fp, "%s%s", "\n$(OBJDIR)",
 						target);
@@ -1616,8 +1587,6 @@ static int _target_source(Configure * configure, FILE * fp,
 			break;
 		case OT_C_SOURCE:
 		case OT_OBJC_SOURCE:
-			if(configure->prefs->flags & PREFS_n)
-				break;
 			if(tt == TT_OBJECT)
 				_makefile_print(fp, "%s%s", "\n$(OBJDIR)",
 						target);
@@ -1664,8 +1633,6 @@ static int _target_source(Configure * configure, FILE * fp,
 			break;
 		case OT_CXX_SOURCE:
 		case OT_OBJCXX_SOURCE:
-			if(configure->prefs->flags & PREFS_n)
-				break;
 			if(tt == TT_OBJECT)
 				_makefile_print(fp, "%s%s", "\n$(OBJDIR)",
 						target);
@@ -1752,8 +1719,6 @@ static int _source_subdir(FILE * fp, String * source)
 static int _clean_targets(Configure * configure, FILE * fp);
 static int _write_clean(Configure * configure, FILE * fp)
 {
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	_makefile_target(fp, "clean", NULL);
 	if(config_get(configure->config, NULL, "subdirs") != NULL)
 		_makefile_subdirs(fp, "clean");
@@ -1824,8 +1789,6 @@ static int _write_distclean(Configure * configure, FILE * fp)
 {
 	String const * subdirs;
 
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	/* only depend on the "clean" target if we do not have subfolders */
 	if((subdirs = config_get(configure->config, NULL, "subdirs")) == NULL)
 		_makefile_target(fp, "distclean", "clean", NULL);
@@ -1850,8 +1813,6 @@ static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 	Config * p;
 	int i;
 
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	package = config_get(configure->config, NULL, "package");
 	version = config_get(configure->config, NULL, "version");
 	if(package == NULL || version == NULL)
@@ -1999,8 +1960,6 @@ static int _write_install(Configure * configure, FILE * fp)
 	int ret = 0;
 	char const * targets;
 
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	targets = config_get(configure->config, NULL, "targets");
 	_makefile_target(fp, "install", (targets != NULL) ? "$(TARGETS)" : NULL,
 			NULL);
@@ -2376,8 +2335,6 @@ static int _write_phony(Configure * configure, FILE * fp, char const ** targets)
 {
 	size_t i;
 
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	_makefile_print(fp, "%s:", "\n.PHONY");
 	for(i = 0; targets[i] != NULL; i++)
 		_makefile_print(fp, " %s", targets[i]);
@@ -2441,8 +2398,6 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	_makefile_target(fp, "uninstall", NULL);
 	if(config_get(configure->config, NULL, "subdirs") != NULL)
 		_makefile_subdirs(fp, "uninstall");
