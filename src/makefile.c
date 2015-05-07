@@ -162,7 +162,7 @@ static int _write_variables(Configure * configure, FILE * fp)
 	ret |= _variables_includes(configure, fp);
 	ret |= _variables_subdirs(configure, fp);
 	if(!(configure->prefs->flags & PREFS_n))
-		fputc('\n', fp);
+		_makefile_print(fp, "%c", '\n');
 	return ret;
 }
 
@@ -211,7 +211,7 @@ static int _variables_print(Configure * configure, FILE * fp,
 	if((prints = string_new(p)) == NULL)
 		return 1;
 	q = prints;
-	fprintf(fp, "%s%s", output, "\t=");
+	_makefile_print(fp, "%s%s", output, "\t=");
 	for(i = 0;; i++)
 	{
 		if(prints[i] != ',' && prints[i] != '\0')
@@ -219,15 +219,15 @@ static int _variables_print(Configure * configure, FILE * fp,
 		c = prints[i];
 		prints[i] = '\0';
 		if(strchr(prints, ' ') != NULL)
-			fprintf(fp, " \"%s\"", prints);
+			_makefile_print(fp, " \"%s\"", prints);
 		else
-			fprintf(fp, " %s", prints);
+			_makefile_print(fp, " %s", prints);
 		if(c == '\0')
 			break;
 		prints += i + 1;
 		i = 0;
 	}
-	fputc('\n', fp);
+	_makefile_print(fp, "%c", '\n');
 	string_delete(q);
 	return 0;
 }
@@ -302,7 +302,7 @@ static int _variables_targets(Configure * configure, FILE * fp)
 		return 1;
 	soext = configure_get_soext(configure);
 	q = prints;
-	fputs("TARGETS\t=", fp);
+	_makefile_print(fp, "%s", "TARGETS\t=");
 	for(i = 0;; i++)
 	{
 		if(prints[i] != ',' && prints[i] != '\0')
@@ -311,36 +311,40 @@ static int _variables_targets(Configure * configure, FILE * fp)
 		prints[i] = '\0';
 		if((type = config_get(configure->config, prints, "type"))
 			       	== NULL)
-			fprintf(fp, " %s", prints);
+			_makefile_print(fp, " %s", prints);
 		else
 			switch(enum_string(TT_LAST, sTargetType, type))
 			{
 				case TT_BINARY:
-					fprintf(fp, " $(OBJDIR)%s", prints);
+					_makefile_print(fp, " $(OBJDIR)%s",
+							prints);
 					if(configure->os == HO_WIN32)
-						fputs("$(EXEEXT)", fp);
+						_makefile_print(fp, "%s",
+								"$(EXEEXT)");
 					break;
 				case TT_LIBRARY:
 					ret |= _variables_targets_library(
 							configure, fp, prints);
 					break;
 				case TT_LIBTOOL:
-					fprintf(fp, " $(OBJDIR)%s%s", prints,
-							".la");
+					_makefile_print(fp, " $(OBJDIR)%s%s",
+							prints, ".la");
 					break;
 				case TT_OBJECT:
 				case TT_UNKNOWN:
-					fprintf(fp, " $(OBJDIR)%s", prints);
+					_makefile_print(fp, " $(OBJDIR)%s",
+							prints);
 					break;
 				case TT_SCRIPT:
 					phony = _makefile_is_phony(configure,
 							prints);
-					fprintf(fp, " %s%s", phony
+					_makefile_print(fp, " %s%s", phony
 							? "" : "$(OBJDIR)",
 							prints);
 					break;
 				case TT_PLUGIN:
-					fprintf(fp, " $(OBJDIR)%s%s", prints,
+					_makefile_print(fp, " $(OBJDIR)%s%s",
+							prints,
 							soext);
 					break;
 			}
@@ -349,7 +353,7 @@ static int _variables_targets(Configure * configure, FILE * fp)
 		prints += i + 1;
 		i = 0;
 	}
-	fputc('\n', fp);
+	_makefile_print(fp, "%c", '\n');
 	string_delete(q);
 	return ret;
 }
@@ -376,15 +380,15 @@ static int _variables_targets_library(Configure * configure, FILE * fp,
 		return 1;
 	if(configure_can_library_static(configure))
 		/* generate a static library */
-		fprintf(fp, "%s%s%s", " $(OBJDIR)", target, ".a");
+		_makefile_print(fp, "%s%s%s", " $(OBJDIR)", target, ".a");
 	if(configure->os == HO_MACOSX)
-		fprintf(fp, "%s%s%s%s%s%s%s%s%s", " $(OBJDIR)", soname,
+		_makefile_print(fp, "%s%s%s%s%s%s%s%s%s", " $(OBJDIR)", soname,
 				" $(OBJDIR)", target, ".0", soext, " $(OBJDIR)",
 				target, soext);
 	else if(configure->os == HO_WIN32)
-		fprintf(fp, "%s%s", " $(OBJDIR)", soname);
+		_makefile_print(fp, "%s%s", " $(OBJDIR)", soname);
 	else
-		fprintf(fp, "%s%s%s%s%s%s%s", " $(OBJDIR)", soname,
+		_makefile_print(fp, "%s%s%s%s%s%s%s", " $(OBJDIR)", soname,
 				".0 $(OBJDIR)", soname, " $(OBJDIR)", target,
 				soext);
 	string_delete(soname);
@@ -621,24 +625,24 @@ static void _targets_cxxflags(Configure * configure, FILE * fp)
 	}
 	if(cxxff != NULL)
 	{
-		fprintf(fp, "%s%s", "CXXFLAGSF= ", cxxff);
+		_makefile_print(fp, "%s%s", "CXXFLAGSF= ", cxxff);
 		if(configure->os == HO_GNU_LINUX && string_find(cxxff, "-ansi"))
-			fprintf(fp, "%s", " -D _GNU_SOURCE");
-		fputc('\n', fp);
+			_makefile_print(fp, "%s", " -D _GNU_SOURCE");
+		_makefile_print(fp, "%c", '\n');
 	}
 	if(cxxf != NULL)
 	{
-		fprintf(fp, "%s%s", "CXXFLAGS= ", cxxf);
+		_makefile_print(fp, "%s%s", "CXXFLAGS= ", cxxf);
 		if(configure->os == HO_GNU_LINUX && string_find(cxxf, "-ansi"))
-			fprintf(fp, "%s", " -D _GNU_SOURCE");
-		fputc('\n', fp);
+			_makefile_print(fp, "%s", " -D _GNU_SOURCE");
+		_makefile_print(fp, "%c", '\n');
 	}
 }
 
 static void _targets_exeext(Configure * configure, FILE * fp)
 {
 	if(configure->os == HO_WIN32)
-		fputs("EXEEXT\t= .exe\n", fp);
+		_makefile_print(fp, "%s", "EXEEXT\t= .exe\n");
 }
 
 static void _targets_ldflags(Configure * configure, FILE * fp)
@@ -647,15 +651,15 @@ static void _targets_ldflags(Configure * configure, FILE * fp)
 
 	if((p = config_get(configure->config, NULL, "ldflags_force")) != NULL)
 	{
-		fputs("LDFLAGSF=", fp);
+		_makefile_print(fp, "%s", "LDFLAGSF=");
 		_binary_ldflags(configure, fp, p);
-		fputc('\n', fp);
+		_makefile_print(fp, "%c", '\n');
 	}
 	if((p = config_get(configure->config, NULL, "ldflags")) != NULL)
 	{
-		fputs("LDFLAGS\t=", fp);
+		_makefile_print(fp, "%s", "LDFLAGS\t=");
 		_binary_ldflags(configure, fp, p);
-		fputc('\n', fp);
+		_makefile_print(fp, "%c", '\n');
 	}
 }
 
@@ -682,7 +686,7 @@ static void _binary_ldflags(Configure * configure, FILE * fp,
 
 	if((p = string_new(ldflags)) == NULL) /* XXX report error? */
 	{
-		fprintf(fp, " %s%s", ldflags, "\n");
+		_makefile_print(fp, " %s%s", ldflags, "\n");
 		return;
 	}
 	switch(configure->os)
@@ -725,7 +729,7 @@ static void _binary_ldflags(Configure * configure, FILE * fp,
 			continue;
 		memmove(q, q + strlen(buf), strlen(q) - strlen(buf) + 1);
 	}
-	fprintf(fp, " %s", p);
+	_makefile_print(fp, " %s", p);
 	string_delete(p);
 }
 
@@ -747,7 +751,7 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 	if(libdir[0] == '/')
 		_makefile_output_variable(fp, "LIBDIR", libdir);
 	else
-		fprintf(fp, "%s%s\n", "LIBDIR\t= $(PREFIX)/", libdir);
+		_makefile_print(fp, "%s%s\n", "LIBDIR\t= $(PREFIX)/", libdir);
 	if(!done[TT_BINARY])
 	{
 		_targets_asflags(configure, fp);
@@ -819,7 +823,7 @@ static int _variables_includes(Configure * configure, FILE * fp)
 		_makefile_output_variable(fp, "INCLUDEDIR",
 				configure->prefs->includedir);
 	else
-		fprintf(fp, "%s%s\n", "INCLUDEDIR= $(PREFIX)/",
+		_makefile_print(fp, "%s%s\n", "INCLUDEDIR= $(PREFIX)/",
 				configure->prefs->includedir);
 	return 0;
 }
@@ -969,8 +973,7 @@ static int _targets_target(Configure * configure, FILE * fp,
 	return 0;
 }
 
-static int _objs_source(Prefs * prefs, FILE * fp, String * source,
-		TargetType tt);
+static int _objs_source(FILE * fp, String * source, TargetType tt);
 static int _target_objs(Configure * configure, FILE * fp,
 		String const * target)
 {
@@ -991,27 +994,26 @@ static int _target_objs(Configure * configure, FILE * fp,
 		return 1;
 	q = sources;
 	if(!(configure->prefs->flags & PREFS_n))
-		fprintf(fp, "%s%s%s", "\n", target, "_OBJS =");
+		_makefile_print(fp, "%s%s%s", "\n", target, "_OBJS =");
 	for(i = 0; ret == 0; i++)
 	{
 		if(sources[i] != ',' && sources[i] != '\0')
 			continue;
 		c = sources[i];
 		sources[i] = '\0';
-		ret = _objs_source(configure->prefs, fp, sources, tt);
+		ret = _objs_source(fp, sources, tt);
 		if(c == '\0')
 			break;
 		sources += i + 1;
 		i = 0;
 	}
 	if(!(configure->prefs->flags & PREFS_n))
-		fputc('\n', fp);
+		_makefile_print(fp, "%c", '\n');
 	string_delete(q);
 	return ret;
 }
 
-static int _objs_source(Prefs * prefs, FILE * fp, String * source,
-		TargetType tt)
+static int _objs_source(FILE * fp, String * source, TargetType tt)
 {
 	int ret = 0;
 	String const * extension;
@@ -1034,7 +1036,7 @@ static int _objs_source(Prefs * prefs, FILE * fp, String * source,
 		case OT_OBJCXX_SOURCE:
 			if(prefs->flags & PREFS_n)
 				break;
-			fprintf(fp, " $(OBJDIR)%s%s", source,
+			_makefile_print(fp, "%s%s%s", " $(OBJDIR)", source,
 					(tt == TT_LIBTOOL) ? ".lo" : ".o");
 			break;
 		case OT_UNKNOWN:
@@ -1061,9 +1063,9 @@ static int _target_binary(Configure * configure, FILE * fp,
 		return 0;
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
-	fputc('\n', fp);
+	_makefile_print(fp, "%c", '\n');
 	/* output the binary target */
-	fprintf(fp, "%s%s%s%s%s%s", "$(OBJDIR)", target,
+	_makefile_print(fp, "%s%s%s%s%s%s", "$(OBJDIR)", target,
 			(configure->os == HO_WIN32) ? "$(EXEEXT)" : "",
 			": $(", target, "_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL)
@@ -1074,12 +1076,12 @@ static int _target_binary(Configure * configure, FILE * fp,
 			string_delete(q);
 			return error_print(PROGNAME);
 		}
-		fprintf(fp, " %s", q);
+		_makefile_print(fp, " %s", q);
 		string_delete(q);
 	}
-	fputc('\n', fp);
+	_makefile_print(fp, "%c", '\n');
 	/* build the binary */
-	fprintf(fp, "%s%s%s%s%s%s%s%s", "\t$(CC) -o $(OBJDIR)", target,
+	_makefile_print(fp, "%s%s%s%s%s%s%s%s", "\t$(CC) -o $(OBJDIR)", target,
 			(configure->os == HO_WIN32) ? "$(EXEEXT)" : "", " $(",
 			target, "_OBJS) $(", target, "_LDFLAGS)\n");
 	return 0;
@@ -1162,47 +1164,48 @@ static void _flags_asm(Configure * configure, FILE * fp, String const * target)
 {
 	String const * p;
 
-	fprintf(fp, "%s%s", target, "_ASFLAGS = $(CPPFLAGSF) $(CPPFLAGS)"
-			" $(ASFLAGS)");
+	_makefile_print(fp, "%s%s", target, "_ASFLAGS = $(CPPFLAGSF)"
+			" $(CPPFLAGS) $(ASFLAGS)");
 	if((p = config_get(configure->config, target, "asflags")) != NULL)
-		fprintf(fp, " %s", p);
-	fputc('\n', fp);
+		_makefile_print(fp, " %s", p);
+	_makefile_print(fp, "%c", '\n');
 }
 
 static void _flags_c(Configure * configure, FILE * fp, String const * target)
 {
 	String const * p;
 
-	fprintf(fp, "%s%s", target, "_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS)");
+	_makefile_print(fp, "%s%s", target, "_CFLAGS = $(CPPFLAGSF)"
+			" $(CPPFLAGS)");
 	if((p = config_get(configure->config, target, "cppflags")) != NULL)
-		fprintf(fp, " %s", p);
-	fprintf(fp, "%s", " $(CFLAGSF) $(CFLAGS)");
+		_makefile_print(fp, " %s", p);
+	_makefile_print(fp, "%s", " $(CFLAGSF) $(CFLAGS)");
 	if((p = config_get(configure->config, target, "cflags")) != NULL)
 	{
-		fprintf(fp, " %s", p);
+		_makefile_print(fp, " %s", p);
 		if(configure->os == HO_GNU_LINUX && string_find(p, "-ansi"))
-			fprintf(fp, "%s", " -D _GNU_SOURCE");
+			_makefile_print(fp, "%s", " -D _GNU_SOURCE");
 	}
-	fputc('\n', fp);
-	fprintf(fp, "%s%s", target, "_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
+	_makefile_print(fp, "\n%s%s", target,
+			"_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
 	if((p = config_get(configure->config, target, "ldflags")) != NULL)
 		_binary_ldflags(configure, fp, p);
-	fputc('\n', fp);
+	_makefile_print(fp, "%c", '\n');
 }
 
 static void _flags_cxx(Configure * configure, FILE * fp, String const * target)
 {
 	String const * p;
 
-	fprintf(fp, "%s%s", target, "_CXXFLAGS = $(CPPFLAGSF) $(CPPFLAGS)"
-			" $(CXXFLAGSF) $(CXXFLAGS)");
+	_makefile_print(fp, "%s%s", target, "_CXXFLAGS = $(CPPFLAGSF)"
+			" $(CPPFLAGS) $(CXXFLAGSF) $(CXXFLAGS)");
 	if((p = config_get(configure->config, target, "cxxflags")) != NULL)
-		fprintf(fp, " %s", p);
-	fputc('\n', fp);
-	fprintf(fp, "%s%s", target, "_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
+		_makefile_print(fp, " %s", p);
+	_makefile_print(fp, "\n%s%s", target,
+			"_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
 	if((p = config_get(configure->config, target, "ldflags")) != NULL)
 		_binary_ldflags(configure, fp, p);
-	fputc('\n', fp);
+	_makefile_print(fp, "%c", '\n');
 }
 
 static int _target_library(Configure * configure, FILE * fp,
@@ -1223,13 +1226,13 @@ static int _target_library(Configure * configure, FILE * fp,
 	if(configure_can_library_static(configure))
 	{
 		/* generate a static library */
-		fprintf(fp, "\n%s%s%s%s%s", "$(OBJDIR)", target, ".a: $(", target,
-				"_OBJS)");
+		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
+				".a: $(", target, "_OBJS)");
 		if((p = config_get(configure->config, target, "depends")) != NULL)
-			fprintf(fp, " %s", p);
-		fputc('\n', fp);
-		fprintf(fp, "%s%s%s%s%s", "\t$(AR) -rc $(OBJDIR)", target,
-				".a $(", target, "_OBJS)");
+			_makefile_print(fp, " %s", p);
+		_makefile_print(fp, "%s%s%s%s%s",
+				"\n\t$(AR) -rc $(OBJDIR)", target, ".a $(",
+				target, "_OBJS)");
 		if((q = malloc(strlen(target) + strlen(soext) + 3)) != NULL)
 		{
 			sprintf(q, "%s.a", target);
@@ -1237,8 +1240,8 @@ static int _target_library(Configure * configure, FILE * fp,
 					!= NULL)
 				_binary_ldflags(configure, fp, p);
 		}
-		fputc('\n', fp);
-		fprintf(fp, "%s%s%s", "\t$(RANLIB) $(OBJDIR)", target, ".a\n");
+		_makefile_print(fp, "%s%s%s",
+				"\n\t$(RANLIB) $(OBJDIR)", target, ".a\n");
 	}
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
@@ -1253,33 +1256,34 @@ static int _target_library(Configure * configure, FILE * fp,
 	if(soname == NULL)
 		return 1;
 	if(configure->os == HO_MACOSX)
-		fprintf(fp, "\n%s%s%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", soname,
-				" $(OBJDIR)", target, ".0", soext, " $(OBJDIR)",
-				target, soext, ": $(", target, "_OBJS)");
+		_makefile_print(fp, "%s%s%s%s%s%s%s%s%s%s%s%s",
+				"\n$(OBJDIR)", soname, " $(OBJDIR)", target,
+				".0", soext, " $(OBJDIR)", target, soext,
+				": $(", target, "_OBJS)");
 	else if(configure->os == HO_WIN32)
-		fprintf(fp, "\n%s%s%s%s%s", "$(OBJDIR)", soname,
+		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
 				": $(", target, "_OBJS)");
 	else
-		fprintf(fp, "\n%s%s%s%s%s%s%s%s%s%s", "$(OBJDIR)", soname,
-				".0 $(OBJDIR)", soname, " $(OBJDIR)", target,
-				soext, ": $(", target, "_OBJS)");
+		_makefile_print(fp, "%s%s%s%s%s%s%s%s%s%s",
+				"\n$(OBJDIR)", soname, ".0 $(OBJDIR)", soname,
+				" $(OBJDIR)", target, soext, ": $(", target,
+				"_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL)
-		fprintf(fp, " %s", p);
-	fputc('\n', fp);
+		_makefile_print(fp, " %s", p);
 	/* build the shared library */
-	fprintf(fp, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname,
+	_makefile_print(fp, "%s%s%s", "\n\t$(CCSHARED) -o $(OBJDIR)", soname,
 			(configure->os != HO_MACOSX
 			 && configure->os != HO_WIN32) ? ".0" : "");
 	if((p = config_get(configure->config, target, "install")) != NULL)
 	{
 		/* soname is not available on MacOS X */
 		if(configure->os == HO_MACOSX)
-			fprintf(fp, "%s%s%s%s%s%s", " -install_name ", p, "/",
-					target, ".0", soext);
+			_makefile_print(fp, "%s%s%s%s%s%s", " -install_name ",
+					p, "/", target, ".0", soext);
 		else if(configure->os != HO_WIN32)
-			fprintf(fp, "%s%s", " -Wl,-soname,", soname);
+			_makefile_print(fp, "%s%s", " -Wl,-soname,", soname);
 	}
-	fprintf(fp, "%s%s%s%s%s", " $(", target, "_OBJS) $(", target,
+	_makefile_print(fp, "%s%s%s%s%s", " $(", target, "_OBJS) $(", target,
 			"_LDFLAGS)");
 	if(q != NULL)
 	{
@@ -1288,19 +1292,19 @@ static int _target_library(Configure * configure, FILE * fp,
 			_binary_ldflags(configure, fp, p);
 		free(q);
 	}
-	fputc('\n', fp);
+	_makefile_print(fp, "%c", '\n');
 	if(configure->os == HO_MACOSX)
 	{
-		fprintf(fp, "%s%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+		_makefile_print(fp, "%s%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				" $(OBJDIR)", target, ".0", soext, "\n");
-		fprintf(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+		_makefile_print(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				" $(OBJDIR)", target, soext, "\n");
 	}
 	else if(configure->os != HO_WIN32)
 	{
-		fprintf(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+		_makefile_print(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				".0 $(OBJDIR)", soname, "\n");
-		fprintf(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+		_makefile_print(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				".0 $(OBJDIR)", target, soext, "\n");
 	}
 	string_delete(soname);
@@ -1318,14 +1322,15 @@ static int _target_libtool(Configure * configure, FILE * fp,
 		return 0;
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
-	fputc('\n', fp);
-	fprintf(fp, "%s%s%s%s%s", "$(OBJDIR)", target, ".la: $(", target,
-			"_OBJS)\n");
-	fprintf(fp, "%s%s%s%s%s", "\t$(LIBTOOL) --mode=link $(CC) -o $(OBJDIR)",
-			target, ".la $(", target, "_OBJS)");
+	_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target, ".la: $(",
+			target, "_OBJS)\n");
+	_makefile_print(fp, "%s%s%s%s%s",
+			"\t$(LIBTOOL) --mode=link $(CC) -o $(OBJDIR)", target,
+			".la $(", target, "_OBJS)");
 	if((p = config_get(configure->config, target, "ldflags")) != NULL)
 		_binary_ldflags(configure, fp, p);
-	fprintf(fp, "%s%s%s", " -rpath $(LIBDIR) $(", target, "_LDFLAGS)\n");
+	_makefile_print(fp, "%s%s%s", " -rpath $(LIBDIR) $(", target,
+			"_LDFLAGS)\n");
 	return 0;
 }
 
@@ -1354,35 +1359,35 @@ static int _target_object(Configure * configure, FILE * fp,
 	switch(_source_type(extension))
 	{
 		case OT_ASM_SOURCE:
-			fprintf(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
+			_makefile_print(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
 					"$(OBJDIR)", target, target, "_ASFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS) $(ASFLAGS)");
 			if((p = config_get(configure->config, target,
 							"asflags")) != NULL)
-				fprintf(fp, " %s", p);
-			fputc('\n', fp);
+				_makefile_print(fp, " %s", p);
+			_makefile_print(fp, "%c", '\n');
 			break;
 		case OT_C_SOURCE:
 		case OT_OBJC_SOURCE:
-			fprintf(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
+			_makefile_print(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
 					"$(OBJDIR)", target, target, "_CFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF)"
 					" $(CFLAGS)");
 			if((p = config_get(configure->config, target, "cflags"))
 					!= NULL)
-				fprintf(fp, " %s", p);
-			fputc('\n', fp);
+				_makefile_print(fp, " %s", p);
+			_makefile_print(fp, "%c", '\n');
 			break;
 		case OT_CXX_SOURCE:
 		case OT_OBJCXX_SOURCE:
-			fprintf(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
+			_makefile_print(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
 					"$(OBJDIR)", target, target, "_CXXFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS)"
 					" $(CXXFLAGS)");
 			if((p = config_get(configure->config, target,
 							"cxxflags")) != NULL)
-				fprintf(fp, " %s", p);
-			fputc('\n', fp);
+				_makefile_print(fp, " %s", p);
+			_makefile_print(fp, "%c", '\n');
 			break;
 		case OT_UNKNOWN:
 			fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
@@ -1405,16 +1410,15 @@ static int _target_plugin(Configure * configure, FILE * fp,
 		return 0;
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
-	fputc('\n', fp);
 	soext = configure_get_soext(configure);
-	fprintf(fp, "%s%s%s%s%s%s", "$(OBJDIR)", target, soext, ": $(",
-			target, "_OBJS)");
+	_makefile_print(fp, "%s%s%s%s%s%s", "\n$(OBJDIR)", target,
+			soext, ": $(", target, "_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL)
-		fprintf(fp, " %s", p);
-	fputc('\n', fp);
+		_makefile_print(fp, " %s", p);
 	/* build the plug-in */
-	fprintf(fp, "%s%s%s%s%s%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", target,
-			soext, " $(", target, "_OBJS) $(", target, "_LDFLAGS)");
+	_makefile_print(fp, "%s%s%s%s%s%s%s%s", "\n\t$(CCSHARED) -o $(OBJDIR)",
+			target, soext, " $(", target, "_OBJS) $(", target,
+			"_LDFLAGS)");
 	if((q = malloc(strlen(target) + strlen(soext) + 1)) != NULL)
 	{
 		sprintf(q, "%s%s", target, soext);
@@ -1422,7 +1426,7 @@ static int _target_plugin(Configure * configure, FILE * fp,
 			_binary_ldflags(configure, fp, p);
 		free(q);
 	}
-	fputc('\n', fp);
+	_makefile_print(fp, "%c", '\n');
 	return 0;
 }
 
@@ -1458,7 +1462,8 @@ static int _write_objects(Configure * configure, FILE * fp)
 	return ret;
 }
 
-static int _script_depends(Config * config, FILE * fp, String const * target);
+static int _script_depends(Configure * configure, FILE * fp,
+		String const * target);
 static int _target_script(Configure * configure, FILE * fp,
 		String const * target)
 {
@@ -1477,20 +1482,20 @@ static int _target_script(Configure * configure, FILE * fp,
 				script,
 				"\" script is executed while compiling");
 	phony = _makefile_is_phony(configure, target);
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
-	fprintf(fp, "\n%s%s:", phony ? "" : "$(OBJDIR)", target);
-	_script_depends(configure->config, fp, target);
-	fputc('\n', fp);
+	_makefile_print(fp, "\n%s%s:", phony ? "" : "$(OBJDIR)",
+			target);
+	_script_depends(configure, fp, target);
 	if((prefix = config_get(configure->config, target, "prefix")) == NULL)
 		prefix = "$(PREFIX)";
-	fprintf(fp, "\t%s -P \"%s\" -- \"%s%s\"\n", script, prefix,
+	_makefile_print(fp, "\n\t%s -P \"%s\" -- \"%s%s\"\n", script, prefix,
 			phony ? "" : "$(OBJDIR)", target);
 	return 0;
 }
 
-static int _script_depends(Config * config, FILE * fp, String const * target)
+static int _script_depends(Configure * configure, FILE * fp,
+		String const * target)
 {
+	Config * config = configure->config;
 	String const * p;
 	String * depends;
 	String * q;
@@ -1509,7 +1514,7 @@ static int _script_depends(Config * config, FILE * fp, String const * target)
 			continue;
 		c = depends[i];
 		depends[i] = '\0';
-		fprintf(fp, " %s", depends);
+		_makefile_print(fp, " %s", depends);
 		if(c == '\0')
 			break;
 		depends += i + 1;
@@ -1552,7 +1557,8 @@ static int _objects_target(Configure * configure, FILE * fp,
 	return ret;
 }
 
-static int _source_depends(Config * config, FILE * fp, String const * source);
+static int _source_depends(Configure * configure, FILE * fp,
+		String const * source);
 static int _source_subdir(FILE * fp, String * source);
 static int _target_source(Configure * configure, FILE * fp,
 		String const * target, String * source)
@@ -1578,45 +1584,53 @@ static int _target_source(Configure * configure, FILE * fp,
 			if(configure->prefs->flags & PREFS_n)
 				break;
 			if(tt == TT_OBJECT)
-				fprintf(fp, "\n$(OBJDIR)%s", target);
+				_makefile_print(fp, "%s%s", "\n$(OBJDIR)",
+						target);
 			else
-				fprintf(fp, "\n$(OBJDIR)%s%s", source, ".o");
+				_makefile_print(fp, "%s%s%s",
+						"\n$(OBJDIR)", source, ".o");
 			if(tt == TT_LIBTOOL)
-				fprintf(fp, " %s.lo", source);
-			fprintf(fp, "%s%s%s%s", ": ", source, ".", extension);
+				_makefile_print(fp, " %s.lo", source);
+			_makefile_print(fp, "%s%s%s%s", ": ", source, ".",
+					extension);
 			source[len] = '.'; /* FIXME ugly */
-			_source_depends(configure->config, fp, source);
+			_source_depends(configure, fp, source);
 			source[len] = '\0';
-			fputs("\n\t", fp);
+			_makefile_print(fp, "%s", "\n\t");
 			if(strchr(source, '/') != NULL)
 				ret = _source_subdir(fp, source);
 			if(tt == TT_LIBTOOL)
-				fputs("$(LIBTOOL) --mode=compile ", fp);
-			fprintf(fp, "%s%s%s", "$(AS) $(", target, "_ASFLAGS)");
+				_makefile_print(fp, "%s",
+						"$(LIBTOOL) --mode=compile ");
+			_makefile_print(fp, "%s%s%s", "$(AS) $(", target,
+					"_ASFLAGS)");
 			if(tt == TT_OBJECT)
-				fprintf(fp, "%s%s%s%s%s%s", " -o $(OBJDIR)",
-						target, " ", source, ".",
-						extension);
+				_makefile_print(fp, "%s%s%s%s%s%s",
+						" -o $(OBJDIR)", target, " ",
+						source, ".", extension);
 			else
-				fprintf(fp, "%s%s%s%s%s%s", " -o $(OBJDIR)",
-						source, ".o ", source, ".",
-						extension);
-			fputc('\n', fp);
+				_makefile_print(fp, "%s%s%s%s%s%s",
+						" -o $(OBJDIR)", source, ".o ",
+						source, ".", extension);
+			_makefile_print(fp, "%c", '\n');
 			break;
 		case OT_C_SOURCE:
 		case OT_OBJC_SOURCE:
 			if(configure->prefs->flags & PREFS_n)
 				break;
 			if(tt == TT_OBJECT)
-				fprintf(fp, "\n$(OBJDIR)%s", target);
+				_makefile_print(fp, "%s%s", "\n$(OBJDIR)",
+						target);
 			else
-				fprintf(fp, "\n$(OBJDIR)%s%s", source, ".o");
+				_makefile_print(fp, "%s%s%s", "\n$(OBJDIR)",
+						source, ".o");
 			if(tt == TT_LIBTOOL)
-				fprintf(fp, " %s%s", source, ".lo");
-			fprintf(fp, "%s%s%s%s", ": ", source, ".", extension);
+				_makefile_print(fp, " %s%s", source, ".lo");
+			_makefile_print(fp, "%s%s%s%s", ": ", source, ".",
+					extension);
 			source[len] = '.'; /* FIXME ugly */
-			_source_depends(configure->config, fp, source);
-			fputs("\n\t", fp);
+			_source_depends(configure, fp, source);
+			_makefile_print(fp, "%s", "\n\t");
 			if(strchr(source, '/') != NULL)
 				ret = _source_subdir(fp, source);
 			/* FIXME do both wherever also relevant */
@@ -1624,52 +1638,60 @@ static int _target_source(Configure * configure, FILE * fp,
 			q = config_get(configure->config, source, "cflags");
 			source[len] = '\0';
 			if(tt == TT_LIBTOOL)
-				fputs("$(LIBTOOL) --mode=compile ", fp);
-			fputs("$(CC)", fp);
+				_makefile_print(fp, "%s",
+						"$(LIBTOOL) --mode=compile ");
+			_makefile_print(fp, "%s", "$(CC)");
 			if(p != NULL)
-				fprintf(fp, " %s", p);
-			fprintf(fp, "%s%s%s", " $(", target, "_CFLAGS)");
+				_makefile_print(fp, " %s", p);
+			_makefile_print(fp, "%s%s%s", " $(", target,
+					"_CFLAGS)");
 			if(q != NULL)
 			{
-				fprintf(fp, " %s", q);
+				_makefile_print(fp, " %s", q);
 				if(configure->os == HO_GNU_LINUX
 					       	&& string_find(q, "-ansi"))
-					fputs(" -D _GNU_SOURCE", fp);
+					_makefile_print(fp, "%s",
+							" -D _GNU_SOURCE");
 			}
 			if(tt == TT_OBJECT)
-				fprintf(fp, "%s%s", " -o $(OBJDIR)", target);
+				_makefile_print(fp, "%s%s",
+						" -o $(OBJDIR)", target);
 			else
-				fprintf(fp, "%s%s%s", " -o $(OBJDIR)", source,
-						".o");
-			fprintf(fp, "%s%s%s%s", " -c ", source, ".", extension);
-			fputc('\n', fp);
+				_makefile_print(fp, "%s%s%s",
+						" -o $(OBJDIR)", source, ".o");
+			_makefile_print(fp, "%s%s%s%s%c", " -c ", source, ".",
+					extension, '\n');
 			break;
 		case OT_CXX_SOURCE:
 		case OT_OBJCXX_SOURCE:
 			if(configure->prefs->flags & PREFS_n)
 				break;
 			if(tt == TT_OBJECT)
-				fprintf(fp, "\n$(OBJDIR)%s", target);
+				_makefile_print(fp, "%s%s", "\n$(OBJDIR)",
+						target);
 			else
-				fprintf(fp, "\n$(OBJDIR)%s%s", source, ".o");
-			fprintf(fp, "%s%s%s%s", ": ", source, ".", extension);
+				_makefile_print(fp, "%s%s%s", "\n$(OBJDIR)",
+						source, ".o");
+			_makefile_print(fp, "%s%s%s%s", ": ", source, ".",
+					extension);
 			source[len] = '.'; /* FIXME ugly */
-			_source_depends(configure->config, fp, source);
+			_source_depends(configure, fp, source);
 			p = config_get(configure->config, source, "cxxflags");
 			source[len] = '\0';
-			fputs("\n\t", fp);
+			_makefile_print(fp, "%s", "\n\t");
 			if(strchr(source, '/') != NULL)
 				ret = _source_subdir(fp, source);
-			fprintf(fp, "%s%s%s", "$(CXX) $(", target,
+			_makefile_print(fp, "%s%s%s", "$(CXX) $(", target,
 					"_CXXFLAGS)");
 			if(p != NULL)
-				fprintf(fp, " %s", p);
+				_makefile_print(fp, " %s", p);
 			if(tt == TT_OBJECT)
-				fprintf(fp, "%s%s", " -o $(OBJDIR)", target);
+				_makefile_print(fp, "%s%s", " -o $(OBJDIR)",
+						target);
 			else
-				fprintf(fp, "%s%s%s", " -o $(OBJDIR)", source,
-						".o");
-			fprintf(fp, "%s%s%s%s\n", " -c ", source, ".",
+				_makefile_print(fp, "%s%s%s", " -o $(OBJDIR)",
+						source, ".o");
+			_makefile_print(fp, "%s%s%s%s\n", " -c ", source, ".",
 					extension);
 			break;
 		case OT_UNKNOWN:
@@ -1682,8 +1704,10 @@ static int _target_source(Configure * configure, FILE * fp,
 	return ret;
 }
 
-static int _source_depends(Config * config, FILE * fp, String const * target)
+static int _source_depends(Configure * configure, FILE * fp,
+		String const * target)
 {
+	Config * config = configure->config;
 	String const * p;
 	String * depends;
 	String * q;
@@ -1701,7 +1725,7 @@ static int _source_depends(Config * config, FILE * fp, String const * target)
 			continue;
 		c = depends[i];
 		depends[i] = '\0';
-		fprintf(fp, " %s", depends);
+		_makefile_print(fp, " %s", depends);
 		if(c == '\0')
 			break;
 		depends += i + 1;
@@ -1719,13 +1743,13 @@ static int _source_subdir(FILE * fp, String * source)
 	if((p = strdup(source)) == NULL)
 		return 1;
 	q = dirname(p);
-	fprintf(fp, "@[ -d \"%s%s\" ] || $(MKDIR) -- \"%s%s\"\n\t",
+	_makefile_print(fp, "@[ -d \"%s%s\" ] || $(MKDIR) -- \"%s%s\"\n\t",
 			"$(OBJDIR)", q, "$(OBJDIR)", q);
 	free(p);
 	return 0;
 }
 
-static int _clean_targets(Config * config, FILE * fp);
+static int _clean_targets(Configure * configure, FILE * fp);
 static int _write_clean(Configure * configure, FILE * fp)
 {
 	if(configure->prefs->flags & PREFS_n)
@@ -1733,11 +1757,12 @@ static int _write_clean(Configure * configure, FILE * fp)
 	_makefile_target(fp, "clean", NULL);
 	if(config_get(configure->config, NULL, "subdirs") != NULL)
 		_makefile_subdirs(fp, "clean");
-	return _clean_targets(configure->config, fp);
+	return _clean_targets(configure, fp);
 }
 
-static int _clean_targets(Config * config, FILE * fp)
+static int _clean_targets(Configure * configure, FILE * fp)
 {
+	Config * config = configure->config;
 	String const * prefix;
 	String const * p;
 	String * targets;
@@ -1751,21 +1776,21 @@ static int _clean_targets(Config * config, FILE * fp)
 		return 1;
 	q = targets;
 	/* remove all of the object files */
-	fputs("\t$(RM) --", fp);
+	_makefile_print(fp, "%s", "\t$(RM) --");
 	for(i = 0;; i++)
 	{
 		if(targets[i] != ',' && targets[i] != '\0')
 			continue;
 		c = targets[i];
 		targets[i] = '\0';
-		fprintf(fp, "%s%s%s", " $(", targets, "_OBJS)");
+		_makefile_print(fp, "%s%s%s", " $(", targets, "_OBJS)");
 		if(c == '\0')
 			break;
 		targets[i] = c;
 		targets += i + 1;
 		i = 0;
 	}
-	fputc('\n', fp);
+	_makefile_print(fp, "%c", '\n');
 	targets = q;
 	/* let each scripted target remove the relevant object files */
 	for(i = 0;; i++)
@@ -1782,8 +1807,8 @@ static int _clean_targets(Config * config, FILE * fp)
 			if((prefix = config_get(config, targets, "prefix"))
 					== NULL)
 				prefix = "$(PREFIX)";
-			fprintf(fp, "\t%s%s%s%s%s%s\n", p, " -c -P \"", prefix,
-					"\" -- \"", targets, "\"");
+			_makefile_print(fp, "\t%s%s%s%s%s%s\n", p, " -c -P \"",
+					prefix, "\" -- \"", targets, "\"");
 		}
 		if(c == '\0')
 			break;
@@ -1808,7 +1833,7 @@ static int _write_distclean(Configure * configure, FILE * fp)
 	{
 		_makefile_target(fp, "distclean", NULL);
 		_makefile_subdirs(fp, "distclean");
-		_clean_targets(configure->config, fp);
+		_clean_targets(configure, fp);
 	}
 	/* FIXME do not erase targets that need be distributed */
 	if(config_get(configure->config, NULL, "targets") != NULL)
@@ -1816,7 +1841,7 @@ static int _write_distclean(Configure * configure, FILE * fp)
 	return 0;
 }
 
-static int _dist_subdir(Config * config, FILE * fp, Config * subdir);
+static int _dist_subdir(Configure * configure, FILE * fp, Config * subdir);
 static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 	       	int from, int to)
 {
@@ -1834,17 +1859,17 @@ static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 	_makefile_target(fp, "dist", NULL);
 	_makefile_remove(fp, 1, "$(OBJDIR)$(PACKAGE)-$(VERSION)", NULL);
 	_makefile_link(fp, 1, "\"$$PWD\"", "$(OBJDIR)$(PACKAGE)-$(VERSION)");
-	fputs("\t@cd $(OBJDIR). && $(TAR) -czvf $(OBJDIR)$(PACKAGE)-$(VERSION).tar.gz -- \\\n",
-			fp);
+	_makefile_print(fp, "%s", "\t@cd $(OBJDIR). && $(TAR) -czvf"
+			" $(OBJDIR)$(PACKAGE)-$(VERSION).tar.gz -- \\\n");
 	for(i = from + 1; i < to; i++)
 	{
 		array_get_copy(ca, i, &p);
-		_dist_subdir(configure->config, fp, p);
+		_dist_subdir(configure, fp, p);
 	}
 	if(from < to)
 	{
 		array_get_copy(ca, from, &p);
-		_dist_subdir(configure->config, fp, p);
+		_dist_subdir(configure, fp, p);
 	}
 	else
 		return 1;
@@ -1867,22 +1892,19 @@ static int _write_distcheck(Configure * configure, FILE * fp)
 		"\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) dist)\n";
 	const char posttarget[] = "\t$(RM) -r -- $(PACKAGE)-$(VERSION)\n";
 
-	if(configure->prefs->flags & PREFS_n)
-		return 0;
 	package = config_get(configure->config, NULL, "package");
 	version = config_get(configure->config, NULL, "version");
 	if(package == NULL || version == NULL)
 		return 0;
-	fputs(pretarget, fp);
-	fputs(target, fp);
-	fputs(posttarget, fp);
+	_makefile_print(fp, "%s%s%s", pretarget, target, posttarget);
 	return 0;
 }
 
 static int _dist_subdir_dist(FILE * fp, String const * path,
 		String const * dist);
-static int _dist_subdir(Config * config, FILE * fp, Config * subdir)
+static int _dist_subdir(Configure * configure, FILE * fp, Config * subdir)
 {
+	Config * config = configure->config;
 	String const * path;
 	size_t len;
 	String const * p;
@@ -1927,8 +1949,9 @@ static int _dist_subdir(Config * config, FILE * fp, Config * subdir)
 	if((dist = config_get(subdir, NULL, "dist")) != NULL)
 		_dist_subdir_dist(fp, path, dist);
 	quote = (strchr(path, ' ') != NULL) ? "\"" : "";
-	fprintf(fp, "%s%s%s%s%s%s%s%s", "\t\t", quote, "$(PACKAGE)-$(VERSION)/",
-			path, (path[0] == '\0') ? "" : "/", PROJECT_CONF, quote,
+	_makefile_print(fp, "%s%s%s%s%s%s%s%s", "\t\t", quote,
+			"$(PACKAGE)-$(VERSION)/", path,
+			(path[0] == '\0') ? "" : "/", PROJECT_CONF, quote,
 			(path[0] == '\0') ? "\n" : " \\\n");
 	return 0;
 }
@@ -1953,7 +1976,7 @@ static int _dist_subdir_dist(FILE * fp, String const * path,
 		d[i] = '\0';
 		quote = (strchr(path, ' ') != NULL || strchr(d, ' ') != NULL)
 			? "\"" : "";
-		fprintf(fp, "%s%s%s%s%s%s%s%s", "\t\t", quote,
+		_makefile_print(fp, "%s%s%s%s%s%s%s%s", "\t\t", quote,
 				"$(PACKAGE)-$(VERSION)/",
 				(path[0] == '\0') ? "" : path,
 				(path[0] == '\0') ? "" : "/",
@@ -2077,9 +2100,10 @@ static void _install_target_binary(Configure * configure, FILE * fp,
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
 	exeext = (configure->os == HO_WIN32) ? "$(EXEEXT)" : "";
-	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%s%s%s%s/%s%s\n", "\t$(INSTALL) -m 0755 $(OBJDIR)",
-			target, exeext, " $(DESTDIR)", path, target, exeext);
+	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
+	_makefile_print(fp, "%s%s%s%s%s/%s%s\n",
+			"\t$(INSTALL) -m 0755 $(OBJDIR)", target, exeext,
+			" $(DESTDIR)", path, target, exeext);
 }
 
 static int _install_target_library(Configure * configure, FILE * fp,
@@ -2093,11 +2117,12 @@ static int _install_target_library(Configure * configure, FILE * fp,
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return 0;
 	soext = configure_get_soext(configure);
-	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
+	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
 	if(configure_can_library_static(configure))
 		/* install the static library */
-		fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0644 $(OBJDIR)",
-				target, ".a $(DESTDIR)", path, target, ".a\n");
+		_makefile_print(fp, "%s%s%s%s/%s%s",
+				"\t$(INSTALL) -m 0644 $(OBJDIR)", target,
+				".a $(DESTDIR)", path, target, ".a\n");
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
 	else if(configure->os == HO_MACOSX)
@@ -2113,23 +2138,23 @@ static int _install_target_library(Configure * configure, FILE * fp,
 	/* install the shared library */
 	if(configure->os == HO_MACOSX)
 	{
-		fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
+		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
 				soname, " $(DESTDIR)", path, soname, "\n");
-		fprintf(fp, "%s%s%s%s/%s%s%s%s", "\t$(LN) -s -- ", soname,
+		_makefile_print(fp, "%s%s%s%s/%s%s%s%s", "\t$(LN) -s -- ", soname,
 				" $(DESTDIR)", path, target, ".0", soext, "\n");
-		fprintf(fp, "%s%s%s%s/%s%s%s", "\t$(LN) -s -- ", soname,
+		_makefile_print(fp, "%s%s%s%s/%s%s%s", "\t$(LN) -s -- ", soname,
 				" $(DESTDIR)", path, target, soext, "\n");
 	}
 	else if(configure->os == HO_WIN32)
-		fprintf(fp, "%s%s%s%s%s%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
+		_makefile_print(fp, "%s%s%s%s%s%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
 				soname, " $(DESTDIR)", path, "/", soname, "\n");
 	else
 	{
-		fprintf(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
+		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
 				soname, ".0 $(DESTDIR)", path, soname, ".0\n");
-		fprintf(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
+		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
 				".0 $(DESTDIR)", path, soname, "\n");
-		fprintf(fp, "%s%s%s%s/%s%s%s", "\t$(LN) -s -- ", soname,
+		_makefile_print(fp, "%s%s%s%s/%s%s%s", "\t$(LN) -s -- ", soname,
 				".0 $(DESTDIR)", path, target, soext, "\n");
 	}
 	string_delete(soname);
@@ -2143,11 +2168,13 @@ static void _install_target_libtool(Configure * configure, FILE * fp,
 
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
-	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%s%s%s/%s%s", "\t$(LIBTOOL) --mode=install $(INSTALL)"
+	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
+	_makefile_print(fp, "%s%s%s%s/%s%s",
+			"\t$(LIBTOOL) --mode=install $(INSTALL)"
 			" -m 0755 $(OBJDIR)", target, ".la $(DESTDIR)", path,
 			target, ".la\n");
-	fprintf(fp, "%s/%s\n", "\t$(LIBTOOL) --mode=finish $(DESTDIR)", path);
+	_makefile_print(fp, "%s/%s\n", "\t$(LIBTOOL) --mode=finish $(DESTDIR)",
+			path);
 }
 
 static void _install_target_object(Configure * configure, FILE * fp,
@@ -2157,9 +2184,9 @@ static void _install_target_object(Configure * configure, FILE * fp,
 
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
-	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 $(OBJDIR)", target,
-			" $(DESTDIR)", path, target);
+	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
+	_makefile_print(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 $(OBJDIR)",
+			target, " $(DESTDIR)", path, target);
 }
 
 static void _install_target_plugin(Configure * configure, FILE * fp,
@@ -2180,8 +2207,8 @@ static void _install_target_plugin(Configure * configure, FILE * fp,
 			|| (m = strtol(mode, &p, 8)) == 0
 			|| *p != '\0')
 		mode = "0755";
-	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	fprintf(fp, "%s%04o%s%s%s%s%s%s%s%s%s", "\t$(INSTALL) -m ", m,
+	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
+	_makefile_print(fp, "%s%04o%s%s%s%s%s%s%s%s%s", "\t$(INSTALL) -m ", m,
 			" $(OBJDIR)", target, soext, " $(DESTDIR)", path, "/",
 			target, soext, "\n");
 }
@@ -2198,13 +2225,14 @@ static void _install_target_script(Configure * configure, FILE * fp,
 	if((script = config_get(configure->config, target, "script")) == NULL)
 		return;
 	phony = _makefile_is_phony(configure, target);
-	fprintf(fp, "\t%s%s%s%s%s%s%s", script, " -P \"$(DESTDIR)",
+	_makefile_print(fp, "\t%s%s%s%s%s%s%s", script, " -P \"$(DESTDIR)",
 			(path[0] != '\0') ? path : "$(PREFIX)",
 			"\" -i -- \"", phony ? "" : "$(OBJDIR)", target,
 			"\"\n");
 }
 
-static int _install_include(Config * config, FILE * fp, String const * include);
+static int _install_include(Configure * configure, FILE * fp,
+		String const * include);
 static int _install_includes(Configure * configure, FILE * fp)
 {
 	int ret = 0;
@@ -2225,8 +2253,7 @@ static int _install_includes(Configure * configure, FILE * fp)
 			continue;
 		c = includes[i];
 		includes[i] = '\0';
-		ret |= _install_include(configure->config, fp,
-				includes);
+		ret |= _install_include(configure, fp, includes);
 		if(c == '\0')
 			break;
 		includes += i + 1;
@@ -2236,14 +2263,16 @@ static int _install_includes(Configure * configure, FILE * fp)
 	return ret;
 }
 
-static int _install_include(Config * config, FILE * fp, String const * include)
+static int _install_include(Configure * configure, FILE * fp,
+		String const * include)
 {
+	Config * config = configure->config;
 	char const * install;
 
 	if((install = config_get(config, include, "install")) == NULL)
 		install = "$(INCLUDEDIR)";
-	fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", install);
-	fprintf(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 ", include,
+	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", install);
+	_makefile_print(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 ", include,
 			" $(DESTDIR)", install, include);
 	return 0;
 }
@@ -2330,13 +2359,14 @@ static int _dist_install(Configure * configure, FILE * fp,
 		if((p = string_new(filename)) == NULL)
 			return -1;
 		q = dirname(p);
-		fprintf(fp, "%s%s%c%s\n", "\t$(MKDIR) $(DESTDIR)", directory,
-				sep, q);
+		_makefile_print(fp, "%s%s%c%s\n", "\t$(MKDIR) $(DESTDIR)",
+				directory, sep, q);
 		string_delete(p);
 	}
 	else
-		fprintf(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", directory);
-	fprintf(fp, "%s%s%s%s%s%s%c%s\n", "\t$(INSTALL) -m ", mode, " ",
+		_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)",
+				directory);
+	_makefile_print(fp, "%s%s%s%s%s%s%c%s\n", "\t$(INSTALL) -m ", mode, " ",
 			filename, " $(DESTDIR)", directory, sep, filename);
 	return 0;
 }
@@ -2348,12 +2378,12 @@ static int _write_phony(Configure * configure, FILE * fp, char const ** targets)
 
 	if(configure->prefs->flags & PREFS_n)
 		return 0;
-	fprintf(fp, "\n%s:", ".PHONY");
+	_makefile_print(fp, "%s:", "\n.PHONY");
 	for(i = 0; targets[i] != NULL; i++)
-		fprintf(fp, " %s", targets[i]);
+		_makefile_print(fp, " %s", targets[i]);
 	if(_write_phony_targets(configure, fp) != 0)
 		return 1;
-	fprintf(fp, "\n");
+	_makefile_print(fp, "%s", "\n");
 	return 0;
 }
 
@@ -2382,7 +2412,8 @@ static int _write_phony_targets(Configure * configure, FILE * fp)
 				case TT_SCRIPT:
 					if(_makefile_is_phony(configure,
 								prints))
-						fprintf(fp, " %s", prints);
+						_makefile_print(fp, " %s",
+								prints);
 					break;
 			}
 		if(c == '\0')
@@ -2395,9 +2426,10 @@ static int _write_phony_targets(Configure * configure, FILE * fp)
 
 static int _uninstall_target(Configure * configure, FILE * fp,
 		String const * target);
-static int _uninstall_include(Config * config, FILE * fp,
+static int _uninstall_include(Configure * configure, FILE * fp,
 		String const * include);
-static int _uninstall_dist(Config * config, FILE * fp, String const * dist);
+static int _uninstall_dist(Configure * configure, FILE * fp,
+		String const * dist);
 static int _write_uninstall(Configure * configure, FILE * fp)
 {
 	int ret = 0;
@@ -2444,8 +2476,7 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 				continue;
 			c = includes[i];
 			includes[i] = '\0';
-			ret = _uninstall_include(configure->config, fp,
-					includes);
+			ret = _uninstall_include(configure, fp, includes);
 			if(c == '\0')
 				break;
 			includes += i + 1;
@@ -2464,7 +2495,7 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 				continue;
 			c = dist[i];
 			dist[i] = '\0';
-			ret = _uninstall_dist(configure->config, fp, dist);
+			ret = _uninstall_dist(configure, fp, dist);
 			if(c == '\0')
 				break;
 			dist += i + 1;
@@ -2499,8 +2530,8 @@ static int _uninstall_target(Configure * configure, FILE * fp,
 	switch(tt)
 	{
 		case TT_BINARY:
-			fprintf(fp, "\t%s%s/%s%s\n", rm_destdir, path, target,
-					exeext);
+			_makefile_print(fp, "\t%s%s/%s%s\n", rm_destdir, path,
+					target, exeext);
 			break;
 		case TT_LIBRARY:
 			if(_uninstall_target_library(configure, fp, target,
@@ -2508,15 +2539,15 @@ static int _uninstall_target(Configure * configure, FILE * fp,
 				return 1;
 			break;
 		case TT_LIBTOOL:
-			fprintf(fp, "\t%s%s%s/%s%s", "$(LIBTOOL)"
+			_makefile_print(fp, "\t%s%s%s/%s%s", "$(LIBTOOL)"
 					" --mode=uninstall ", rm_destdir, path,
 					target, ".la\n");
 			break;
 		case TT_OBJECT:
-			fprintf(fp, "\t%s%s/%s\n", rm_destdir, path, target);
+			_makefile_print(fp, "\t%s%s/%s\n", rm_destdir, path, target);
 			break;
 		case TT_PLUGIN:
-			fprintf(fp, "\t%s%s/%s%s\n", rm_destdir, path, target,
+			_makefile_print(fp, "\t%s%s/%s%s\n", rm_destdir, path, target,
 					soext);
 			break;
 		case TT_SCRIPT:
@@ -2540,7 +2571,8 @@ static int _uninstall_target_library(Configure * configure, FILE * fp,
 	soext = configure_get_soext(configure);
 	if(configure_can_library_static(configure))
 		/* uninstall the static library */
-		fprintf(fp, format, rm_destdir, path, target, ".a\n", "", "");
+		_makefile_print(fp, format, rm_destdir, path, target, ".a\n",
+				"", "");
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
 	else if(configure->os == HO_MACOSX)
@@ -2556,16 +2588,19 @@ static int _uninstall_target_library(Configure * configure, FILE * fp,
 	/* uninstall the shared library */
 	if(configure->os == HO_MACOSX)
 	{
-		fprintf(fp, format, rm_destdir, path, soname, "\n", "", "");
-		fprintf(fp, format, rm_destdir, path, target, ".0", soext,
-				"\n");
+		_makefile_print(fp, format, rm_destdir, path, soname, "\n", "",
+				"");
+		_makefile_print(fp, format, rm_destdir, path, target, ".0",
+				soext, "\n");
 	}
 	else if(configure->os != HO_WIN32)
 	{
-		fprintf(fp, format, rm_destdir, path, soname, ".0\n", "", "");
-		fprintf(fp, format, rm_destdir, path, soname, "\n", "", "");
+		_makefile_print(fp, format, rm_destdir, path, soname, ".0\n",
+				"", "");
+		_makefile_print(fp, format, rm_destdir, path, soname, "\n", "",
+				"");
 	}
-	fprintf(fp, format, rm_destdir, path, target, soext, "\n", "");
+	_makefile_print(fp, format, rm_destdir, path, target, soext, "\n", "");
 	string_delete(soname);
 	return 0;
 }
@@ -2577,29 +2612,34 @@ static void _uninstall_target_script(Configure * configure, FILE * fp,
 
 	if((script = config_get(configure->config, target, "script")) == NULL)
 		return;
-	fprintf(fp, "\t%s%s%s%s%s%s", script, " -P \"$(DESTDIR)",
+	_makefile_print(fp, "\t%s%s%s%s%s%s", script, " -P \"$(DESTDIR)",
 			(path[0] != '\0') ? path : "$(PREFIX)", "\" -u -- \"",
 			target, "\"\n");
 }
 
-static int _uninstall_include(Config * config, FILE * fp,
+static int _uninstall_include(Configure * configure, FILE * fp,
 		String const * include)
 {
+	Config * config = configure->config;
 	String const * install;
 
 	if((install = config_get(config, include, "install")) == NULL)
 		install = "$(INCLUDEDIR)";
-	fprintf(fp, "%s%s/%s\n", "\t$(RM) -- $(DESTDIR)", install, include);
+	_makefile_print(fp, "%s%s/%s\n", "\t$(RM) -- $(DESTDIR)", install,
+			include);
 	return 0;
 }
 
-static int _uninstall_dist(Config * config, FILE * fp, String const * dist)
+static int _uninstall_dist(Configure * configure, FILE * fp,
+		String const * dist)
 {
+	Config * config = configure->config;
 	String const * install;
 
 	if((install = config_get(config, dist, "install")) == NULL)
 		return 0;
-	fprintf(fp, "%s%s/%s\n", "\t$(RM) -- $(DESTDIR)", install, dist);
+	_makefile_print(fp, "%s%s/%s\n", "\t$(RM) -- $(DESTDIR)", install,
+			dist);
 	return 0;
 }
 
@@ -2620,7 +2660,8 @@ static int _makefile_is_phony(Configure * configure, char const * target)
 static int _makefile_link(FILE * fp, int symlink, char const * link,
 		char const * path)
 {
-	fprintf(fp, "\t$(LN)%s -- %s %s\n", symlink ? " -s" : "", link, path);
+	_makefile_print(fp, "\t$(LN)%s -- %s %s\n", symlink ? " -s" : "", link,
+			path);
 	return 0;
 }
 
@@ -2641,7 +2682,7 @@ static int _makefile_output_variable(FILE * fp, char const * name,
 		value = "";
 	align = (strlen(name) >= 8) ? "" : "\t";
 	equals = (strlen(value) > 0) ? "= " : "=";
-	res = fprintf(fp, "%s%s%s%s\n", name, align, equals, value);
+	res = _makefile_print(fp, "%s%s%s%s\n", name, align, equals, value);
 	return (res >= 0) ? 0 : -1;
 }
 
@@ -2669,15 +2710,15 @@ static int _makefile_remove(FILE * fp, int recursive, ...)
 	char const * sep = " -- ";
 	char const * p;
 
-	fprintf(fp, "\t$(RM)%s", recursive ? " -r" : "");
+	_makefile_print(fp, "\t$(RM)%s", recursive ? " -r" : "");
 	va_start(ap, recursive);
 	while((p = va_arg(ap, char const * )) != NULL)
 	{
-		fprintf(fp, "%s%s", sep, p);
+		_makefile_print(fp, "%s%s", sep, p);
 		sep = " ";
 	}
 	va_end(ap);
-	fputc('\n', fp);
+	_makefile_print(fp, "%c", '\n');
 	return 0;
 }
 
@@ -2686,11 +2727,12 @@ static int _makefile_remove(FILE * fp, int recursive, ...)
 static int _makefile_subdirs(FILE * fp, char const * target)
 {
 	if(target != NULL)
-		fprintf(fp, "\t@for i in $(SUBDIRS); do"
+		_makefile_print(fp, "\t@for i in $(SUBDIRS); do"
 				" (cd \"$$i\" && $(MAKE) %s) || exit; done\n",
 				target);
 	else
-		fputs("\t@for i in $(SUBDIRS); do (cd \"$$i\" && \\\n"
+		_makefile_print(fp, "%s",
+				"\t@for i in $(SUBDIRS); do (cd \"$$i\" && \\\n"
 				"\t\tif [ -n \"$(OBJDIR)\" ]; then \\\n"
 				"\t\t([ -d \"$(OBJDIR)$$i\" ]"
 				" || $(MKDIR) -- \"$(OBJDIR)$$i\") && \\\n"
@@ -2709,12 +2751,12 @@ static int _makefile_target(FILE * fp, char const * target, ...)
 
 	if(target == NULL)
 		return -1;
-	fprintf(fp, "\n%s:", target);
+	_makefile_print(fp, "\n%s:", target);
 	va_start(ap, target);
 	while((p = va_arg(ap, char const *)) != NULL)
-		fprintf(fp, "%s%s", sep, p);
+		_makefile_print(fp, "%s%s", sep, p);
 	va_end(ap);
-	fputc('\n', fp);
+	_makefile_print(fp, "%c", '\n');
 	return 0;
 }
 
@@ -2727,10 +2769,10 @@ static int _makefile_targetv(FILE * fp, char const * target,
 
 	if(target == NULL)
 		return -1;
-	fprintf(fp, "\n%s:", target);
+	_makefile_print(fp, "\n%s:", target);
 	if(depends != NULL)
 		for(p = depends; *p != NULL; p++)
-			fprintf(fp, " %s", *p);
-	fputc('\n', fp);
+			_makefile_print(fp, " %s", *p);
+	_makefile_print(fp, "%c", '\n');
 	return 0;
 }
