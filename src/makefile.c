@@ -25,8 +25,6 @@
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
-/* TODO:
- * - only check the PREFS_n flags inside a wrapper around fputs()/fprintf() */
 
 
 
@@ -49,10 +47,12 @@
 /* accessors */
 static int _makefile_is_phony(Configure * configure, char const * target);
 
+/* useful */
 static int _makefile_link(FILE * fp, int symlink, char const * link,
 		char const * path);
 static int _makefile_output_variable(FILE * fp, char const * name,
 		char const * value);
+static int _makefile_print(FILE * fp, char const * format, ...);
 static int _makefile_remove(FILE * fp, int recursive, ...);
 static int _makefile_subdirs(FILE * fp, char const * target);
 static int _makefile_target(FILE * fp, char const * target, ...);
@@ -2645,6 +2645,22 @@ static int _makefile_output_variable(FILE * fp, char const * name,
 	equals = (strlen(value) > 0) ? "= " : "=";
 	res = fprintf(fp, "%s%s%s%s\n", name, align, equals, value);
 	return (res >= 0) ? 0 : -1;
+}
+
+
+/* makefile_print */
+static int _makefile_print(FILE * fp, char const * format, ...)
+{
+	int ret;
+	va_list ap;
+
+	va_start(ap, format);
+	if(fp == NULL)
+		ret = vsprintf(NULL, format, ap);
+	else
+		ret = vfprintf(fp, format, ap);
+	va_end(ap);
+	return ret;
 }
 
 
