@@ -188,7 +188,7 @@ int configure(Prefs * prefs, char const * directory)
 	int ret;
 	Configure cfgr;
 	configArray * ca;
-	int flags = prefs->flags;
+	const int flags = prefs->flags;
 	int i;
 	Config * p;
 
