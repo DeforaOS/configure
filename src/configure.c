@@ -109,6 +109,8 @@ const struct ExtensionType _sExtensionType[] =
 	{ "c++",	OT_CXX_SOURCE	},
 	{ "asm",	OT_ASM_SOURCE	},
 	{ "S",		OT_ASM_SOURCE	},
+	{ "m",		OT_OBJC_SOURCE	},
+	{ "mm",		OT_OBJCXX_SOURCE},
 	{ NULL,		0		}
 };
 const struct ExtensionType * sExtensionType = _sExtensionType;

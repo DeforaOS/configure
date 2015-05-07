@@ -1030,6 +1030,8 @@ static int _objs_source(Prefs * prefs, FILE * fp, String * source,
 		case OT_ASM_SOURCE:
 		case OT_C_SOURCE:
 		case OT_CXX_SOURCE:
+		case OT_OBJC_SOURCE:
+		case OT_OBJCXX_SOURCE:
 			if(prefs->flags & PREFS_n)
 				break;
 			fprintf(fp, " $(OBJDIR)%s%s", source,
@@ -1129,11 +1131,18 @@ static int _target_flags(Configure * configure, FILE * fp,
 				case OT_ASM_SOURCE:
 					_flags_asm(configure, fp, target);
 					break;
+				case OT_OBJC_SOURCE:
+					done[OT_C_SOURCE] = 1;
+					/* fallback */
 				case OT_C_SOURCE:
+					done[OT_OBJC_SOURCE] = 1;
 					_flags_c(configure, fp, target);
 					break;
-				case OT_CXX_SOURCE:
+				case OT_OBJCXX_SOURCE:
 					done[OT_CXX_SOURCE] = 1;
+					/* fallback */
+				case OT_CXX_SOURCE:
+					done[OT_OBJCXX_SOURCE] = 1;
 					_flags_cxx(configure, fp, target);
 					break;
 				case OT_UNKNOWN:
@@ -1354,6 +1363,7 @@ static int _target_object(Configure * configure, FILE * fp,
 			fputc('\n', fp);
 			break;
 		case OT_C_SOURCE:
+		case OT_OBJC_SOURCE:
 			fprintf(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
 					"$(OBJDIR)", target, target, "_CFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF)"
@@ -1364,6 +1374,7 @@ static int _target_object(Configure * configure, FILE * fp,
 			fputc('\n', fp);
 			break;
 		case OT_CXX_SOURCE:
+		case OT_OBJCXX_SOURCE:
 			fprintf(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
 					"$(OBJDIR)", target, target, "_CXXFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS)"
@@ -1593,6 +1604,7 @@ static int _target_source(Configure * configure, FILE * fp,
 			fputc('\n', fp);
 			break;
 		case OT_C_SOURCE:
+		case OT_OBJC_SOURCE:
 			if(configure->prefs->flags & PREFS_n)
 				break;
 			if(tt == TT_OBJECT)
@@ -1633,6 +1645,7 @@ static int _target_source(Configure * configure, FILE * fp,
 			fputc('\n', fp);
 			break;
 		case OT_CXX_SOURCE:
+		case OT_OBJCXX_SOURCE:
 			if(configure->prefs->flags & PREFS_n)
 				break;
 			if(tt == TT_OBJECT)
