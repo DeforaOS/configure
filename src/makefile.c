@@ -2361,7 +2361,6 @@ static int _write_phony_targets(Configure * configure, FILE * fp)
 {
 	String const * p;
 	String * prints;
-	String * q;
 	size_t i;
 	char c;
 	String const * type;
@@ -2370,7 +2369,6 @@ static int _write_phony_targets(Configure * configure, FILE * fp)
 		return 0;
 	if((prints = string_new(p)) == NULL)
 		return 1;
-	q = prints;
 	for(i = 0;; i++)
 	{
 		if(prints[i] != ',' && prints[i] != '\0')
