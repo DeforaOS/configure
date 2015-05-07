@@ -103,6 +103,7 @@ const String * sTargetType[TT_COUNT] = { "binary", "library", "libtool",
 const struct ExtensionType _sExtensionType[] =
 {
 	{ "c",		OT_C_SOURCE	},
+	{ "cc",		OT_CXX_SOURCE	},
 	{ "cpp",	OT_CXX_SOURCE	},
 	{ "cxx",	OT_CXX_SOURCE	},
 	{ "c++",	OT_CXX_SOURCE	},
