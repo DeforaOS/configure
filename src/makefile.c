@@ -2650,7 +2650,7 @@ static int _makefile_print(FILE * fp, char const * format, ...)
 
 	va_start(ap, format);
 	if(fp == NULL)
-		ret = vsprintf(NULL, format, ap);
+		ret = vsnprintf(NULL, 0, format, ap);
 	else
 		ret = vfprintf(fp, format, ap);
 	va_end(ap);
