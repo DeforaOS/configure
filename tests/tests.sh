@@ -27,8 +27,7 @@
 #variables
 PROGNAME="tests.sh"
 #executables
-CONFIGURE="../src/configure"
-[ -n "$OBJDIR" ] && CONFIGURE="${OBJDIR}configure"
+CONFIGURE="${OBJDIR}../src/configure"
 DATE="date"
 DIFF="diff"
 
