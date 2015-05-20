@@ -1260,22 +1260,23 @@ static int _target_library(Configure * configure, FILE * fp,
 	_makefile_print(fp, "%c", '\n');
 	if(configure->os == HO_MACOSX)
 	{
-		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target, ".0",
-				soext, ":\n");
+		_makefile_print(fp, "%s%s%s%s%s%s%s", "\n$(OBJDIR)", target,
+				".0", soext, ": $(OBJDIR)", soname, "\n");
 		_makefile_print(fp, "%s%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				" $(OBJDIR)", target, ".0", soext, "\n");
-		_makefile_print(fp, "%s%s%s%s", "\n$(OBJDIR)", target, soext,
-				":\n");
+		_makefile_print(fp, "%s%s%s%s%s%s", "\n$(OBJDIR)", target,
+				soext, ": $(OBJDIR)", soname, "\n");
 		_makefile_print(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				" $(OBJDIR)", target, soext, "\n");
 	}
 	else if(configure->os != HO_WIN32)
 	{
-		_makefile_print(fp, "%s%s%s", "\n$(OBJDIR)", soname, ":\n");
+		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
+				": $(OBJDIR)", soname, ".0\n");
 		_makefile_print(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				".0 $(OBJDIR)", soname, "\n");
-		_makefile_print(fp, "%s%s%s%s", "\n$(OBJDIR)", target, soext,
-				":\n");
+		_makefile_print(fp, "%s%s%s%s%s%s", "\n$(OBJDIR)", target,
+				soext, ": $(OBJDIR)", soname, ".0\n");
 		_makefile_print(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				".0 $(OBJDIR)", target, soext, "\n");
 	}
