@@ -23,9 +23,13 @@ $(OBJDIR)libtest.a: $(libtest_OBJS)
 	$(AR) -rc $(OBJDIR)libtest.a $(libtest_OBJS)
 	$(RANLIB) $(OBJDIR)libtest.a
 
-$(OBJDIR)libtest.0.0.dylib $(OBJDIR)libtest.0.dylib $(OBJDIR)libtest.dylib: $(libtest_OBJS)
+$(OBJDIR)libtest.0.0.dylib: $(libtest_OBJS)
 	$(CCSHARED) -o $(OBJDIR)libtest.0.0.dylib -install_name $(LIBDIR)/libtest.0.dylib $(libtest_OBJS) $(libtest_LDFLAGS)
+
+$(OBJDIR)libtest.0.dylib:
 	$(LN) -s -- libtest.0.0.dylib $(OBJDIR)libtest.0.dylib
+
+$(OBJDIR)libtest.dylib:
 	$(LN) -s -- libtest.0.0.dylib $(OBJDIR)libtest.dylib
 
 $(OBJDIR)test.o: test.c

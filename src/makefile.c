@@ -1222,18 +1222,14 @@ static int _target_library(Configure * configure, FILE * fp,
 	if(soname == NULL)
 		return 1;
 	if(configure->os == HO_MACOSX)
-		_makefile_print(fp, "%s%s%s%s%s%s%s%s%s%s%s%s",
-				"\n$(OBJDIR)", soname, " $(OBJDIR)", target,
-				".0", soext, " $(OBJDIR)", target, soext,
-				": $(", target, "_OBJS)");
+		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname, ": $(",
+				target, "_OBJS)");
 	else if(configure->os == HO_WIN32)
-		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
-				": $(", target, "_OBJS)");
+		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname, ": $(",
+				target, "_OBJS)");
 	else
-		_makefile_print(fp, "%s%s%s%s%s%s%s%s%s%s",
-				"\n$(OBJDIR)", soname, ".0 $(OBJDIR)", soname,
-				" $(OBJDIR)", target, soext, ": $(", target,
-				"_OBJS)");
+		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
+				".0: $(", target, "_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL)
 		_makefile_print(fp, " %s", p);
 	/* build the shared library */
@@ -1264,15 +1260,22 @@ static int _target_library(Configure * configure, FILE * fp,
 	_makefile_print(fp, "%c", '\n');
 	if(configure->os == HO_MACOSX)
 	{
+		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target, ".0",
+				soext, ":\n");
 		_makefile_print(fp, "%s%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				" $(OBJDIR)", target, ".0", soext, "\n");
+		_makefile_print(fp, "%s%s%s%s", "\n$(OBJDIR)", target, soext,
+				":\n");
 		_makefile_print(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				" $(OBJDIR)", target, soext, "\n");
 	}
 	else if(configure->os != HO_WIN32)
 	{
+		_makefile_print(fp, "%s%s%s", "\n$(OBJDIR)", soname, ":\n");
 		_makefile_print(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				".0 $(OBJDIR)", soname, "\n");
+		_makefile_print(fp, "%s%s%s%s", "\n$(OBJDIR)", target, soext,
+				":\n");
 		_makefile_print(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				".0 $(OBJDIR)", target, soext, "\n");
 	}
