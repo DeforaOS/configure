@@ -917,7 +917,7 @@ static int _target_binary(Configure * configure, FILE * fp,
 		String const * target);
 static int _target_library(Configure * configure, FILE * fp,
 		String const * target);
-static void _target_library_static(Configure * configure, FILE * fp,
+static int _target_library_static(Configure * configure, FILE * fp,
 		String const * target);
 static int _target_libtool(Configure * configure, FILE * fp,
 		String const * target);
@@ -1205,9 +1205,10 @@ static int _target_library(Configure * configure, FILE * fp,
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
 	soext = configure_get_soext(configure);
-	if(configure_can_library_static(configure))
-		/* generate a static library */
-		_target_library_static(configure, fp, target);
+	if(configure_can_library_static(configure)
+			/* generate a static library */
+			&& _target_library_static(configure, fp, target) != 0)
+		return 1;
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
 	else if(configure->os == HO_MACOSX)
@@ -1251,13 +1252,15 @@ static int _target_library(Configure * configure, FILE * fp,
 	_makefile_print(fp, "%s%s%s%s%s", " $(", target, "_OBJS) $(", target,
 			"_LDFLAGS)");
 	len = strlen(target) + strlen(soext) + 1;
-	if((q = malloc(len)) != NULL)
+	if((q = malloc(len)) == NULL)
 	{
-		snprintf(q, len, "%s%s", target, soext);
-		if((p = config_get(configure->config, q, "ldflags")) != NULL)
-			_binary_ldflags(configure, fp, p);
-		free(q);
+		string_delete(soname);
+		return 1;
 	}
+	snprintf(q, len, "%s%s", target, soext);
+	if((p = config_get(configure->config, q, "ldflags")) != NULL)
+		_binary_ldflags(configure, fp, p);
+	free(q);
 	_makefile_print(fp, "%c", '\n');
 	if(configure->os == HO_MACOSX)
 	{
@@ -1277,7 +1280,7 @@ static int _target_library(Configure * configure, FILE * fp,
 	return 0;
 }
 
-static void _target_library_static(Configure * configure, FILE * fp,
+static int _target_library_static(Configure * configure, FILE * fp,
 		String const * target)
 {
 	String const * p;
@@ -1292,16 +1295,16 @@ static void _target_library_static(Configure * configure, FILE * fp,
 			"\n\t$(AR) -rc $(OBJDIR)", target, ".a $(",
 			target, "_OBJS)");
 	len = strlen(target) + 3;
-	if((q = malloc(len)) != NULL)
-	{
-		snprintf(q, len, "%s.a", target);
-		if((p = config_get(configure->config, q, "ldflags"))
-				!= NULL)
-			_binary_ldflags(configure, fp, p);
-		free(q);
-	}
+	if((q = malloc(len)) == NULL)
+		return 1;
+	snprintf(q, len, "%s.a", target);
+	if((p = config_get(configure->config, q, "ldflags"))
+			!= NULL)
+		_binary_ldflags(configure, fp, p);
+	free(q);
 	_makefile_print(fp, "%s%s%s",
 			"\n\t$(RANLIB) $(OBJDIR)", target, ".a\n");
+	return 0;
 }
 
 static int _target_libtool(Configure * configure, FILE * fp,
