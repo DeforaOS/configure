@@ -1,0 +1,43 @@
+TARGETS	= $(OBJDIR)libtest.la
+OBJDIR	=
+PREFIX	= /usr/local
+DESTDIR	=
+LIBDIR	= $(PREFIX)/lib
+LDFLAGS	= -ldl   -ltest 
+AR	= ar
+RANLIB	= ranlib
+CCSHARED= $(CC) -shared
+LIBTOOL	= libtool
+RM	= rm -f
+LN	= ln -f
+MKDIR	= mkdir -m 0755 -p
+INSTALL	= install
+
+
+all: $(TARGETS)
+
+libtest_OBJS = $(OBJDIR)test.lo
+libtest_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+libtest_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+
+$(OBJDIR)libtest.la: $(libtest_OBJS)
+	$(LIBTOOL) --mode=link $(CC) -o $(OBJDIR)libtest.la $(libtest_OBJS) -rpath $(LIBDIR) $(libtest_LDFLAGS)
+
+$(OBJDIR)test.o test.lo: test.c
+	$(LIBTOOL) --mode=compile $(CC) $(libtest_CFLAGS) -o $(OBJDIR)test.o -c test.c
+
+clean:
+	$(RM) -- $(libtest_OBJS)
+
+distclean: clean
+	$(RM) -- $(TARGETS)
+
+install: $(TARGETS)
+	$(MKDIR) $(DESTDIR)$(LIBDIR)
+	$(LIBTOOL) --mode=install $(INSTALL) -m 0755 $(OBJDIR)libtest.la $(DESTDIR)$(LIBDIR)/libtest.la
+	$(LIBTOOL) --mode=finish $(DESTDIR)/$(LIBDIR)
+
+uninstall:
+	$(LIBTOOL) --mode=uninstall $(RM) -- $(DESTDIR)$(LIBDIR)/libtest.la
+
+.PHONY: all clean distclean install uninstall

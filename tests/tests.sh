@@ -69,15 +69,19 @@ _tests()
 	$DATE
 	_test "Darwin" "binary"					|| ret=2
 	_test "Darwin" "library"				|| ret=2
+	_test "Darwin" "libtool"				|| ret=2
 	_test "Darwin" "plugin"					|| ret=2
 	_test "Linux" "library"					|| ret=2
+	_test "Linux" "libtool"					|| ret=2
 	_test "NetBSD" "binary"					|| ret=2
 	_test "NetBSD" "library"				|| ret=2
+	_test "NetBSD" "libtool"				|| ret=2
 	_test "NetBSD" "object"					|| ret=2
 	_test "NetBSD" "plugin"					|| ret=2
 	_test "NetBSD" "script"					|| ret=2
 	_test "Windows" "binary"				|| ret=2
 	_test "Windows" "library"				|| ret=2
+	_test "Windows" "libtool"				|| ret=2
 	return $ret
 }
 
