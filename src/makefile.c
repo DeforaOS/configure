@@ -1867,11 +1867,11 @@ static int _write_distcheck(Configure * configure, FILE * fp)
 		"\t$(TAR) -xzvf $(OBJDIR)$(PACKAGE)-$(VERSION).tar.gz\n"
 		"\t$(MKDIR) -- $(PACKAGE)-$(VERSION)/objdir\n"
 		"\t$(MKDIR) -- $(PACKAGE)-$(VERSION)/destdir\n";
-	const char target[] = "\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) OBJDIR=\"$$PWD/objdir/\")\n"
-		"\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) OBJDIR=\"$$PWD/objdir/\" DESTDIR=\"$$PWD/destdir\" install)\n"
-		"\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) OBJDIR=\"$$PWD/objdir/\" DESTDIR=\"$$PWD/destdir\" uninstall)\n"
-		"\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) OBJDIR=\"$$PWD/objdir/\" distclean)\n"
-		"\t(cd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) dist)\n";
+	const char target[] = "\tcd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) OBJDIR=\"$$PWD/objdir/\"\n"
+		"\tcd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) OBJDIR=\"$$PWD/objdir/\" DESTDIR=\"$$PWD/destdir\" install\n"
+		"\tcd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) OBJDIR=\"$$PWD/objdir/\" DESTDIR=\"$$PWD/destdir\" uninstall\n"
+		"\tcd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) OBJDIR=\"$$PWD/objdir/\" distclean\n"
+		"\tcd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) dist\n";
 	const char posttarget[] = "\t$(RM) -r -- $(PACKAGE)-$(VERSION)\n";
 
 	package = config_get(configure->config, NULL, "package");
