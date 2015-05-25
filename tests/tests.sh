@@ -77,6 +77,7 @@ _tests()
 	_test "NetBSD" "library"				|| ret=2
 	_test "NetBSD" "libtool"				|| ret=2
 	_test "NetBSD" "object"					|| ret=2
+	_test "NetBSD" "package"				|| ret=2
 	_test "NetBSD" "plugin"					|| ret=2
 	_test "NetBSD" "script"					|| ret=2
 	_test "Windows" "binary"				|| ret=2
