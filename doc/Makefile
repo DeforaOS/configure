@@ -31,7 +31,10 @@ $(OBJDIR)project.conf.html: project.conf.css.xml project.conf.xml manual.css.xml
 	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)project.conf.html"
 
 clean:
-	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) clean) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/" clean; \
+		else $(MAKE) clean; fi) || exit; done
 	$(RM) -- $(configure.1_OBJS) $(configure.html_OBJS) $(project.conf.5_OBJS) $(project.conf.html_OBJS)
 	./docbook.sh -c -P "$(PREFIX)" -- "configure.1"
 	./docbook.sh -c -P "$(PREFIX)" -- "configure.html"
@@ -39,7 +42,10 @@ clean:
 	./docbook.sh -c -P "$(PREFIX)" -- "project.conf.html"
 
 distclean:
-	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) distclean) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/" distclean; \
+		else $(MAKE) distclean; fi) || exit; done
 	$(RM) -- $(configure.1_OBJS) $(configure.html_OBJS) $(project.conf.5_OBJS) $(project.conf.html_OBJS)
 	./docbook.sh -c -P "$(PREFIX)" -- "configure.1"
 	./docbook.sh -c -P "$(PREFIX)" -- "configure.html"
@@ -48,14 +54,20 @@ distclean:
 	$(RM) -- $(TARGETS)
 
 install: $(TARGETS)
-	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) install) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/" install; \
+		else $(MAKE) install; fi) || exit; done
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)configure.1"
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)configure.html"
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)project.conf.5"
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)project.conf.html"
 
 uninstall:
-	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) uninstall) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/" uninstall; \
+		else $(MAKE) uninstall; fi) || exit; done
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "configure.1"
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "configure.html"
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "project.conf.5"
