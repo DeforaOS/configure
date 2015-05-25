@@ -2703,9 +2703,12 @@ static int _makefile_remove(FILE * fp, int recursive, ...)
 static int _makefile_subdirs(FILE * fp, char const * target)
 {
 	if(target != NULL)
-		_makefile_print(fp, "\t@for i in $(SUBDIRS); do"
-				" (cd \"$$i\" && $(MAKE) %s) || exit; done\n",
-				target);
+		_makefile_print(fp,
+				"\t@for i in $(SUBDIRS); do (cd \"$$i\" && \\\n"
+				"\t\tif [ -n \"$(OBJDIR)\" ]; then \\\n"
+				"\t\t$(MAKE) OBJDIR=\"$(OBJDIR)$$i/\" %s; \\\n"
+				"\t\telse $(MAKE) %s; fi) || exit; done\n",
+				target, target);
 	else
 		_makefile_print(fp, "%s",
 				"\t@for i in $(SUBDIRS); do (cd \"$$i\" && \\\n"
