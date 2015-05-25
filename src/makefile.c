@@ -2713,7 +2713,7 @@ static int _makefile_subdirs(FILE * fp, char const * target)
 				"\t\t([ -d \"$(OBJDIR)$$i\" ]"
 				" || $(MKDIR) -- \"$(OBJDIR)$$i\") && \\\n"
 				"\t\t$(MAKE) OBJDIR=\"$(OBJDIR)$$i/\"; \\\n"
-				"\t\telse $(MAKE); fi) || exit; done\n", fp);
+				"\t\telse $(MAKE); fi) || exit; done\n");
 	return 0;
 }
 
