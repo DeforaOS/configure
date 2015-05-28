@@ -30,6 +30,7 @@ PROGNAME="tests.sh"
 CONFIGURE="${OBJDIR}../src/configure"
 DATE="date"
 DIFF="diff"
+RM="rm"
 
 
 #functions
@@ -53,6 +54,7 @@ _test()
 	$CONFIGURE -O "$system" -- "$subdir" 2>&1		|| return 2
 	$DIFF -- "$subdir/Makefile.$system" "$subdir/Makefile" 2>&1
 	res=$?
+	$RM -- "$subdir/Makefile"
 	if [ $res -ne 0 ]; then
 		echo "$system $subdir: Failed with error code $res"
 		echo "$system $subdir: FAIL" 1>&2
