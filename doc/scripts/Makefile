@@ -28,6 +28,8 @@ install:
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 pkgconfig.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/pkgconfig.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
+	$(INSTALL) -m 0644 platform.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/platform.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 pylint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/pylint.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 shlint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/shlint.sh
@@ -44,6 +46,7 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/manual.css.xml
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/phplint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/pkgconfig.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/platform.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/pylint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/shlint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/subst.sh
