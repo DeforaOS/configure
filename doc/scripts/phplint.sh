@@ -25,6 +25,7 @@
 
 
 #variables
+PROGNAME="phplint.sh"
 #executables
 DEBUG="_debug"
 FIND="find"
@@ -47,7 +48,7 @@ _debug()
 #usage
 _usage()
 {
-	echo "Usage: phplint.sh [-c] target" 1>&2
+	echo "Usage: $PROGNAME [-c] target" 1>&2
 	return 1
 }
 

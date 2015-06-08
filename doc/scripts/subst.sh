@@ -34,6 +34,7 @@ LDSO=
 LIBDIR=
 LIBEXECDIR=
 MANDIR=
+PROGNAME="subst.sh"
 SYSCONFDIR=
 [ -f "$CONFIGSH" ] && . "$CONFIGSH"
 [ -z "$BINDIR" ] && BINDIR="$PREFIX/bin"
@@ -81,7 +82,7 @@ _debug()
 #error
 _error()
 {
-	echo "subst.sh: $@" 1>&2
+	echo "$PROGNAME: $@" 1>&2
 	return 2
 }
 
@@ -89,7 +90,7 @@ _error()
 #usage
 _usage()
 {
-	echo "Usage: subst.sh [-c|-i|-u][-P prefix] target..." 1>&2
+	echo "Usage: $PROGNAME [-c|-i|-u][-P prefix] target..." 1>&2
 	return 1
 }
 
