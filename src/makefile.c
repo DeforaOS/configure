@@ -588,12 +588,14 @@ static void _targets_cflags(Configure * configure, FILE * fp)
 	_makefile_output_variable(fp, "CPPFLAGSF", cppf);
 	_makefile_output_variable(fp, "CPPFLAGS", cpp);
 	p = NULL;
-	if(configure->os == HO_GNU_LINUX && string_find(cff, "-ansi"))
+	if(configure->os == HO_GNU_LINUX && cff != NULL
+			&& string_find(cff, "-ansi"))
 		p = string_new_append(cff, " -D _GNU_SOURCE");
 	_makefile_output_variable(fp, "CFLAGSF", (p != NULL) ? p : cff);
 	string_delete(p);
 	p = NULL;
-	if(configure->os == HO_GNU_LINUX && string_find(cf, "-ansi"))
+	if(configure->os == HO_GNU_LINUX && cf != NULL
+			&& string_find(cf, "-ansi"))
 		p = string_new_append(cf, " -D _GNU_SOURCE");
 	_makefile_output_variable(fp, "CFLAGS", (p != NULL) ? p : cf);
 	string_delete(p);
