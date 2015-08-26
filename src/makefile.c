@@ -48,6 +48,7 @@
 static int _makefile_is_phony(Configure * configure, char const * target);
 
 /* useful */
+static int _makefile_expand(FILE * fp, char const * field);
 static int _makefile_link(FILE * fp, int symlink, char const * link,
 		char const * path);
 static int _makefile_output_variable(FILE * fp, char const * name,
@@ -1044,7 +1045,6 @@ static int _target_binary(Configure * configure, FILE * fp,
 		String const * target)
 {
 	String const * p;
-	String * q;
 
 	if(_target_objs(configure, fp, target) != 0)
 		return 1;
@@ -1055,18 +1055,9 @@ static int _target_binary(Configure * configure, FILE * fp,
 	_makefile_print(fp, "%s%s%s%s%s%s", "$(OBJDIR)", target,
 			(configure->os == HO_WIN32) ? "$(EXEEXT)" : "",
 			": $(", target, "_OBJS)");
-	/* XXX code duplication */
-	if((p = config_get(configure->config, target, "depends")) != NULL)
-	{
-		if((q = string_new(p)) == NULL
-				|| string_replace(&q, ",", " ") != 0)
-		{
-			string_delete(q);
-			return error_print(PROGNAME);
-		}
-		_makefile_print(fp, " %s", q);
-		string_delete(q);
-	}
+	if((p = config_get(configure->config, target, "depends")) != NULL
+			&& _makefile_expand(fp, p) != 0)
+		return error_print(PROGNAME);
 	_makefile_print(fp, "%c", '\n');
 	/* build the binary */
 	_makefile_print(fp, "%s%s%s%s%s%s%s%s", "\t$(CC) -o $(OBJDIR)", target,
@@ -1235,18 +1226,9 @@ static int _target_library(Configure * configure, FILE * fp,
 	else
 		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
 				".0: $(", target, "_OBJS)");
-	/* XXX code duplication */
-	if((p = config_get(configure->config, target, "depends")) != NULL)
-	{
-		if((q = string_new(p)) == NULL
-				|| string_replace(&q, ",", " ") != 0)
-		{
-			string_delete(q);
-			return error_print(PROGNAME);
-		}
-		_makefile_print(fp, " %s", q);
-		string_delete(q);
-	}
+	if((p = config_get(configure->config, target, "depends")) != NULL
+			&& _makefile_expand(fp, p) != 0)
+		return error_print(PROGNAME);
 	_makefile_print(fp, "%c", '\n');
 	/* build the shared library */
 	_makefile_print(fp, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname,
@@ -1309,18 +1291,9 @@ static int _target_library_static(Configure * configure, FILE * fp,
 
 	_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
 			".a: $(", target, "_OBJS)");
-	/* XXX code duplication */
-	if((p = config_get(configure->config, target, "depends")) != NULL)
-	{
-		if((q = string_new(p)) == NULL
-				|| string_replace(&q, ",", " ") != 0)
-		{
-			string_delete(q);
-			return error_print(PROGNAME);
-		}
-		_makefile_print(fp, " %s", q);
-		string_delete(q);
-	}
+	if((p = config_get(configure->config, target, "depends")) != NULL
+			&& _makefile_expand(fp, p) != 0)
+		return error_print(PROGNAME);
 	_makefile_print(fp, "%c", '\n');
 	/* build the static library */
 	_makefile_print(fp, "%s%s%s%s%s",
@@ -1435,18 +1408,9 @@ static int _target_plugin(Configure * configure, FILE * fp,
 	soext = configure_get_soext(configure);
 	_makefile_print(fp, "%s%s%s%s%s%s", "\n$(OBJDIR)", target,
 			soext, ": $(", target, "_OBJS)");
-	/* XXX code duplication */
-	if((p = config_get(configure->config, target, "depends")) != NULL)
-	{
-		if((q = string_new(p)) == NULL
-				|| string_replace(&q, ",", " ") != 0)
-		{
-			string_delete(q);
-			return error_print(PROGNAME);
-		}
-		_makefile_print(fp, " %s", q);
-		string_delete(q);
-	}
+	if((p = config_get(configure->config, target, "depends")) != NULL
+			&& _makefile_expand(fp, p) != 0)
+		return error_print(PROGNAME);
 	_makefile_print(fp, "%c", '\n');
 	/* build the plug-in */
 	_makefile_print(fp, "%s%s%s%s%s%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)",
@@ -1530,20 +1494,10 @@ static int _script_depends(Configure * configure, FILE * fp,
 {
 	Config * config = configure->config;
 	String const * p;
-	String * q;
 
-	/* XXX code duplication */
-	if((p = config_get(config, target, "depends")) != NULL)
-	{
-		if((q = string_new(p)) == NULL
-				|| string_replace(&q, ",", " ") != 0)
-		{
-			string_delete(q);
-			return error_print(PROGNAME);
-		}
-		_makefile_print(fp, " %s", q);
-		string_delete(q);
-	}
+	if((p = config_get(config, target, "depends")) != NULL
+			&& _makefile_expand(fp, p) != 0)
+		return error_print(PROGNAME);
 	return 0;
 }
 
@@ -1726,20 +1680,10 @@ static int _source_depends(Configure * configure, FILE * fp,
 {
 	Config * config = configure->config;
 	String const * p;
-	String * q;
 
-	/* XXX code duplication */
-	if((p = config_get(config, target, "depends")) != NULL)
-	{
-		if((q = string_new(p)) == NULL
-				|| string_replace(&q, ",", " ") != 0)
-		{
-			string_delete(q);
-			return error_print(PROGNAME);
-		}
-		_makefile_print(fp, " %s", q);
-		string_delete(q);
-	}
+	if((p = config_get(config, target, "depends")) != NULL
+			&& _makefile_expand(fp, p) != 0)
+		return error_print(PROGNAME);
 	return 0;
 }
 
@@ -2649,6 +2593,25 @@ static int _makefile_is_phony(Configure * configure, char const * target)
 			&& strtol(p, NULL, 10) == 1)
 		return 1;
 	return 0;
+}
+
+
+/* useful */
+/* makefile_expand */
+static int _makefile_expand(FILE * fp, char const * field)
+{
+	String * q;
+	int res;
+
+	if((q = string_new(field)) == NULL
+			|| string_replace(&q, ",", " ") != 0)
+	{
+		string_delete(q);
+		return -1;
+	}
+	res = _makefile_print(fp, " %s", q);
+	string_delete(q);
+	return (res >= 0) ? 0 : -1;
 }
 
 
