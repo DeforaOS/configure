@@ -15,7 +15,7 @@ all: $(TARGETS)
 object.o_OBJS = $(OBJDIR)object.o
 object.o_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 
-$(OBJDIR)object.o: object.c
+$(OBJDIR)object.o: object.c a.c b.c
 	$(CC) $(object.o_CFLAGS) -o $(OBJDIR)object.o -c object.c
 
 clean:

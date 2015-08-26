@@ -13,7 +13,7 @@ all: $(TARGETS)
 $(OBJDIR)test:
 	./script.sh -P "/somewhere/else" -- "$(OBJDIR)test"
 
-phony:
+phony: a.c b.c
 	./script.sh -P "$(PREFIX)" -- "phony"
 
 clean:

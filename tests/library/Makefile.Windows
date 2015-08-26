@@ -18,7 +18,7 @@ libtest_OBJS = $(OBJDIR)test.o
 libtest_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 libtest_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-$(OBJDIR)libtest.dll: $(libtest_OBJS)
+$(OBJDIR)libtest.dll: $(libtest_OBJS) a.c b.c
 	$(CCSHARED) -o $(OBJDIR)libtest.dll $(libtest_OBJS) $(libtest_LDFLAGS)
 
 $(OBJDIR)test.o: test.c

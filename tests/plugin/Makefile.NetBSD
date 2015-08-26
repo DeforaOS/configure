@@ -18,7 +18,7 @@ test_OBJS = $(OBJDIR)test.o
 test_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 test_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-$(OBJDIR)test.so: $(test_OBJS)
+$(OBJDIR)test.so: $(test_OBJS) a.c b.c
 	$(CCSHARED) -o $(OBJDIR)test.so $(test_OBJS) $(test_LDFLAGS)
 
 $(OBJDIR)test.o: test.c
