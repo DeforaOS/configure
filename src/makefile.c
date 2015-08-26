@@ -56,8 +56,10 @@ static int _makefile_print(FILE * fp, char const * format, ...);
 static int _makefile_remove(FILE * fp, int recursive, ...);
 static int _makefile_subdirs(FILE * fp, char const * target);
 static int _makefile_target(FILE * fp, char const * target, ...);
+#ifdef WITH_UNUSED
 static int _makefile_targetv(FILE * fp, char const * target,
 		char const ** depends);
+#endif
 
 
 /* functions */
@@ -2742,6 +2744,7 @@ static int _makefile_target(FILE * fp, char const * target, ...)
 }
 
 
+#ifdef WITH_UNUSED
 /* makefile_targetv */
 static int _makefile_targetv(FILE * fp, char const * target,
 		char const ** depends)
@@ -2757,3 +2760,4 @@ static int _makefile_targetv(FILE * fp, char const * target,
 	_makefile_print(fp, "%c", '\n');
 	return 0;
 }
+#endif
