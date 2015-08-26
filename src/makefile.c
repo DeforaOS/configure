@@ -1055,6 +1055,7 @@ static int _target_binary(Configure * configure, FILE * fp,
 	_makefile_print(fp, "%s%s%s%s%s%s", "$(OBJDIR)", target,
 			(configure->os == HO_WIN32) ? "$(EXEEXT)" : "",
 			": $(", target, "_OBJS)");
+	/* XXX code duplication */
 	if((p = config_get(configure->config, target, "depends")) != NULL)
 	{
 		if((q = string_new(p)) == NULL
@@ -1234,10 +1235,21 @@ static int _target_library(Configure * configure, FILE * fp,
 	else
 		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
 				".0: $(", target, "_OBJS)");
+	/* XXX code duplication */
 	if((p = config_get(configure->config, target, "depends")) != NULL)
-		_makefile_print(fp, " %s", p);
+	{
+		if((q = string_new(p)) == NULL
+				|| string_replace(&q, ",", " ") != 0)
+		{
+			string_delete(q);
+			return error_print(PROGNAME);
+		}
+		_makefile_print(fp, " %s", q);
+		string_delete(q);
+	}
+	_makefile_print(fp, "%c", '\n');
 	/* build the shared library */
-	_makefile_print(fp, "%s%s%s", "\n\t$(CCSHARED) -o $(OBJDIR)", soname,
+	_makefile_print(fp, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname,
 			(configure->os != HO_MACOSX
 			 && configure->os != HO_WIN32) ? ".0" : "");
 	if((p = config_get(configure->config, target, "install")) != NULL)
@@ -1297,10 +1309,22 @@ static int _target_library_static(Configure * configure, FILE * fp,
 
 	_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
 			".a: $(", target, "_OBJS)");
+	/* XXX code duplication */
 	if((p = config_get(configure->config, target, "depends")) != NULL)
-		_makefile_print(fp, " %s", p);
+	{
+		if((q = string_new(p)) == NULL
+				|| string_replace(&q, ",", " ") != 0)
+		{
+			string_delete(q);
+			return error_print(PROGNAME);
+		}
+		_makefile_print(fp, " %s", q);
+		string_delete(q);
+	}
+	_makefile_print(fp, "%c", '\n');
+	/* build the static library */
 	_makefile_print(fp, "%s%s%s%s%s",
-			"\n\t$(AR) -rc $(OBJDIR)", target, ".a $(",
+			"\t$(AR) -rc $(OBJDIR)", target, ".a $(",
 			target, "_OBJS)");
 	len = strlen(target) + 3;
 	if((q = malloc(len)) == NULL)
@@ -1411,10 +1435,21 @@ static int _target_plugin(Configure * configure, FILE * fp,
 	soext = configure_get_soext(configure);
 	_makefile_print(fp, "%s%s%s%s%s%s", "\n$(OBJDIR)", target,
 			soext, ": $(", target, "_OBJS)");
+	/* XXX code duplication */
 	if((p = config_get(configure->config, target, "depends")) != NULL)
-		_makefile_print(fp, " %s", p);
+	{
+		if((q = string_new(p)) == NULL
+				|| string_replace(&q, ",", " ") != 0)
+		{
+			string_delete(q);
+			return error_print(PROGNAME);
+		}
+		_makefile_print(fp, " %s", q);
+		string_delete(q);
+	}
+	_makefile_print(fp, "%c", '\n');
 	/* build the plug-in */
-	_makefile_print(fp, "%s%s%s%s%s%s%s%s", "\n\t$(CCSHARED) -o $(OBJDIR)",
+	_makefile_print(fp, "%s%s%s%s%s%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)",
 			target, soext, " $(", target, "_OBJS) $(", target,
 			"_LDFLAGS)");
 	if((q = malloc(strlen(target) + strlen(soext) + 1)) != NULL)
@@ -1495,30 +1530,20 @@ static int _script_depends(Configure * configure, FILE * fp,
 {
 	Config * config = configure->config;
 	String const * p;
-	String * depends;
 	String * q;
-	size_t i;
-	char c;
 
 	/* XXX code duplication */
-	if((p = config_get(config, target, "depends")) == NULL)
-		return 0;
-	if((depends = string_new(p)) == NULL)
-		return 1;
-	q = depends;
-	for(i = 0;; i++)
+	if((p = config_get(config, target, "depends")) != NULL)
 	{
-		if(depends[i] != ',' && depends[i] != '\0')
-			continue;
-		c = depends[i];
-		depends[i] = '\0';
-		_makefile_print(fp, " %s", depends);
-		if(c == '\0')
-			break;
-		depends += i + 1;
-		i = 0;
+		if((q = string_new(p)) == NULL
+				|| string_replace(&q, ",", " ") != 0)
+		{
+			string_delete(q);
+			return error_print(PROGNAME);
+		}
+		_makefile_print(fp, " %s", q);
+		string_delete(q);
 	}
-	string_delete(q);
 	return 0;
 }
 
@@ -1701,29 +1726,20 @@ static int _source_depends(Configure * configure, FILE * fp,
 {
 	Config * config = configure->config;
 	String const * p;
-	String * depends;
 	String * q;
-	size_t i;
-	char c;
 
-	if((p = config_get(config, target, "depends")) == NULL)
-		return 0;
-	if((depends = string_new(p)) == NULL)
-		return 1;
-	q = depends;
-	for(i = 0;; i++)
+	/* XXX code duplication */
+	if((p = config_get(config, target, "depends")) != NULL)
 	{
-		if(depends[i] != ',' && depends[i] != '\0')
-			continue;
-		c = depends[i];
-		depends[i] = '\0';
-		_makefile_print(fp, " %s", depends);
-		if(c == '\0')
-			break;
-		depends += i + 1;
-		i = 0;
+		if((q = string_new(p)) == NULL
+				|| string_replace(&q, ",", " ") != 0)
+		{
+			string_delete(q);
+			return error_print(PROGNAME);
+		}
+		_makefile_print(fp, " %s", q);
+		string_delete(q);
 	}
-	string_delete(q);
 	return 0;
 }
 
