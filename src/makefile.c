@@ -556,13 +556,16 @@ static void _targets_asflags(Configure * configure, FILE * fp)
 {
 	String const * as;
 	String const * asf;
+	String const * asff;
 
 	as = config_get(configure->config, NULL, "as");
+	asff = config_get(configure->config, NULL, "asflags_force");
 	asf = config_get(configure->config, NULL, "asflags");
-	if(as != NULL || asf != NULL)
+	if(as != NULL || asff != NULL || asf != NULL)
 	{
 		_makefile_output_variable(fp, "AS", (as != NULL) ? as
 				: configure->programs.as);
+		_makefile_output_variable(fp, "ASFLAGSF", asff);
 		_makefile_output_variable(fp, "ASFLAGS", asf);
 	}
 }
@@ -1144,7 +1147,7 @@ static void _flags_asm(Configure * configure, FILE * fp, String const * target)
 	String const * p;
 
 	_makefile_print(fp, "%s%s", target, "_ASFLAGS = $(CPPFLAGSF)"
-			" $(CPPFLAGS) $(ASFLAGS)");
+			" $(CPPFLAGS) $(ASFLAGSF) $(ASFLAGS)");
 	if((p = config_get(configure->config, target, "asflags")) != NULL)
 		_makefile_print(fp, " %s", p);
 	_makefile_print(fp, "%c", '\n');
@@ -1358,7 +1361,8 @@ static int _target_object(Configure * configure, FILE * fp,
 		case OT_ASM_SOURCE:
 			_makefile_print(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
 					"$(OBJDIR)", target, target, "_ASFLAGS ="
-					" $(CPPFLAGSF) $(CPPFLAGS) $(ASFLAGS)");
+					" $(CPPFLAGSF) $(CPPFLAGS) $(ASFLAGSF)"
+					" $(ASFLAGS)");
 			if((p = config_get(configure->config, target,
 							"asflags")) != NULL)
 				_makefile_print(fp, " %s", p);
