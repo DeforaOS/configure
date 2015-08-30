@@ -27,6 +27,9 @@
 		</authorgroup>
 		<copyright>
 			<year>2012</year>
+			<year>2013</year>
+			<year>2014</year>
+			<year>2015</year>
 			<holder>&firstname; &surname; &lt;&email;&gt;</holder>
 		</copyright>
 		<legalnotice>
@@ -49,9 +52,15 @@
 		<cmdsynopsis>
 			<command>&name;</command>
 			<arg choice="opt"><option>-n</option></arg>
-			<arg choice="opt"><option>-v</option></arg>
 			<arg choice="opt"><option>-S</option></arg>
-			<arg choice="opt" rep="repeat"><option>options</option></arg>
+			<arg choice="opt"><option>-v</option></arg>
+			<arg choice="opt"><option>-b</option> <replaceable>bindir</replaceable></arg>
+			<arg choice="opt"><option>-d</option> <replaceable>destdir</replaceable></arg>
+			<arg choice="opt"><option>-i</option> <replaceable>includedir</replaceable></arg>
+			<arg choice="opt"><option>-l</option> <replaceable>libdir</replaceable></arg>
+			<arg choice="opt"><option>-O</option> <replaceable>system</replaceable></arg>
+			<arg choice="opt"><option>-p</option> <replaceable>prefix</replaceable></arg>
+			<arg choice="opt"><option>-s</option> <replaceable>sbindir</replaceable></arg>
 			<arg rep="repeat"><replaceable>directory</replaceable></arg>
 		</cmdsynopsis>
 	</refsynopsisdiv>
@@ -73,6 +82,30 @@
 		<para>The following options are available:</para>
 		<variablelist>
 			<varlistentry>
+				<term><option>-b</option></term>
+				<listitem>
+					<para>Where to install regular executables (BINDIR)</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>-d</option></term>
+				<listitem>
+					<para>Where to stage the installation (DESTDIR)</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>-i</option></term>
+				<listitem>
+					<para>Where to install header files (INCLUDEDIR)</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>-l</option></term>
+				<listitem>
+					<para>Where to install libraries (LIBDIR)</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
 				<term><option>-n</option></term>
 				<listitem>
 					<para>This option just parses the project definition files, without
@@ -80,16 +113,28 @@
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>-v</option></term>
+				<term><option>-O</option></term>
 				<listitem>
-					<para>This option gives information about the progress of the
-						operation.</para>
+					<para>Force a specific platform, bypassing auto-detection.</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>-p</option></term>
+				<listitem>
+					<para>Where to base the package installation (PREFIX)</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
 				<term><option>-S</option></term>
 				<listitem>
 					<para>This option warns about potential security risks.</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>-v</option></term>
+				<listitem>
+					<para>This option gives information about the progress of the
+						operation.</para>
 				</listitem>
 			</varlistentry>
 		</variablelist>
