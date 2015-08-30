@@ -83,7 +83,8 @@ static int _usage(void)
 
 	_prefs_init(&prefs);
 	fprintf(stderr, "%s%s%s%s%s%s%s%s%s%s%s",
-"Usage: configure [-nvS][options...][directory...]\n"
+"Usage: configure [-nSv][-b bindir][-d destdir][-l libdir][-O system][-p prefix]\n"
+"       [-s sbindir][directory...]\n"
 "  -n	Do not actually write Makefiles\n"
 "  -v	Verbose mode\n"
 "  -b	Binary files directory (default: \"", prefs.bindir, "\")\n"
