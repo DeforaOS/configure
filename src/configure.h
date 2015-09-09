@@ -149,6 +149,7 @@ typedef struct _Configure
 	HostKernel kernel;
 	struct
 	{
+		char const * exeext;
 		char const * soext;
 	} extensions;
 	struct
@@ -177,6 +178,7 @@ int configure_can_library_static(Configure * configure);
 
 String const * configure_get_config(Configure * configure,
 		String const * section, String const * variable);
+String const * configure_get_exeext(Configure * configure);
 String const * configure_get_soext(Configure * configure);
 
 /* useful */

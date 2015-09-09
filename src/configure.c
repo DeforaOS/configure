@@ -281,6 +281,7 @@ static HostKernel _detect_kernel(HostOS os, char const * release)
 
 static void _configure_detect_extensions(Configure * configure)
 {
+	configure->extensions.exeext = "";
 	configure->extensions.soext = ".so";
 	/* platform-specific */
 	switch(configure->os)
@@ -289,6 +290,7 @@ static void _configure_detect_extensions(Configure * configure)
 			configure->extensions.soext = ".dylib";
 			break;
 		case HO_WIN32:
+			configure->extensions.exeext = ".exe";
 			configure->extensions.soext = ".dll";
 			break;
 		default:
@@ -451,6 +453,13 @@ String const * configure_get_config(Configure * configure,
 		String const * section, String const * variable)
 {
 	return config_get(configure->config, section, variable);
+}
+
+
+/* configure_get_exeext */
+String const * configure_get_exeext(Configure * configure)
+{
+	return configure->extensions.exeext;
 }
 
 

@@ -641,7 +641,8 @@ static void _targets_cxxflags(Configure * configure, FILE * fp)
 static void _targets_exeext(Configure * configure, FILE * fp)
 {
 	if(configure->os == HO_WIN32)
-		_makefile_print(fp, "%s", "EXEEXT\t= .exe\n");
+		_makefile_output_variable(fp, "EXEEXT",
+				configure_get_exeext(configure));
 }
 
 static void _targets_ldflags(Configure * configure, FILE * fp)
