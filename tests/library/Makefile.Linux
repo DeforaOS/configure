@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)libtest.a $(OBJDIR)libtest.so.0.0 $(OBJDIR)libtest.so.0 $(OBJDIR)libtest.so
+TARGETS	= $(OBJDIR)libtest.a $(OBJDIR)libtest$(SOEXT).0.0 $(OBJDIR)libtest$(SOEXT).0 $(OBJDIR)libtest$(SOEXT)
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -25,14 +25,14 @@ $(OBJDIR)libtest.a: $(libtest_OBJS) a.c b.c
 	$(AR) -rc $(OBJDIR)libtest.a $(libtest_OBJS)
 	$(RANLIB) $(OBJDIR)libtest.a
 
-$(OBJDIR)libtest.so.0.0: $(libtest_OBJS) a.c b.c
-	$(CCSHARED) -o $(OBJDIR)libtest.so.0.0 -Wl,-soname,libtest.so.0 $(libtest_OBJS) $(libtest_LDFLAGS)
+$(OBJDIR)libtest$(SOEXT).0.0: $(libtest_OBJS) a.c b.c
+	$(CCSHARED) -o $(OBJDIR)libtest$(SOEXT).0.0 -Wl,-soname,libtest$(SOEXT).0 $(libtest_OBJS) $(libtest_LDFLAGS)
 
-$(OBJDIR)libtest.so.0: $(OBJDIR)libtest.so.0.0
-	$(LN) -s -- libtest.so.0.0 $(OBJDIR)libtest.so.0
+$(OBJDIR)libtest$(SOEXT).0: $(OBJDIR)libtest$(SOEXT).0.0
+	$(LN) -s -- libtest$(SOEXT).0.0 $(OBJDIR)libtest$(SOEXT).0
 
-$(OBJDIR)libtest.so: $(OBJDIR)libtest.so.0.0
-	$(LN) -s -- libtest.so.0.0 $(OBJDIR)libtest.so
+$(OBJDIR)libtest$(SOEXT): $(OBJDIR)libtest$(SOEXT).0.0
+	$(LN) -s -- libtest$(SOEXT).0.0 $(OBJDIR)libtest$(SOEXT)
 
 $(OBJDIR)test.o: test.c
 	$(CC) $(libtest_CFLAGS) -o $(OBJDIR)test.o -c test.c
@@ -46,14 +46,14 @@ distclean: clean
 install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
 	$(INSTALL) -m 0644 $(OBJDIR)libtest.a $(DESTDIR)$(LIBDIR)/libtest.a
-	$(INSTALL) -m 0755 $(OBJDIR)libtest.so.0.0 $(DESTDIR)$(LIBDIR)/libtest.so.0.0
-	$(LN) -s -- libtest.so.0.0 $(DESTDIR)$(LIBDIR)/libtest.so.0
-	$(LN) -s -- libtest.so.0.0 $(DESTDIR)$(LIBDIR)/libtest.so
+	$(INSTALL) -m 0755 $(OBJDIR)libtest$(SOEXT).0.0 $(DESTDIR)$(LIBDIR)/libtest$(SOEXT).0.0
+	$(LN) -s -- libtest$(SOEXT).0.0 $(DESTDIR)$(LIBDIR)/libtest$(SOEXT).0
+	$(LN) -s -- libtest$(SOEXT).0.0 $(DESTDIR)$(LIBDIR)/libtest$(SOEXT)
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.a
-	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.so.0.0
-	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.so.0
-	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.so
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest$(SOEXT).0.0
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest$(SOEXT).0
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest$(SOEXT)
 
 .PHONY: all clean distclean install uninstall

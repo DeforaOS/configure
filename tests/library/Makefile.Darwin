@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)libtest.a $(OBJDIR)libtest.0.0.dylib $(OBJDIR)libtest.0.dylib $(OBJDIR)libtest.dylib
+TARGETS	= $(OBJDIR)libtest.a $(OBJDIR)libtest.0.0$(SOEXT) $(OBJDIR)libtest.0$(SOEXT) $(OBJDIR)libtest$(SOEXT)
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -25,14 +25,14 @@ $(OBJDIR)libtest.a: $(libtest_OBJS) a.c b.c
 	$(AR) -rc $(OBJDIR)libtest.a $(libtest_OBJS)
 	$(RANLIB) $(OBJDIR)libtest.a
 
-$(OBJDIR)libtest.0.0.dylib: $(libtest_OBJS) a.c b.c
-	$(CCSHARED) -o $(OBJDIR)libtest.0.0.dylib -install_name $(LIBDIR)/libtest.0.dylib $(libtest_OBJS) $(libtest_LDFLAGS)
+$(OBJDIR)libtest.0.0$(SOEXT): $(libtest_OBJS) a.c b.c
+	$(CCSHARED) -o $(OBJDIR)libtest.0.0$(SOEXT) -install_name $(LIBDIR)/libtest.0$(SOEXT) $(libtest_OBJS) $(libtest_LDFLAGS)
 
-$(OBJDIR)libtest.0.dylib: $(OBJDIR)libtest.0.0.dylib
-	$(LN) -s -- libtest.0.0.dylib $(OBJDIR)libtest.0.dylib
+$(OBJDIR)libtest.0$(SOEXT): $(OBJDIR)libtest.0.0$(SOEXT)
+	$(LN) -s -- libtest.0.0$(SOEXT) $(OBJDIR)libtest.0$(SOEXT)
 
-$(OBJDIR)libtest.dylib: $(OBJDIR)libtest.0.0.dylib
-	$(LN) -s -- libtest.0.0.dylib $(OBJDIR)libtest.dylib
+$(OBJDIR)libtest$(SOEXT): $(OBJDIR)libtest.0.0$(SOEXT)
+	$(LN) -s -- libtest.0.0$(SOEXT) $(OBJDIR)libtest$(SOEXT)
 
 $(OBJDIR)test.o: test.c
 	$(CC) $(libtest_CFLAGS) -o $(OBJDIR)test.o -c test.c
@@ -46,14 +46,14 @@ distclean: clean
 install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
 	$(INSTALL) -m 0644 $(OBJDIR)libtest.a $(DESTDIR)$(LIBDIR)/libtest.a
-	$(INSTALL) -m 0755 $(OBJDIR)libtest.0.0.dylib $(DESTDIR)$(LIBDIR)/libtest.0.0.dylib
-	$(LN) -s -- libtest.0.0.dylib $(DESTDIR)$(LIBDIR)/libtest.0.dylib
-	$(LN) -s -- libtest.0.0.dylib $(DESTDIR)$(LIBDIR)/libtest.dylib
+	$(INSTALL) -m 0755 $(OBJDIR)libtest.0.0$(SOEXT) $(DESTDIR)$(LIBDIR)/libtest.0.0$(SOEXT)
+	$(LN) -s -- libtest.0.0$(SOEXT) $(DESTDIR)$(LIBDIR)/libtest.0$(SOEXT)
+	$(LN) -s -- libtest.0.0$(SOEXT) $(DESTDIR)$(LIBDIR)/libtest$(SOEXT)
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.a
-	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.0.0.dylib
-	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.0.dylib
-	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.dylib
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.0.0$(SOEXT)
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.0$(SOEXT)
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest$(SOEXT)
 
 .PHONY: all clean distclean install uninstall

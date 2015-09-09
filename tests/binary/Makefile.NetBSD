@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)test $(OBJDIR)test2
+TARGETS	= $(OBJDIR)test$(EXEEXT) $(OBJDIR)test2$(EXEEXT)
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -17,15 +17,15 @@ test_OBJS = $(OBJDIR)test.o $(OBJDIR)main.o
 test_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 test_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-$(OBJDIR)test: $(test_OBJS)
-	$(CC) -o $(OBJDIR)test $(test_OBJS) $(test_LDFLAGS)
+$(OBJDIR)test$(EXEEXT): $(test_OBJS)
+	$(CC) -o $(OBJDIR)test$(EXEEXT) $(test_OBJS) $(test_LDFLAGS)
 
 test2_OBJS = $(OBJDIR)test.o
 test2_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 test2_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) -lobjc
 
-$(OBJDIR)test2: $(test2_OBJS)
-	$(CC) -o $(OBJDIR)test2 $(test2_OBJS) $(test2_LDFLAGS)
+$(OBJDIR)test2$(EXEEXT): $(test2_OBJS)
+	$(CC) -o $(OBJDIR)test2$(EXEEXT) $(test2_OBJS) $(test2_LDFLAGS)
 
 $(OBJDIR)test.o: test.c
 	$(CC) $(test_CFLAGS) -o $(OBJDIR)test.o -c test.c
@@ -44,9 +44,9 @@ distclean: clean
 
 install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 0755 $(OBJDIR)test $(DESTDIR)$(BINDIR)/test
+	$(INSTALL) -m 0755 $(OBJDIR)test$(EXEEXT) $(DESTDIR)$(BINDIR)/test$(EXEEXT)
 
 uninstall:
-	$(RM) -- $(DESTDIR)$(BINDIR)/test
+	$(RM) -- $(DESTDIR)$(BINDIR)/test$(EXEEXT)
 
 .PHONY: all clean distclean install uninstall

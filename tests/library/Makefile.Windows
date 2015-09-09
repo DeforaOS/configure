@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)libtest.dll
+TARGETS	= $(OBJDIR)libtest$(SOEXT)
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -19,8 +19,8 @@ libtest_OBJS = $(OBJDIR)test.o
 libtest_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 libtest_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-$(OBJDIR)libtest.dll: $(libtest_OBJS) a.c b.c
-	$(CCSHARED) -o $(OBJDIR)libtest.dll $(libtest_OBJS) $(libtest_LDFLAGS)
+$(OBJDIR)libtest$(SOEXT): $(libtest_OBJS) a.c b.c
+	$(CCSHARED) -o $(OBJDIR)libtest$(SOEXT) $(libtest_OBJS) $(libtest_LDFLAGS)
 
 $(OBJDIR)test.o: test.c
 	$(CC) $(libtest_CFLAGS) -o $(OBJDIR)test.o -c test.c
@@ -33,9 +33,9 @@ distclean: clean
 
 install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
-	$(INSTALL) -m 0755 $(OBJDIR)libtest.dll $(DESTDIR)$(LIBDIR)/libtest.dll
+	$(INSTALL) -m 0755 $(OBJDIR)libtest$(SOEXT) $(DESTDIR)$(LIBDIR)/libtest$(SOEXT)
 
 uninstall:
-	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.dll
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest$(SOEXT)
 
 .PHONY: all clean distclean install uninstall
