@@ -4,6 +4,7 @@ PREFIX	= /usr/local
 DESTDIR	=
 BINDIR	= $(PREFIX)/bin
 SBINDIR	= $(PREFIX)/sbin
+EXEEXT	=
 RM	= rm -f
 LN	= ln -f
 MKDIR	= mkdir -m 0755 -p

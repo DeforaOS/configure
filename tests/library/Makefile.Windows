@@ -6,6 +6,7 @@ LIBDIR	= $(PREFIX)/lib
 LDFLAGS	=  -lintl  -ltest -lws2_32
 EXEEXT	= .exe
 CCSHARED= $(CC) -shared -Wl,-no-undefined -Wl,--enable-runtime-pseudo-reloc
+SOEXT	= .dll
 RM	= rm -f
 LN	= ln -f
 MKDIR	= mkdir -m 0755 -p
