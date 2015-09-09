@@ -285,7 +285,6 @@ static int _variables_targets(Configure * configure, FILE * fp)
 	int ret = 0;
 	String const * p;
 	String * prints;
-	String const * soext;
 	String * q;
 	size_t i;
 	char c;
@@ -296,7 +295,6 @@ static int _variables_targets(Configure * configure, FILE * fp)
 		return 0;
 	if((prints = string_new(p)) == NULL)
 		return 1;
-	soext = configure_get_soext(configure);
 	q = prints;
 	_makefile_print(fp, "%s", "TARGETS\t=");
 	for(i = 0;; i++)
@@ -312,11 +310,9 @@ static int _variables_targets(Configure * configure, FILE * fp)
 			switch(enum_string(TT_LAST, sTargetType, type))
 			{
 				case TT_BINARY:
-					_makefile_print(fp, " $(OBJDIR)%s",
+					_makefile_print(fp,
+							" $(OBJDIR)%s$(EXEEXT)",
 							prints);
-					if(configure->os == HO_WIN32)
-						_makefile_print(fp, "%s",
-								"$(EXEEXT)");
 					break;
 				case TT_LIBRARY:
 					ret |= _variables_targets_library(
@@ -339,9 +335,9 @@ static int _variables_targets(Configure * configure, FILE * fp)
 							prints);
 					break;
 				case TT_PLUGIN:
-					_makefile_print(fp, " $(OBJDIR)%s%s",
-							prints,
-							soext);
+					_makefile_print(fp,
+							" $(OBJDIR)%s$(SOEXT)",
+							prints);
 					break;
 			}
 		if(c == '\0')
@@ -357,36 +353,34 @@ static int _variables_targets(Configure * configure, FILE * fp)
 static int _variables_targets_library(Configure * configure, FILE * fp,
 		char const * target)
 {
-	String const * soext;
 	String * soname;
 	String const * p;
 
-	soext = configure_get_soext(configure);
 	if((p = config_get(configure->config, target, "soname")) != NULL)
 		soname = string_new(p);
 	else if(configure->os == HO_MACOSX)
 		/* versioning is different on MacOS X */
-		soname = string_new_append(target, ".0.0", soext, NULL);
+		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
 	else if(configure->os == HO_WIN32)
 		/* and on Windows */
-		soname = string_new_append(target, soext, NULL);
+		soname = string_new_append(target, "$(SOEXT)", NULL);
 	else
-		soname = string_new_append(target, soext, ".0", NULL);
+		soname = string_new_append(target, "$(SOEXT)", ".0", NULL);
 	if(soname == NULL)
 		return 1;
 	if(configure_can_library_static(configure))
 		/* generate a static library */
 		_makefile_print(fp, "%s%s%s", " $(OBJDIR)", target, ".a");
 	if(configure->os == HO_MACOSX)
-		_makefile_print(fp, "%s%s%s%s%s%s%s%s%s", " $(OBJDIR)", soname,
-				" $(OBJDIR)", target, ".0", soext, " $(OBJDIR)",
-				target, soext);
+		_makefile_print(fp, "%s%s%s%s%s%s%s", " $(OBJDIR)", soname,
+				" $(OBJDIR)", target, ".0$(SOEXT) $(OBJDIR)",
+				target, "$(SOEXT)");
 	else if(configure->os == HO_WIN32)
 		_makefile_print(fp, "%s%s", " $(OBJDIR)", soname);
 	else
 		_makefile_print(fp, "%s%s%s%s%s%s%s", " $(OBJDIR)", soname,
 				".0 $(OBJDIR)", soname, " $(OBJDIR)", target,
-				soext);
+				"$(SOEXT)");
 	string_delete(soname);
 	return 0;
 }
@@ -1056,17 +1050,16 @@ static int _target_binary(Configure * configure, FILE * fp,
 		return 1;
 	_makefile_print(fp, "%c", '\n');
 	/* output the binary target */
-	_makefile_print(fp, "%s%s%s%s%s%s", "$(OBJDIR)", target,
-			(configure->os == HO_WIN32) ? "$(EXEEXT)" : "",
+	_makefile_print(fp, "%s%s%s%s%s%s", "$(OBJDIR)", target, "$(EXEEXT)",
 			": $(", target, "_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL
 			&& _makefile_expand(fp, p) != 0)
 		return error_print(PROGNAME);
 	_makefile_print(fp, "%c", '\n');
 	/* build the binary */
-	_makefile_print(fp, "%s%s%s%s%s%s%s%s", "\t$(CC) -o $(OBJDIR)", target,
-			(configure->os == HO_WIN32) ? "$(EXEEXT)" : "", " $(",
-			target, "_OBJS) $(", target, "_LDFLAGS)\n");
+	_makefile_print(fp, "%s%s%s%s%s%s%s", "\t$(CC) -o $(OBJDIR)", target,
+			"$(EXEEXT) $(", target, "_OBJS) $(", target,
+			"_LDFLAGS)\n");
 	return 0;
 }
 
@@ -1194,17 +1187,14 @@ static void _flags_cxx(Configure * configure, FILE * fp, String const * target)
 static int _target_library(Configure * configure, FILE * fp,
 		String const * target)
 {
-	String const * soext;
 	String const * p;
 	String * q;
 	String * soname;
-	size_t len;
 
 	if(_target_objs(configure, fp, target) != 0)
 		return 1;
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
-	soext = configure_get_soext(configure);
 	if(configure_can_library_static(configure)
 			/* generate a static library */
 			&& _target_library_static(configure, fp, target) != 0)
@@ -1213,12 +1203,12 @@ static int _target_library(Configure * configure, FILE * fp,
 		soname = string_new(p);
 	else if(configure->os == HO_MACOSX)
 		/* versioning is different on MacOS X */
-		soname = string_new_append(target, ".0.0", soext, NULL);
+		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
 	else if(configure->os == HO_WIN32)
 		/* and on Windows */
-		soname = string_new_append(target, soext, NULL);
+		soname = string_new_append(target, "$(SOEXT)", NULL);
 	else
-		soname = string_new_append(target, soext, ".0", NULL);
+		soname = string_new_append(target, "$(SOEXT)", ".0", NULL);
 	if(soname == NULL)
 		return 1;
 	if(configure->os == HO_MACOSX)
@@ -1242,34 +1232,32 @@ static int _target_library(Configure * configure, FILE * fp,
 	{
 		/* soname is not available on MacOS X */
 		if(configure->os == HO_MACOSX)
-			_makefile_print(fp, "%s%s%s%s%s%s", " -install_name ",
-					p, "/", target, ".0", soext);
+			_makefile_print(fp, "%s%s%s%s%s", " -install_name ",
+					p, "/", target, ".0$(SOEXT)");
 		else if(configure->os != HO_WIN32)
 			_makefile_print(fp, "%s%s", " -Wl,-soname,", soname);
 	}
 	_makefile_print(fp, "%s%s%s%s%s", " $(", target, "_OBJS) $(", target,
 			"_LDFLAGS)");
-	len = strlen(target) + strlen(soext) + 1;
-	if((q = malloc(len)) == NULL)
+	if((q = string_new_append(target, "$(SOEXT)", NULL)) == NULL)
 	{
 		string_delete(soname);
 		return 1;
 	}
-	snprintf(q, len, "%s%s", target, soext);
 	if((p = config_get(configure->config, q, "ldflags")) != NULL)
 		_binary_ldflags(configure, fp, p);
-	free(q);
+	string_delete(q);
 	_makefile_print(fp, "%c", '\n');
 	if(configure->os == HO_MACOSX)
 	{
-		_makefile_print(fp, "%s%s%s%s%s%s%s", "\n$(OBJDIR)", target,
-				".0", soext, ": $(OBJDIR)", soname, "\n");
-		_makefile_print(fp, "%s%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
-				" $(OBJDIR)", target, ".0", soext, "\n");
-		_makefile_print(fp, "%s%s%s%s%s%s", "\n$(OBJDIR)", target,
-				soext, ": $(OBJDIR)", soname, "\n");
+		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
+				".0$(SOEXT): $(OBJDIR)", soname, "\n");
 		_makefile_print(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
-				" $(OBJDIR)", target, soext, "\n");
+				" $(OBJDIR)", target, ".0$(SOEXT)", "\n");
+		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
+				"$(SOEXT): $(OBJDIR)", soname, "\n");
+		_makefile_print(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+				" $(OBJDIR)", target, "$(SOEXT)\n");
 	}
 	else if(configure->os != HO_WIN32)
 	{
@@ -1277,10 +1265,10 @@ static int _target_library(Configure * configure, FILE * fp,
 				": $(OBJDIR)", soname, ".0\n");
 		_makefile_print(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				".0 $(OBJDIR)", soname, "\n");
-		_makefile_print(fp, "%s%s%s%s%s%s", "\n$(OBJDIR)", target,
-				soext, ": $(OBJDIR)", soname, ".0\n");
-		_makefile_print(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
-				".0 $(OBJDIR)", target, soext, "\n");
+		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
+				"$(SOEXT): $(OBJDIR)", soname, ".0\n");
+		_makefile_print(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+				".0 $(OBJDIR)", target, "$(SOEXT)\n");
 	}
 	string_delete(soname);
 	return 0;
@@ -1402,7 +1390,6 @@ static int _target_object(Configure * configure, FILE * fp,
 static int _target_plugin(Configure * configure, FILE * fp,
 		String const * target)
 {
-	String const * soext;
 	String const * p;
 	String * q;
 
@@ -1410,24 +1397,21 @@ static int _target_plugin(Configure * configure, FILE * fp,
 		return 1;
 	if(_target_flags(configure, fp, target) != 0)
 		return 1;
-	soext = configure_get_soext(configure);
-	_makefile_print(fp, "%s%s%s%s%s%s", "\n$(OBJDIR)", target,
-			soext, ": $(", target, "_OBJS)");
+	_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
+			"$(SOEXT): $(", target, "_OBJS)");
 	if((p = config_get(configure->config, target, "depends")) != NULL
 			&& _makefile_expand(fp, p) != 0)
 		return error_print(PROGNAME);
 	_makefile_print(fp, "%c", '\n');
 	/* build the plug-in */
-	_makefile_print(fp, "%s%s%s%s%s%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)",
-			target, soext, " $(", target, "_OBJS) $(", target,
+	_makefile_print(fp, "%s%s%s%s%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)",
+			target, "$(SOEXT) $(", target, "_OBJS) $(", target,
 			"_LDFLAGS)");
-	if((q = malloc(strlen(target) + strlen(soext) + 1)) != NULL)
-	{
-		sprintf(q, "%s%s", target, soext);
-		if((p = config_get(configure->config, q, "ldflags")) != NULL)
-			_binary_ldflags(configure, fp, p);
-		free(q);
-	}
+	if((q = string_new_append(target, "$(SOEXT)", NULL)) == NULL)
+		return error_print(PROGNAME);
+	if((p = config_get(configure->config, q, "ldflags")) != NULL)
+		_binary_ldflags(configure, fp, p);
+	string_delete(q);
 	_makefile_print(fp, "%c", '\n');
 	return 0;
 }
@@ -2044,28 +2028,24 @@ static void _install_target_binary(Configure * configure, FILE * fp,
 		String const * target)
 {
 	String const * path;
-	String const * exeext;
 
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
-	exeext = (configure->os == HO_WIN32) ? "$(EXEEXT)" : "";
 	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	_makefile_print(fp, "%s%s%s%s%s/%s%s\n",
-			"\t$(INSTALL) -m 0755 $(OBJDIR)", target, exeext,
-			" $(DESTDIR)", path, target, exeext);
+	_makefile_print(fp, "%s%s%s%s/%s%s\n",
+			"\t$(INSTALL) -m 0755 $(OBJDIR)", target,
+			"$(EXEEXT) $(DESTDIR)", path, target, "$(EXEEXT)");
 }
 
 static int _install_target_library(Configure * configure, FILE * fp,
 		String const * target)
 {
 	String const * path;
-	String const * soext;
 	String const * p;
 	String * soname;
 
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return 0;
-	soext = configure_get_soext(configure);
 	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
 	if(configure_can_library_static(configure))
 		/* install the static library */
@@ -2076,12 +2056,12 @@ static int _install_target_library(Configure * configure, FILE * fp,
 		soname = string_new(p);
 	else if(configure->os == HO_MACOSX)
 		/* versioning is different on MacOS X */
-		soname = string_new_append(target, ".0.0", soext, NULL);
+		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
 	else if(configure->os == HO_WIN32)
 		/* and on Windows */
-		soname = string_new_append(target, soext, NULL);
+		soname = string_new_append(target, "$(SOEXT)", NULL);
 	else
-		soname = string_new_append(target, soext, ".0", NULL);
+		soname = string_new_append(target, "$(SOEXT)", ".0", NULL);
 	if(soname == NULL)
 		return 1;
 	/* install the shared library */
@@ -2089,10 +2069,10 @@ static int _install_target_library(Configure * configure, FILE * fp,
 	{
 		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
 				soname, " $(DESTDIR)", path, soname, "\n");
-		_makefile_print(fp, "%s%s%s%s/%s%s%s%s", "\t$(LN) -s -- ", soname,
-				" $(DESTDIR)", path, target, ".0", soext, "\n");
-		_makefile_print(fp, "%s%s%s%s/%s%s%s", "\t$(LN) -s -- ", soname,
-				" $(DESTDIR)", path, target, soext, "\n");
+		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
+				" $(DESTDIR)", path, target, ".0$(SOEXT)\n");
+		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
+				" $(DESTDIR)", path, target, "$(SOEXT)\n");
 	}
 	else if(configure->os == HO_WIN32)
 		_makefile_print(fp, "%s%s%s%s%s%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
@@ -2103,8 +2083,8 @@ static int _install_target_library(Configure * configure, FILE * fp,
 				soname, ".0 $(DESTDIR)", path, soname, ".0\n");
 		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
 				".0 $(DESTDIR)", path, soname, "\n");
-		_makefile_print(fp, "%s%s%s%s/%s%s%s", "\t$(LN) -s -- ", soname,
-				".0 $(DESTDIR)", path, target, soext, "\n");
+		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
+				".0 $(DESTDIR)", path, target, "$(SOEXT)\n");
 	}
 	string_delete(soname);
 	return 0;
@@ -2142,14 +2122,12 @@ static void _install_target_plugin(Configure * configure, FILE * fp,
 		String const * target)
 {
 	String const * path;
-	String const * soext;
 	String const * mode;
 	mode_t m = 0755;
 	String * p;
 
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
-	soext = configure_get_soext(configure);
 	if((mode = config_get(configure->config, target, "mode")) == NULL
 			/* XXX these tests are not sufficient */
 			|| mode[0] == '\0'
@@ -2157,9 +2135,9 @@ static void _install_target_plugin(Configure * configure, FILE * fp,
 			|| *p != '\0')
 		mode = "0755";
 	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
-	_makefile_print(fp, "%s%04o%s%s%s%s%s%s%s%s%s", "\t$(INSTALL) -m ", m,
-			" $(OBJDIR)", target, soext, " $(DESTDIR)", path, "/",
-			target, soext, "\n");
+	_makefile_print(fp, "%s%04o%s%s%s%s%s%s%s", "\t$(INSTALL) -m ", m,
+			" $(OBJDIR)", target, "$(SOEXT) $(DESTDIR)", path, "/",
+			target, "$(SOEXT)\n");
 }
 
 static void _install_target_script(Configure * configure, FILE * fp,
@@ -2460,8 +2438,6 @@ static int _uninstall_target(Configure * configure, FILE * fp,
 {
 	String const * type;
 	String const * path;
-	String const * exeext;
-	String const * soext;
 	TargetType tt;
 	const String rm_destdir[] = "$(RM) -- $(DESTDIR)";
 
@@ -2469,14 +2445,12 @@ static int _uninstall_target(Configure * configure, FILE * fp,
 		return 1;
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return 0;
-	exeext = (configure->os == HO_WIN32) ? "$(EXEEXT)" : "";
-	soext = configure_get_soext(configure);
 	tt = enum_string(TT_LAST, sTargetType, type);
 	switch(tt)
 	{
 		case TT_BINARY:
 			_makefile_print(fp, "\t%s%s/%s%s\n", rm_destdir, path,
-					target, exeext);
+					target, "$(EXEEXT)");
 			break;
 		case TT_LIBRARY:
 			if(_uninstall_target_library(configure, fp, target,
@@ -2489,11 +2463,12 @@ static int _uninstall_target(Configure * configure, FILE * fp,
 					target, ".la\n");
 			break;
 		case TT_OBJECT:
-			_makefile_print(fp, "\t%s%s/%s\n", rm_destdir, path, target);
+			_makefile_print(fp, "\t%s%s/%s\n", rm_destdir, path,
+					target);
 			break;
 		case TT_PLUGIN:
-			_makefile_print(fp, "\t%s%s/%s%s\n", rm_destdir, path, target,
-					soext);
+			_makefile_print(fp, "\t%s%s/%s%s\n", rm_destdir, path,
+					target, "$(SOEXT)");
 			break;
 		case TT_SCRIPT:
 			_uninstall_target_script(configure, fp, target, path);
@@ -2507,13 +2482,11 @@ static int _uninstall_target(Configure * configure, FILE * fp,
 static int _uninstall_target_library(Configure * configure, FILE * fp,
 		String const * target, String const * path)
 {
-	String const * soext;
 	String * soname;
 	String const * p;
 	const String format[] = "\t%s%s/%s%s%s%s";
 	const String rm_destdir[] = "$(RM) -- $(DESTDIR)";
 
-	soext = configure_get_soext(configure);
 	if(configure_can_library_static(configure))
 		/* uninstall the static library */
 		_makefile_print(fp, format, rm_destdir, path, target, ".a\n",
@@ -2522,12 +2495,12 @@ static int _uninstall_target_library(Configure * configure, FILE * fp,
 		soname = string_new(p);
 	else if(configure->os == HO_MACOSX)
 		/* versioning is different on MacOS X */
-		soname = string_new_append(target, ".0.0", soext, NULL);
+		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
 	else if(configure->os == HO_WIN32)
 		/* and on Windows */
-		soname = string_new_append(target, soext, NULL);
+		soname = string_new_append(target, "$(SOEXT)", NULL);
 	else
-		soname = string_new_append(target, soext, ".0", NULL);
+		soname = string_new_append(target, "$(SOEXT).0", NULL);
 	if(soname == NULL)
 		return 1;
 	/* uninstall the shared library */
@@ -2536,7 +2509,7 @@ static int _uninstall_target_library(Configure * configure, FILE * fp,
 		_makefile_print(fp, format, rm_destdir, path, soname, "\n", "",
 				"");
 		_makefile_print(fp, format, rm_destdir, path, target, ".0",
-				soext, "\n");
+				"$(SOEXT)", "\n");
 	}
 	else if(configure->os != HO_WIN32)
 	{
@@ -2545,7 +2518,8 @@ static int _uninstall_target_library(Configure * configure, FILE * fp,
 		_makefile_print(fp, format, rm_destdir, path, soname, "\n", "",
 				"");
 	}
-	_makefile_print(fp, format, rm_destdir, path, target, soext, "\n", "");
+	_makefile_print(fp, format, rm_destdir, path, target, "$(SOEXT)", "\n",
+			"");
 	string_delete(soname);
 	return 0;
 }
