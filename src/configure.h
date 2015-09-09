@@ -149,6 +149,10 @@ typedef struct _Configure
 	HostKernel kernel;
 	struct
 	{
+		char const * soext;
+	} extensions;
+	struct
+	{
 		char const * ar;
 		char const * as;
 		char const * cc;

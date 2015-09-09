@@ -174,6 +174,7 @@ unsigned int enum_string_short(unsigned int last, const String * strings[],
 /* configure */
 static void _configure_detect(Configure * configure);
 static HostKernel _detect_kernel(HostOS os, char const * release);
+static void _configure_detect_extensions(Configure * configure);
 static void _configure_detect_programs(Configure * configure);
 static int _configure_load(Prefs * prefs, char const * directory,
 		configArray * ca);
@@ -196,6 +197,7 @@ int configure(Prefs * prefs, char const * directory)
 		return error_print(PROGNAME);
 	cfgr.prefs = prefs;
 	_configure_detect(&cfgr);
+	_configure_detect_extensions(&cfgr);
 	_configure_detect_programs(&cfgr);
 	if((ret = _configure_load(prefs, directory, ca)) == 0)
 	{
@@ -275,6 +277,23 @@ static HostKernel _detect_kernel(HostOS os, char const * release)
 			return i;
 	}
 	return i;
+}
+
+static void _configure_detect_extensions(Configure * configure)
+{
+	configure->extensions.soext = ".so";
+	/* platform-specific */
+	switch(configure->os)
+	{
+		case HO_MACOSX:
+			configure->extensions.soext = ".dylib";
+			break;
+		case HO_WIN32:
+			configure->extensions.soext = ".dll";
+			break;
+		default:
+			break;
+	}
 }
 
 static void _configure_detect_programs(Configure * configure)
@@ -438,11 +457,7 @@ String const * configure_get_config(Configure * configure,
 /* configure_get_soext */
 String const * configure_get_soext(Configure * configure)
 {
-	if(configure->os == HO_MACOSX)
-		return ".dylib";
-	else if(configure->os == HO_WIN32)
-		return ".dll";
-	return ".so";
+	return configure->extensions.soext;
 }
 
 
