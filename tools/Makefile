@@ -9,6 +9,7 @@ CPPFLAGSF=
 CPPFLAGS=
 CFLAGSF	= -W
 CFLAGS	= -Wall -g -O2 -pedantic
+EXEEXT	=
 RM	= rm -f
 LN	= ln -f
 MKDIR	= mkdir -m 0755 -p

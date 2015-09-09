@@ -11,6 +11,7 @@ CFLAGSF	= -W `pkg-config --cflags libSystem`
 CFLAGS	= -Wall -g -O2 -pedantic
 LDFLAGSF= `pkg-config --libs libSystem`
 LDFLAGS	= 
+EXEEXT	=
 RM	= rm -f
 LN	= ln -f
 MKDIR	= mkdir -m 0755 -p
