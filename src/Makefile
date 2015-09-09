@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)configure $(OBJDIR)makedepend $(OBJDIR)makefile.o
+TARGETS	= $(OBJDIR)configure$(EXEEXT) $(OBJDIR)makedepend$(EXEEXT) $(OBJDIR)makefile.o
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -24,15 +24,15 @@ configure_OBJS = $(OBJDIR)configure.o $(OBJDIR)settings.o $(OBJDIR)main.o
 configure_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 configure_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) $(OBJDIR)makefile.o
 
-$(OBJDIR)configure: $(configure_OBJS) $(OBJDIR)makefile.o
-	$(CC) -o $(OBJDIR)configure $(configure_OBJS) $(configure_LDFLAGS)
+$(OBJDIR)configure$(EXEEXT): $(configure_OBJS) $(OBJDIR)makefile.o
+	$(CC) -o $(OBJDIR)configure$(EXEEXT) $(configure_OBJS) $(configure_LDFLAGS)
 
 makedepend_OBJS = $(OBJDIR)makedepend.o
 makedepend_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 makedepend_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-$(OBJDIR)makedepend: $(makedepend_OBJS)
-	$(CC) -o $(OBJDIR)makedepend $(makedepend_OBJS) $(makedepend_LDFLAGS)
+$(OBJDIR)makedepend$(EXEEXT): $(makedepend_OBJS)
+	$(CC) -o $(OBJDIR)makedepend$(EXEEXT) $(makedepend_OBJS) $(makedepend_LDFLAGS)
 
 makefile.o_OBJS = $(OBJDIR)makefile.o
 makefile.o_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
@@ -60,9 +60,9 @@ distclean: clean
 
 install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 0755 $(OBJDIR)configure $(DESTDIR)$(BINDIR)/configure
+	$(INSTALL) -m 0755 $(OBJDIR)configure$(EXEEXT) $(DESTDIR)$(BINDIR)/configure$(EXEEXT)
 
 uninstall:
-	$(RM) -- $(DESTDIR)$(BINDIR)/configure
+	$(RM) -- $(DESTDIR)$(BINDIR)/configure$(EXEEXT)
 
 .PHONY: all clean distclean install uninstall

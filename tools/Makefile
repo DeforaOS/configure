@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)pkg-config
+TARGETS	= $(OBJDIR)pkg-config$(EXEEXT)
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -22,8 +22,8 @@ pkg-config_OBJS = $(OBJDIR)pkg-config.o
 pkg-config_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 pkg-config_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-$(OBJDIR)pkg-config: $(pkg-config_OBJS)
-	$(CC) -o $(OBJDIR)pkg-config $(pkg-config_OBJS) $(pkg-config_LDFLAGS)
+$(OBJDIR)pkg-config$(EXEEXT): $(pkg-config_OBJS)
+	$(CC) -o $(OBJDIR)pkg-config$(EXEEXT) $(pkg-config_OBJS) $(pkg-config_LDFLAGS)
 
 $(OBJDIR)pkg-config.o: pkg-config.c ../config.h
 	$(CC) -D PREFIX=\"$(PREFIX)\" $(pkg-config_CFLAGS) -o $(OBJDIR)pkg-config.o -c pkg-config.c
