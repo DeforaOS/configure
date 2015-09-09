@@ -640,9 +640,8 @@ static void _targets_cxxflags(Configure * configure, FILE * fp)
 
 static void _targets_exeext(Configure * configure, FILE * fp)
 {
-	if(configure->os == HO_WIN32)
-		_makefile_output_variable(fp, "EXEEXT",
-				configure_get_exeext(configure));
+	_makefile_output_variable(fp, "EXEEXT",
+			configure_get_exeext(configure));
 }
 
 static void _targets_ldflags(Configure * configure, FILE * fp)
@@ -767,6 +766,7 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 				configure->programs.ccshared);
 	else
 		_makefile_output_variable(fp, "CCSHARED", p);
+	_makefile_output_variable(fp, "SOEXT", configure_get_soext(configure));
 }
 
 static void _variables_library_static(Configure * configure, FILE * fp)
