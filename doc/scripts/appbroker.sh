@@ -31,10 +31,20 @@ APPBROKER="AppBroker"
 
 
 #functions
+#appbroker
+_appbroker()
+{
+	target="$1"
+	appinterface="$2"
+
+	$APPBROKER -o "$target" "$appinterface"
+}
+
+
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME [-c][-P prefix] target" 1>&2
+	echo "Usage: $PROGNAME [-c][-P prefix] target..." 1>&2
 	return 1
 }
 
@@ -59,15 +69,19 @@ while getopts "cO:P:" name; do
 	esac
 done
 shift $(($OPTIND - 1))
-if [ $# -ne 1 ]; then
+if [ $# -eq 0 ]; then
 	_usage
 	exit $?
 fi
 
 [ "$clean" -ne 0 ] && exit 0
 
-target="$1"
-source="${target#$OBJDIR}"
-APPINTERFACE="${source##*/}"
-APPINTERFACE="../data/${APPINTERFACE%%.h}.interface"
-$APPBROKER -o "$target" "$APPINTERFACE"
+while [ $# -gt 0 ]; do
+	target="$1"
+	shift
+
+	source="${target#$OBJDIR}"
+	appinterface="${source##*/}"
+	appinterface="../data/${appinterface%%.h}.interface"
+	_appbroker "$target" "$appinterface"			|| exit 2
+done
