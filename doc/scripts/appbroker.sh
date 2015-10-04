@@ -28,6 +28,7 @@
 PROGNAME="appbroker.sh"
 #executables
 APPBROKER="AppBroker"
+DEBUG="_debug"
 
 
 #functions
@@ -37,7 +38,15 @@ _appbroker()
 	target="$1"
 	appinterface="$2"
 
-	$APPBROKER -o "$target" "$appinterface"
+	$DEBUG $APPBROKER -o "$target" "$appinterface"
+}
+
+
+#debug
+_debug()
+{
+	echo "$@" 1>&2
+	"$@"
 }
 
 
