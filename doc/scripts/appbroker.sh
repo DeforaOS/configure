@@ -34,7 +34,7 @@ APPBROKER="AppBroker"
 #usage
 _usage()
 {
-	echo "Usage: $APPBROKER target" 1>&2
+	echo "Usage: $PROGNAME [-c][-P prefix] target" 1>&2
 	return 1
 }
 
