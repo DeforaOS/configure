@@ -74,7 +74,7 @@ SED="sed"
 #debug
 _debug()
 {
-	echo "$@" 1>&2
+	echo "$@" 1>&3
 	"$@"
 }
 
@@ -137,6 +137,7 @@ if [ -z "$VERSION" ]; then
 	exit $?
 fi
 
+exec 3>&1
 while [ $# -gt 0 ]; do
 	target="$1"
 	shift

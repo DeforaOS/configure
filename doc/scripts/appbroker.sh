@@ -45,7 +45,7 @@ _appbroker()
 #debug
 _debug()
 {
-	echo "$@" 1>&2
+	echo "$@" 1>&3
 	"$@"
 }
 
@@ -85,6 +85,7 @@ fi
 
 [ "$clean" -ne 0 ] && exit 0
 
+exec 3>&1
 while [ $# -gt 0 ]; do
 	target="$1"
 	shift

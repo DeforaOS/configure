@@ -36,7 +36,7 @@ SHLINT="sh -n"
 #debug
 _debug()
 {
-	echo "$@" 1>&2
+	echo "$@" 1>&3
 	"$@"
 	res=$?
 	#ignore errors when the command is not available
@@ -80,6 +80,7 @@ target="$1"
 [ $clean -ne 0 ] && return 0
 
 ret=0
+exec 3>&1
 for i in $($FIND "../doc" "../src" "../tests" "../tools" -name '*.sh'); do
 	$DEBUG $SHLINT "$i"					|| ret=2
 done 2> "$target"

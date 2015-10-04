@@ -36,7 +36,7 @@ PHPLINT="php -l"
 #debug
 _debug()
 {
-	echo "$@" 1>&2
+	echo "$@" 1>&3
 	"$@"
 	res=$?
 	#ignore errors when the command is not available
@@ -79,6 +79,7 @@ target="$1"
 [ $clean -ne 0 ] && exit 0
 
 ret=0
+exec 3>&1
 for i in $($FIND "../src" "../tools" -name '*.php'); do
 	$DEBUG $PHPLINT -f "$i"					|| ret=2
 done 2> "$target"
