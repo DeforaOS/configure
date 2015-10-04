@@ -53,7 +53,7 @@ _debug()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME [-c][-P prefix] target..." 1>&2
+	echo "Usage: $PROGNAME [-c] target..." 1>&2
 	return 1
 }
 
@@ -69,7 +69,7 @@ while getopts "cO:P:" name; do
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
 			;;
 		P)
-			#we can ignore it
+			#XXX ignored for compatibility
 			;;
 		?)
 			_usage
@@ -77,7 +77,7 @@ while getopts "cO:P:" name; do
 			;;
 	esac
 done
-shift $(($OPTIND - 1))
+shift $((OPTIND - 1))
 if [ $# -eq 0 ]; then
 	_usage
 	exit $?
