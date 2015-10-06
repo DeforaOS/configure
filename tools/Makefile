@@ -7,8 +7,9 @@ SBINDIR	= $(PREFIX)/sbin
 CC	= cc
 CPPFLAGSF=
 CPPFLAGS=
-CFLAGSF	= -W
-CFLAGS	= -Wall -g -O2 -pedantic
+CFLAGSF	=
+CFLAGS	= -W -Wall -g -O2 -pedantic -fPIE -D_FORTIFY_SOURCE=2 -fstack-protector-all
+LDFLAGS	= -Wl,-pie -Wl,-z,relro -Wl,-z,now
 EXEEXT	=
 RM	= rm -f
 LN	= ln -f
