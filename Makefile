@@ -1,5 +1,5 @@
 PACKAGE	= configure
-VERSION	= 0.2.1
+VERSION	= 0.2.2
 SUBDIRS	= doc src tests tools
 OBJDIR	=
 PREFIX	= /usr/local
