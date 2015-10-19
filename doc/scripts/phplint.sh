@@ -30,6 +30,7 @@ PROGNAME="phplint.sh"
 DEBUG="_debug"
 FIND="find"
 PHPLINT="php -l"
+SORT="sort"
 
 
 #functions
@@ -80,7 +81,7 @@ target="$1"
 
 ret=0
 exec 3>&1
-for i in $($FIND "../src" "../tools" -name '*.php'); do
+for i in $($FIND "../src" "../tools" -name '*.php' | $SORT); do
 	$DEBUG $PHPLINT -f "$i"					|| ret=2
 done 2> "$target"
 exit $ret
