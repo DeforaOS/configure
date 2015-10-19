@@ -30,6 +30,7 @@ PROGNAME="xmllint.sh"
 #executables
 DEBUG="_debug"
 FIND="find"
+SORT="sort"
 XMLLINT="xmllint"
 
 
@@ -82,7 +83,7 @@ target="$1"
 
 ret=0
 exec 3>&1
-for i in $($FIND "../src" "../tools" -name '*.xml' -o -name '*.xsl'); do
+for i in $($FIND "../src" "../tools" -name '*.xml' -o -name '*.xsl' | $SORT); do
 	$DEBUG $XMLLINT "$i" > "$DEVNULL"			|| ret=2
 done 2> "$target"
 exit $ret

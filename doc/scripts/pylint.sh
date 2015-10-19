@@ -30,6 +30,7 @@ PROGNAME="pylint.sh"
 DEBUG="_debug"
 FIND="find"
 PYLINT="pep8"
+SORT="sort"
 
 
 #functions
@@ -96,7 +97,7 @@ ret=0
 exec 3>&1
 (date
 echo
-$FIND "../doc" "../src" "../tests" "../tools" -name '*.py' | while read filename; do
+$FIND "../doc" "../src" "../tests" "../tools" -name '*.py' | $SORT | while read filename; do
 	_pylint "$filename"
 done) > "$target"
 exit $ret
