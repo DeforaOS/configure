@@ -39,7 +39,6 @@ dist:
 	$(LN) -s -- "$$PWD" $(OBJDIR)$(PACKAGE)-$(VERSION)
 	@cd $(OBJDIR). && $(TAR) -czvf $(OBJDIR)$(PACKAGE)-$(VERSION).tar.gz -- \
 		$(PACKAGE)-$(VERSION)/doc/Makefile \
-		$(PACKAGE)-$(VERSION)/doc/docbook.sh \
 		$(PACKAGE)-$(VERSION)/doc/configure.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/configure.xml \
 		$(PACKAGE)-$(VERSION)/doc/manual.css.xml \
