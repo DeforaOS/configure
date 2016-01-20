@@ -26,13 +26,51 @@
 
 #variables
 PROGNAME="shlint.sh"
+PROJECTCONF="../project.conf"
 #executables
+DATE="date"
 DEBUG="_debug"
 FIND="find"
 SHLINT="sh -n"
+TR="tr"
 
 
 #functions
+#shlint
+_shlint()
+{
+	ret=0
+	subdirs="data doc src tests tools"
+
+	$DATE
+	echo
+	while read line; do
+		case "$line" in
+			"["*)
+				break
+				;;
+			"subdirs="*)
+				subdirs=${line#subdirs=}
+				subdirs=$(echo "$subdirs" | $TR ',' ' ')
+				;;
+		esac
+	done < "$PROJECTCONF"
+	for subdir in $subdirs; do
+		[ -d "../$subdir" ] || continue
+		for filename in $($FIND "../$subdir" -name '*.sh'); do
+			$DEBUG $SHLINT "$filename" 2>&1
+			if [ $? -eq 0 ]; then
+				echo "$filename:"
+			else
+				echo "$PROGNAME: $filename: FAIL" 1>&2
+				ret=2
+			fi
+		done
+	done
+	return $ret
+}
+
+
 #debug
 _debug()
 {
@@ -79,9 +117,5 @@ target="$1"
 #clean
 [ $clean -ne 0 ] && return 0
 
-ret=0
 exec 3>&1
-for i in $($FIND "../doc" "../src" "../tests" "../tools" -name '*.sh'); do
-	$DEBUG $SHLINT "$i"					|| ret=2
-done 2> "$target"
-exit $ret
+_shlint > "$target"
