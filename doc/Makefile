@@ -22,13 +22,13 @@ $(OBJDIR)configure.1: configure.xml
 	./scripts/docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)configure.1"
 
 $(OBJDIR)configure.html: configure.css.xml configure.xml manual.css.xml
-	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)configure.html"
+	./scripts/docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)configure.html"
 
 $(OBJDIR)project.conf.5: project.conf.xml
-	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)project.conf.5"
+	./scripts/docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)project.conf.5"
 
 $(OBJDIR)project.conf.html: project.conf.css.xml project.conf.xml manual.css.xml
-	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)project.conf.html"
+	./scripts/docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)project.conf.html"
 
 clean:
 	@for i in $(SUBDIRS); do (cd "$$i" && \
@@ -59,9 +59,9 @@ install: $(TARGETS)
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/" install; \
 		else $(MAKE) install; fi) || exit; done
 	./scripts/docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)configure.1"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)configure.html"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)project.conf.5"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)project.conf.html"
+	./scripts/docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)configure.html"
+	./scripts/docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)project.conf.5"
+	./scripts/docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)project.conf.html"
 
 uninstall:
 	@for i in $(SUBDIRS); do (cd "$$i" && \
@@ -69,8 +69,8 @@ uninstall:
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/" uninstall; \
 		else $(MAKE) uninstall; fi) || exit; done
 	./scripts/docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "configure.1"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "configure.html"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "project.conf.5"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "project.conf.html"
+	./scripts/docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "configure.html"
+	./scripts/docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "project.conf.5"
+	./scripts/docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "project.conf.html"
 
 .PHONY: all subdirs clean distclean install uninstall
