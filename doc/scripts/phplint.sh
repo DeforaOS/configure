@@ -114,6 +114,7 @@ if [ $# -ne 1 ]; then
 fi
 target="$1"
 
+#clean
 [ $clean -ne 0 ] && exit 0
 
 exec 3>&1
