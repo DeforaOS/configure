@@ -144,6 +144,7 @@ int main(int argc, char * argv[])
 				prefs.flags |= PREFS_v;
 				break;
 			case '?':
+			default:
 				return _usage();
 		}
 	if(optind == argc)
