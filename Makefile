@@ -105,7 +105,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/COPYING \
 		$(PACKAGE)-$(VERSION)/config.h \
 		$(PACKAGE)-$(VERSION)/config.sh \
-		$(PACKAGE)-$(VERSION)/INSTALL \
+		$(PACKAGE)-$(VERSION)/INSTALL.md \
 		$(PACKAGE)-$(VERSION)/README.md \
 		$(PACKAGE)-$(VERSION)/project.conf
 	$(RM) -- $(OBJDIR)$(PACKAGE)-$(VERSION)
@@ -133,7 +133,7 @@ install:
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
 	$(INSTALL) -m 0644 CHANGES $(DESTDIR)$(PREFIX)/share/doc/configure/CHANGES
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
-	$(INSTALL) -m 0644 INSTALL $(DESTDIR)$(PREFIX)/share/doc/configure/INSTALL
+	$(INSTALL) -m 0644 INSTALL.md $(DESTDIR)$(PREFIX)/share/doc/configure/INSTALL.md
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
 	$(INSTALL) -m 0644 README.md $(DESTDIR)$(PREFIX)/share/doc/configure/README.md
 
@@ -145,7 +145,7 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/AUTHORS
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/BUGS
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/CHANGES
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/INSTALL
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/INSTALL.md
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/README.md
 
 .PHONY: all subdirs clean distclean dist distcheck install uninstall
