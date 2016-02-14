@@ -1747,7 +1747,8 @@ static int _clean_targets(Configure * configure, FILE * fp)
 					== NULL)
 				prefix = "$(PREFIX)";
 			_makefile_print(fp, "\t%s%s%s%s%s%s\n", p, " -c -P \"",
-					prefix, "\" -- \"", targets, "\"");
+					prefix, "\" -- \"$(OBJDIR)", targets,
+					"\"");
 		}
 		if(c == '\0')
 			break;
