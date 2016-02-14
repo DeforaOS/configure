@@ -21,9 +21,9 @@ $(OBJDIR)xmllint.log: ../doc/scripts/xmllint.sh
 
 clean:
 	$(RM) -- $(shlint.log_OBJS) $(tests.log_OBJS) $(xmllint.log_OBJS)
-	../doc/scripts/shlint.sh -c -P "$(PREFIX)" -- "shlint.log"
-	./tests.sh -c -P "$(PREFIX)" -- "tests.log"
-	../doc/scripts/xmllint.sh -c -P "$(PREFIX)" -- "xmllint.log"
+	../doc/scripts/shlint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)shlint.log"
+	./tests.sh -c -P "$(PREFIX)" -- "$(OBJDIR)tests.log"
+	../doc/scripts/xmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)xmllint.log"
 
 distclean: clean
 	$(RM) -- $(TARGETS)

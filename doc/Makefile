@@ -36,10 +36,10 @@ clean:
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/" clean; \
 		else $(MAKE) clean; fi) || exit; done
 	$(RM) -- $(configure.1_OBJS) $(configure.html_OBJS) $(project.conf.5_OBJS) $(project.conf.html_OBJS)
-	./scripts/docbook.sh -c -P "$(PREFIX)" -- "configure.1"
-	./docbook.sh -c -P "$(PREFIX)" -- "configure.html"
-	./docbook.sh -c -P "$(PREFIX)" -- "project.conf.5"
-	./docbook.sh -c -P "$(PREFIX)" -- "project.conf.html"
+	./scripts/docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)configure.1"
+	./docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)configure.html"
+	./docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)project.conf.5"
+	./docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)project.conf.html"
 
 distclean:
 	@for i in $(SUBDIRS); do (cd "$$i" && \
@@ -47,10 +47,10 @@ distclean:
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/" distclean; \
 		else $(MAKE) distclean; fi) || exit; done
 	$(RM) -- $(configure.1_OBJS) $(configure.html_OBJS) $(project.conf.5_OBJS) $(project.conf.html_OBJS)
-	./scripts/docbook.sh -c -P "$(PREFIX)" -- "configure.1"
-	./docbook.sh -c -P "$(PREFIX)" -- "configure.html"
-	./docbook.sh -c -P "$(PREFIX)" -- "project.conf.5"
-	./docbook.sh -c -P "$(PREFIX)" -- "project.conf.html"
+	./scripts/docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)configure.1"
+	./docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)configure.html"
+	./docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)project.conf.5"
+	./docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)project.conf.html"
 	$(RM) -- $(TARGETS)
 
 install: $(TARGETS)
