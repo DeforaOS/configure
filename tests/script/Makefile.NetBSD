@@ -18,8 +18,8 @@ phony: a.c b.c
 
 clean:
 	$(RM) -- $(test_OBJS) $(phony_OBJS)
-	./script.sh -c -P "/somewhere/else" -- "test"
-	./script.sh -c -P "$(PREFIX)" -- "phony"
+	./script.sh -c -P "/somewhere/else" -- "$(OBJDIR)test"
+	./script.sh -c -P "$(PREFIX)" -- "$(OBJDIR)phony"
 
 distclean: clean
 	$(RM) -- $(TARGETS)
