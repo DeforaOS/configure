@@ -57,7 +57,7 @@ _pylint()
 	done < "$PROJECTCONF"
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
-		for filename in $($FIND "../$subdir" -name '*.py'); do
+		for filename in $($FIND "../$subdir" -name '*.py' | $SORT); do
 			$DEBUG $PYLINT -- "$filename" 2>&1
 			if [ $? -eq 0 ]; then
 				echo "$filename:"
