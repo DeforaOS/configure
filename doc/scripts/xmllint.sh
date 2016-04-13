@@ -32,7 +32,7 @@ PROJECTCONF="../project.conf"
 DATE="date"
 DEBUG="_debug"
 FIND="find"
-SORT="sort"
+SORT="sort -n"
 TR="tr"
 XMLLINT="xmllint"
 

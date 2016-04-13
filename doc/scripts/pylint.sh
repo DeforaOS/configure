@@ -32,7 +32,7 @@ DATE="date"
 DEBUG="_debug"
 FIND="find"
 PYLINT="pep8"
-SORT="sort"
+SORT="sort -n"
 TR="tr"
 
 

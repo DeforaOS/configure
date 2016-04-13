@@ -32,7 +32,7 @@ DATE="date"
 DEBUG="_debug"
 FIND="find"
 PHPLINT="php -l"
-SORT="sort"
+SORT="sort -n"
 TR="tr"
 
 
