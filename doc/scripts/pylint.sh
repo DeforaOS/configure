@@ -43,7 +43,6 @@ _pylint()
 	subdirs="data doc src tests tools"
 
 	$DATE
-	echo
 	while read line; do
 		case "$line" in
 			"["*)
@@ -58,9 +57,11 @@ _pylint()
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
 		for filename in $($FIND "../$subdir" -name '*.py' | $SORT); do
+			echo
+			echo "Testing: $filename"
 			$DEBUG $PYLINT -- "$filename" 2>&1
 			if [ $? -eq 0 ]; then
-				echo "$filename:"
+				echo "$PROGNAME: $filename: OK" 1>&2
 			else
 				#XXX ignore errors
 				echo "$PROGNAME: $filename: FAIL" 1>&2
