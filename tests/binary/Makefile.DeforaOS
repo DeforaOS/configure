@@ -4,7 +4,7 @@ PREFIX	= /usr/local
 DESTDIR	=
 BINDIR	= $(PREFIX)/bin
 SBINDIR	= $(PREFIX)/sbin
-EXEEXT	= .exe
+EXEEXT	=
 RM	= rm -f
 LN	= ln -f
 MKDIR	= mkdir -m 0755 -p
@@ -29,7 +29,7 @@ $(OBJDIR)test2$(EXEEXT): $(test2_OBJS)
 
 test3_OBJS = $(OBJDIR)test.o
 test3_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
-test3_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)  -lsocket -lm
+test3_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) -ldl -lsocket -lm
 
 $(OBJDIR)test3$(EXEEXT): $(test3_OBJS)
 	$(CC) -o $(OBJDIR)test3$(EXEEXT) $(test3_OBJS) $(test3_LDFLAGS)

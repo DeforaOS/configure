@@ -73,6 +73,7 @@ _tests()
 	_test "Darwin" "library"				|| ret=2
 	_test "Darwin" "libtool"				|| ret=2
 	_test "Darwin" "plugin"					|| ret=2
+	_test "DeforaOS" "binary"				|| ret=2
 	_test "Linux" "library"					|| ret=2
 	_test "Linux" "libtool"					|| ret=2
 	_test "NetBSD" "binary"					|| ret=2

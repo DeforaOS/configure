@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)test$(EXEEXT) $(OBJDIR)test2$(EXEEXT)
+TARGETS	= $(OBJDIR)test$(EXEEXT) $(OBJDIR)test2$(EXEEXT) $(OBJDIR)test3$(EXEEXT)
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -27,6 +27,13 @@ test2_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) -lobjc
 $(OBJDIR)test2$(EXEEXT): $(test2_OBJS)
 	$(CC) -o $(OBJDIR)test2$(EXEEXT) $(test2_OBJS) $(test2_LDFLAGS)
 
+test3_OBJS = $(OBJDIR)test.o
+test3_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+test3_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)   -lm
+
+$(OBJDIR)test3$(EXEEXT): $(test3_OBJS)
+	$(CC) -o $(OBJDIR)test3$(EXEEXT) $(test3_OBJS) $(test3_LDFLAGS)
+
 $(OBJDIR)test.o: test.c
 	$(CC) $(test_CFLAGS) -o $(OBJDIR)test.o -c test.c
 
@@ -36,8 +43,11 @@ $(OBJDIR)main.o: main.c
 $(OBJDIR)test.o: test.m
 	$(CC) $(test2_CFLAGS) -o $(OBJDIR)test.o -c test.m
 
+$(OBJDIR)test.o: test.c
+	$(CC) $(test3_CFLAGS) -o $(OBJDIR)test.o -c test.c
+
 clean:
-	$(RM) -- $(test_OBJS) $(test2_OBJS)
+	$(RM) -- $(test_OBJS) $(test2_OBJS) $(test3_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
