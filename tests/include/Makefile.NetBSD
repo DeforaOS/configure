@@ -1,0 +1,30 @@
+OBJDIR	=
+PREFIX	= /usr/local
+DESTDIR	=
+RM	= rm -f
+LN	= ln -f
+MKDIR	= mkdir -m 0755 -p
+INSTALL	= install
+INCLUDEDIR= $(PREFIX)/include
+
+
+all:
+
+clean:
+
+distclean: clean
+
+install:
+	$(MKDIR) $(DESTDIR)$(INCLUDEDIR)
+	$(INSTALL) -m 0644 stdio.h $(DESTDIR)$(INCLUDEDIR)/stdio.h
+	$(MKDIR) $(DESTDIR)$(INCLUDEDIR)/staging
+	$(INSTALL) -m 0644 stdlib.h $(DESTDIR)$(INCLUDEDIR)/staging/stdlib.h
+	$(MKDIR) $(DESTDIR)$(INCLUDEDIR)/sys
+	$(INSTALL) -m 0644 sys/socket.h $(DESTDIR)$(INCLUDEDIR)/sys/socket.h
+
+uninstall:
+	$(RM) -- $(DESTDIR)$(INCLUDEDIR)/stdio.h
+	$(RM) -- $(DESTDIR)$(INCLUDEDIR)/staging/stdlib.h
+	$(RM) -- $(DESTDIR)$(INCLUDEDIR)/sys/socket.h
+
+.PHONY: all clean distclean install uninstall
