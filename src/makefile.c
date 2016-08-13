@@ -2196,10 +2196,23 @@ static int _install_include(Configure * configure, FILE * fp,
 {
 	Config * config = configure->config;
 	char const * install;
+	ssize_t i;
+	String * p = NULL;
 
 	if((install = config_get(config, include, "install")) == NULL)
+	{
 		install = "$(INCLUDEDIR)";
-	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", install);
+		if((i = string_rindex(include, "/")) >= 0)
+			if((p = string_new_length(include, i)) == NULL)
+				return 2;
+	}
+	_makefile_print(fp, "%s%s", "\t$(MKDIR) $(DESTDIR)", install);
+	if(p != NULL)
+	{
+		_makefile_print(fp, "/%s", p);
+		string_delete(p);
+	}
+	_makefile_print(fp, "\n");
 	_makefile_print(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 ", include,
 			" $(DESTDIR)", install, include);
 	return 0;
