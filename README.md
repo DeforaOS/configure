@@ -6,8 +6,8 @@ About configure
 
 configure automatically generates Makefiles from project definition files.
 
-configure depends on the DeforaOS libSystem library, which is found on the
-website for the DeforaOS Project: http://www.defora.org/
+configure depends on the DeforaOS libSystem library (version 0.3.2 or above),
+which is found on the website for the DeforaOS Project: http://www.defora.org/
 
 
 Compiling configure
