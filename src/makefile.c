@@ -1450,7 +1450,8 @@ static int _write_objects(Configure * configure, FILE * fp)
 	return ret;
 }
 
-static void _script_check(Configure * configure, String const * script);
+static void _script_check(Configure * configure, String const * target,
+		String const * script);
 static int _script_depends(Configure * configure, FILE * fp,
 		String const * target);
 static int _target_script(Configure * configure, FILE * fp,
@@ -1467,7 +1468,7 @@ static int _target_script(Configure * configure, FILE * fp,
 		return 1;
 	}
 	if(fp == NULL)
-		_script_check(configure, script);
+		_script_check(configure, target, script);
 	if(configure->prefs->flags & PREFS_S)
 		error_set_print(PROGNAME, 0, "%s: %s%s%s", target, "The \"",
 				script,
@@ -1483,21 +1484,38 @@ static int _target_script(Configure * configure, FILE * fp,
 	return 0;
 }
 
-static void _script_check(Configure * configure, String const * script)
+static void _script_check(Configure * configure, String const * target,
+		String const * script)
 {
 	String const * directory;
-	String * p = NULL;
+	String * p;
 
 	if((directory = config_get(configure->config, NULL, "directory"))
 			== NULL)
+	{
 		error_print(PROGNAME);
-	else if((p = string_new_append((script[0] == '/') ? "" : directory,
-					(script[0] == '/') ? "" : "/",
-					script, NULL)) == NULL)
+		return;
+	}
+	if(script[0] == '/')
+		p = string_new(script);
+	else if(string_compare_length(script, "./", 2) == 0)
+		p = string_new_append(directory, &script[1], NULL);
+	else
+		p = string_new_append(directory, "/", script, NULL);
+	if(p == NULL)
+	{
 		error_print(PROGNAME);
+		return;
+	}
+	/* XXX make it clear these are warnings */
+	if(access(p, R_OK) != 0)
+		error_set_print(PROGNAME, 0, "%s: %s%s%s%s%s", target, "The \"",
+				p, "\" script is not readable (",
+				strerror(errno), ")");
 	else if(access(p, R_OK | X_OK) != 0)
-		/* XXX make it clear it is a warning */
-		error_set_print(PROGNAME, 0, "%s: %s", p, strerror(errno));
+		error_set_print(PROGNAME, 0, "%s: %s%s%s%s%s", target, "The \"",
+				p, "\" script is not executable (",
+				strerror(errno), ")");
 	string_delete(p);
 }
 
