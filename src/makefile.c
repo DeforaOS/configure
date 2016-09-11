@@ -1454,6 +1454,9 @@ static void _script_check(Configure * configure, String const * target,
 		String const * script);
 static int _script_depends(Configure * configure, FILE * fp,
 		String const * target);
+static String * _script_path(Configure * configure, String const * script);
+static void _script_security(Configure * configure, String const * target,
+		String const * script);
 static int _target_script(Configure * configure, FILE * fp,
 		String const * target)
 {
@@ -1470,9 +1473,7 @@ static int _target_script(Configure * configure, FILE * fp,
 	if(fp == NULL)
 		_script_check(configure, target, script);
 	if(configure->prefs->flags & PREFS_S)
-		error_set_print(PROGNAME, 0, "%s: %s%s%s", target, "The \"",
-				script,
-				"\" script is executed while compiling");
+		_script_security(configure, target, script);
 	phony = _makefile_is_phony(configure, target);
 	_makefile_print(fp, "\n%s%s:", phony ? "" : "$(OBJDIR)",
 			target);
@@ -1487,36 +1488,23 @@ static int _target_script(Configure * configure, FILE * fp,
 static void _script_check(Configure * configure, String const * target,
 		String const * script)
 {
-	String const * directory;
-	String * p;
+	String * path;
 
-	if((directory = config_get(configure->config, NULL, "directory"))
-			== NULL)
-	{
-		error_print(PROGNAME);
-		return;
-	}
-	if(script[0] == '/')
-		p = string_new(script);
-	else if(string_compare_length(script, "./", 2) == 0)
-		p = string_new_append(directory, &script[1], NULL);
-	else
-		p = string_new_append(directory, "/", script, NULL);
-	if(p == NULL)
+	if((path = _script_path(configure, script)) == NULL)
 	{
 		error_print(PROGNAME);
 		return;
 	}
 	/* XXX make it clear these are warnings */
-	if(access(p, R_OK) != 0)
+	if(access(path, R_OK) != 0)
 		error_set_print(PROGNAME, 0, "%s: %s%s%s%s%s", target, "The \"",
-				p, "\" script is not readable (",
+				path, "\" script is not readable (",
 				strerror(errno), ")");
-	else if(access(p, R_OK | X_OK) != 0)
+	else if(access(path, R_OK | X_OK) != 0)
 		error_set_print(PROGNAME, 0, "%s: %s%s%s%s%s", target, "The \"",
-				p, "\" script is not executable (",
+				path, "\" script is not executable (",
 				strerror(errno), ")");
-	string_delete(p);
+	string_delete(path);
 }
 
 static int _script_depends(Configure * configure, FILE * fp,
@@ -1529,6 +1517,38 @@ static int _script_depends(Configure * configure, FILE * fp,
 			&& _makefile_expand(fp, p) != 0)
 		return error_print(PROGNAME);
 	return 0;
+}
+
+static String * _script_path(Configure * configure, String const * script)
+{
+	String const * directory;
+
+	if((directory = config_get(configure->config, NULL, "directory"))
+			== NULL)
+	{
+		error_print(PROGNAME);
+		return NULL;
+	}
+	if(script[0] == '/')
+		return string_new(script);
+	else if(string_compare_length(script, "./", 2) == 0)
+		return string_new_append(directory, &script[1], NULL);
+	return string_new_append(directory, "/", script, NULL);
+}
+
+static void _script_security(Configure * configure, String const * target,
+		String const * script)
+{
+	String * path;
+
+	if((path = _script_path(configure, script)) == NULL)
+	{
+		error_print(PROGNAME);
+		return;
+	}
+	error_set_print(PROGNAME, 0, "%s: %s%s%s", target, "The \"", path,
+			"\" script is executed while compiling");
+	string_delete(path);
 }
 
 static int _target_source(Configure * configure, FILE * fp,
