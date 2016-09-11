@@ -29,11 +29,13 @@
 
 
 #include <System.h>
+#include <unistd.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <libgen.h>
+#include <errno.h>
 #include "settings.h"
 #include "configure.h"
 #include "../config.h"
@@ -1448,6 +1450,7 @@ static int _write_objects(Configure * configure, FILE * fp)
 	return ret;
 }
 
+static void _script_check(Configure * configure, String const * script);
 static int _script_depends(Configure * configure, FILE * fp,
 		String const * target);
 static int _target_script(Configure * configure, FILE * fp,
@@ -1463,6 +1466,8 @@ static int _target_script(Configure * configure, FILE * fp,
 				": No script for target\n");
 		return 1;
 	}
+	if(fp == NULL)
+		_script_check(configure, script);
 	if(configure->prefs->flags & PREFS_S)
 		error_set_print(PROGNAME, 0, "%s: %s%s%s", target, "The \"",
 				script,
@@ -1476,6 +1481,24 @@ static int _target_script(Configure * configure, FILE * fp,
 	_makefile_print(fp, "\n\t%s -P \"%s\" -- \"%s%s\"\n", script, prefix,
 			phony ? "" : "$(OBJDIR)", target);
 	return 0;
+}
+
+static void _script_check(Configure * configure, String const * script)
+{
+	String const * directory;
+	String * p = NULL;
+
+	if((directory = config_get(configure->config, NULL, "directory"))
+			== NULL)
+		error_print(PROGNAME);
+	else if((p = string_new_append((script[0] == '/') ? "" : directory,
+					(script[0] == '/') ? "" : "/",
+					script, NULL)) == NULL)
+		error_print(PROGNAME);
+	else if(access(p, R_OK | X_OK) != 0)
+		/* XXX make it clear it is a warning */
+		error_set_print(PROGNAME, 0, "%s: %s", p, strerror(errno));
+	string_delete(p);
 }
 
 static int _script_depends(Configure * configure, FILE * fp,
