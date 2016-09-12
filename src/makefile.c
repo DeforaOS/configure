@@ -55,6 +55,7 @@ static int _makefile_link(FILE * fp, int symlink, char const * link,
 		char const * path);
 static int _makefile_output_variable(FILE * fp, char const * name,
 		char const * value);
+static int _makefile_mkdir(FILE * fp, char const * directory);
 static int _makefile_print(FILE * fp, char const * format, ...);
 static int _makefile_remove(FILE * fp, int recursive, ...);
 static int _makefile_subdirs(FILE * fp, char const * target);
@@ -2093,7 +2094,7 @@ static void _install_target_binary(Configure * configure, FILE * fp,
 
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
-	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
+	_makefile_mkdir(fp, path);
 	_makefile_print(fp, "%s%s%s%s/%s%s\n",
 			"\t$(INSTALL) -m 0755 $(OBJDIR)", target,
 			"$(EXEEXT) $(DESTDIR)", path, target, "$(EXEEXT)");
@@ -2108,7 +2109,7 @@ static int _install_target_library(Configure * configure, FILE * fp,
 
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return 0;
-	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
+	_makefile_mkdir(fp, path);
 	if(configure_can_library_static(configure))
 		/* install the static library */
 		_makefile_print(fp, "%s%s%s%s/%s%s",
@@ -2159,7 +2160,7 @@ static void _install_target_libtool(Configure * configure, FILE * fp,
 
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
-	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
+	_makefile_mkdir(fp, path);
 	_makefile_print(fp, "%s%s%s%s/%s%s",
 			"\t$(LIBTOOL) --mode=install $(INSTALL)"
 			" -m 0755 $(OBJDIR)", target, ".la $(DESTDIR)", path,
@@ -2175,7 +2176,7 @@ static void _install_target_object(Configure * configure, FILE * fp,
 
 	if((path = config_get(configure->config, target, "install")) == NULL)
 		return;
-	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
+	_makefile_mkdir(fp, path);
 	_makefile_print(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 $(OBJDIR)",
 			target, " $(DESTDIR)", path, target);
 }
@@ -2196,7 +2197,7 @@ static void _install_target_plugin(Configure * configure, FILE * fp,
 			|| (m = strtol(mode, &p, 8)) == 0
 			|| *p != '\0')
 		mode = "0755";
-	_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)", path);
+	_makefile_mkdir(fp, path);
 	_makefile_print(fp, "%s%04o%s%s%s%s%s%s%s", "\t$(INSTALL) -m ", m,
 			" $(OBJDIR)", target, "$(SOEXT) $(DESTDIR)", path, "/",
 			target, "$(SOEXT)\n");
@@ -2267,6 +2268,7 @@ static int _install_include(Configure * configure, FILE * fp,
 			if((p = string_new_length(include, i)) == NULL)
 				return 2;
 	}
+	/* FIXME keep track of the directories created */
 	_makefile_print(fp, "%s%s", "\t$(MKDIR) $(DESTDIR)", install);
 	if(p != NULL)
 	{
@@ -2361,13 +2363,13 @@ static int _dist_install(Configure * configure, FILE * fp,
 		if((p = string_new(filename)) == NULL)
 			return -1;
 		q = dirname(p);
+		/* FIXME keep track of the directories created */
 		_makefile_print(fp, "%s%s%c%s\n", "\t$(MKDIR) $(DESTDIR)",
 				directory, sep, q);
 		string_delete(p);
 	}
 	else
-		_makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)",
-				directory);
+		_makefile_mkdir(fp, directory);
 	_makefile_print(fp, "%s%s%s%s%s%s%c%s\n", "\t$(INSTALL) -m ", mode, " ",
 			filename, " $(DESTDIR)", directory, sep, filename);
 	return 0;
@@ -2697,6 +2699,15 @@ static int _makefile_output_variable(FILE * fp, char const * name,
 	equals = (strlen(value) > 0) ? "= " : "=";
 	res = _makefile_print(fp, "%s%s%s%s\n", name, align, equals, value);
 	return (res >= 0) ? 0 : -1;
+}
+
+
+/* makefile_mkdir */
+static int _makefile_mkdir(FILE * fp, char const * directory)
+{
+	/* FIXME keep track of the directories created */
+	return _makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)",
+			directory);
 }
 
 
