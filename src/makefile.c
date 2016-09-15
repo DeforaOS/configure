@@ -1522,7 +1522,10 @@ static int _script_depends(Configure * configure, FILE * fp,
 
 static String * _script_path(Configure * configure, String const * script)
 {
+	String * ret;
 	String const * directory;
+	ssize_t i;
+	String * p = NULL;
 
 	if((directory = config_get(configure->config, NULL, "directory"))
 			== NULL)
@@ -1530,11 +1533,24 @@ static String * _script_path(Configure * configure, String const * script)
 		error_print(PROGNAME);
 		return NULL;
 	}
+	/* XXX truncate scripts at the first space (to allow arguments) */
+	if((i = string_index(script, " ")) > 0)
+	{
+		if((p = string_new_length(script, i)) == NULL)
+		{
+			error_print(PROGNAME);
+			return NULL;
+		}
+		script = p;
+	}
 	if(script[0] == '/')
-		return string_new(script);
+		ret = string_new(script);
 	else if(string_compare_length(script, "./", 2) == 0)
-		return string_new_append(directory, &script[1], NULL);
-	return string_new_append(directory, "/", script, NULL);
+		ret = string_new_append(directory, &script[1], NULL);
+	else
+		ret = string_new_append(directory, "/", script, NULL);
+	string_delete(p);
+	return ret;
 }
 
 static void _script_security(Configure * configure, String const * target,
