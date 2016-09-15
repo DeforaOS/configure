@@ -69,6 +69,8 @@ _tests()
 	ret=0
 
 	$DATE
+	#XXX cross-compiling
+	[ -n "$PKG_CONFIG_SYSROOT_DIR" ] && return 0
 	_test "Darwin" "binary"					|| ret=2
 	_test "Darwin" "library"				|| ret=2
 	_test "Darwin" "libtool"				|| ret=2
