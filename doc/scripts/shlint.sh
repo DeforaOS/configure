@@ -73,7 +73,24 @@ _shlint()
 
 _shlint_file()
 {
-	$DEBUG $SHLINT "$filename" 2>&1
+	$DEBUG $SHLINT "$filename" 2>&1				|| return 2
+	#try to detect invalid use of return
+	#XXX this test is not accurate (therefore a warning)
+	warn=0
+	while read line; do
+		case "$line" in
+			*return*)
+				warn=1
+				;;
+			*)
+				warn=0
+				;;
+		esac
+	done < "$filename"
+	if [ $warn -ne 0 ]; then
+		_warning "$filename: return instead of exit in the global scope"
+	fi
+	return 0
 }
 
 
@@ -94,6 +111,14 @@ _usage()
 {
 	echo "Usage: $PROGNAME [-c] target" 1>&2
 	return 1
+}
+
+
+#warning
+_warning()
+{
+	echo "$PROGNAME: $@" 1>&2
+	return 2
 }
 
 
