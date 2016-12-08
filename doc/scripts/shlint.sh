@@ -59,7 +59,7 @@ _shlint()
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
 		for filename in $($FIND "../$subdir" -name '*.sh' | $SORT); do
-			$DEBUG $SHLINT "$filename" 2>&1
+			_shlint_file "$filename"
 			if [ $? -eq 0 ]; then
 				echo "$filename:"
 			else
@@ -69,6 +69,11 @@ _shlint()
 		done
 	done
 	return $ret
+}
+
+_shlint_file()
+{
+	$DEBUG $SHLINT "$filename" 2>&1
 }
 
 
