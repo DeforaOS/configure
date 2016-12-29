@@ -66,7 +66,7 @@ _usage()
 clean=0
 install=0
 uninstall=0
-while getopts "ciuP:" name; do
+while getopts "ciuO:P:" name; do
 	case $name in
 		c)
 			clean=1
@@ -78,6 +78,9 @@ while getopts "ciuP:" name; do
 		u)
 			install=0
 			uninstall=1
+			;;
+		O)
+			export "${OPTARG%%=*}"="${OPTARG#*=}"
 			;;
 		P)
 			PREFIX="$OPTARG"
