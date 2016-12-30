@@ -47,6 +47,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/doc/project.conf \
 		$(PACKAGE)-$(VERSION)/doc/scripts/Makefile \
 		$(PACKAGE)-$(VERSION)/doc/scripts/appbroker.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/clint.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/docbook.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/gettext.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/gtkdoc.sh \
