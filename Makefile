@@ -73,6 +73,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/tests.sh \
 		$(PACKAGE)-$(VERSION)/tests/binary/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/binary/Makefile.Darwin \
+		$(PACKAGE)-$(VERSION)/tests/binary/Makefile.DeforaOS \
 		$(PACKAGE)-$(VERSION)/tests/binary/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/binary/Makefile.Windows \
 		$(PACKAGE)-$(VERSION)/tests/include/project.conf \
