@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)shlint.log $(OBJDIR)tests.log $(OBJDIR)xmllint.log
+TARGETS	= $(OBJDIR)clint.log $(OBJDIR)shlint.log $(OBJDIR)tests.log $(OBJDIR)xmllint.log
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -10,6 +10,9 @@ INSTALL	= install
 
 all: $(TARGETS)
 
+$(OBJDIR)clint.log: ../doc/scripts/clint.sh
+	../doc/scripts/clint.sh -P "$(PREFIX)" -- "$(OBJDIR)clint.log"
+
 $(OBJDIR)shlint.log: ../doc/scripts/shlint.sh
 	../doc/scripts/shlint.sh -P "$(PREFIX)" -- "$(OBJDIR)shlint.log"
 
@@ -20,7 +23,8 @@ $(OBJDIR)xmllint.log: ../doc/scripts/xmllint.sh
 	../doc/scripts/xmllint.sh -P "$(PREFIX)" -- "$(OBJDIR)xmllint.log"
 
 clean:
-	$(RM) -- $(shlint.log_OBJS) $(tests.log_OBJS) $(xmllint.log_OBJS)
+	$(RM) -- $(clint.log_OBJS) $(shlint.log_OBJS) $(tests.log_OBJS) $(xmllint.log_OBJS)
+	../doc/scripts/clint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)clint.log"
 	../doc/scripts/shlint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)shlint.log"
 	./tests.sh -c -P "$(PREFIX)" -- "$(OBJDIR)tests.log"
 	../doc/scripts/xmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)xmllint.log"
