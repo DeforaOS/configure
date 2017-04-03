@@ -25,6 +25,8 @@
 
 
 #variables
+CFLAGS=
+CPPFLAGS=
 PROGNAME="clint.sh"
 PROJECTCONF="../project.conf"
 #executables
@@ -73,7 +75,7 @@ _clint()
 _clint_file()
 {
 	echo
-	$DEBUG $LINT "$filename" 2>&1
+	$DEBUG $LINT $CPPFLAGS $CFLAGS "$filename" 2>&1
 }
 
 
@@ -107,10 +109,13 @@ _warning()
 
 #main
 clean=0
-while getopts "cP:" name; do
+while getopts "cO:P:" name; do
 	case "$name" in
 		c)
 			clean=1
+			;;
+		O)
+			export "${OPTARG%%=*}"="${OPTARG#*=}"
 			;;
 		P)
 			#XXX ignored for compatibility
