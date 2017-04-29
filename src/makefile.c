@@ -1351,8 +1351,9 @@ static int _target_object(Configure * configure, FILE * fp,
 	switch(_source_type(extension))
 	{
 		case OT_ASM_SOURCE:
-			_makefile_print(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
-					"$(OBJDIR)", target, target, "_ASFLAGS ="
+			_makefile_print(fp, "\n%s%s%s%s\n%s%s",
+					target, "_OBJS = ", "$(OBJDIR)", target,
+					target, "_ASFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS) $(ASFLAGSF)"
 					" $(ASFLAGS)");
 			if((p = config_get(configure->config, target,
@@ -1362,8 +1363,9 @@ static int _target_object(Configure * configure, FILE * fp,
 			break;
 		case OT_C_SOURCE:
 		case OT_OBJC_SOURCE:
-			_makefile_print(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
-					"$(OBJDIR)", target, target, "_CFLAGS ="
+			_makefile_print(fp, "\n%s%s%s%s\n%s%s",
+					target, "_OBJS = ", "$(OBJDIR)", target,
+					target, "_CFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF)"
 					" $(CFLAGS)");
 			if((p = config_get(configure->config, target, "cflags"))
@@ -1373,8 +1375,9 @@ static int _target_object(Configure * configure, FILE * fp,
 			break;
 		case OT_CXX_SOURCE:
 		case OT_OBJCXX_SOURCE:
-			_makefile_print(fp, "\n%s%s%s%s\n%s%s", target, "_OBJS = ",
-					"$(OBJDIR)", target, target, "_CXXFLAGS ="
+			_makefile_print(fp, "\n%s%s%s%s\n%s%s",
+					target, "_OBJS = ", "$(OBJDIR)", target,
+					target, "_CXXFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS)"
 					" $(CXXFLAGS)");
 			if((p = config_get(configure->config, target,
