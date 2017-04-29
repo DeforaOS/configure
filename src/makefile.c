@@ -1378,7 +1378,7 @@ static int _target_object(Configure * configure, FILE * fp,
 			_makefile_print(fp, "\n%s%s%s%s\n%s%s",
 					target, "_OBJS = ", "$(OBJDIR)", target,
 					target, "_CXXFLAGS ="
-					" $(CPPFLAGSF) $(CPPFLAGS)"
+					" $(CPPFLAGSF) $(CPPFLAGS) $(CXXFLAGSF)"
 					" $(CXXFLAGS)");
 			if((p = config_get(configure->config, target,
 							"cxxflags")) != NULL)
