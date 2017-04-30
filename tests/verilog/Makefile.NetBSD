@@ -1,0 +1,38 @@
+TARGETS	= $(OBJDIR)top.vvp $(OBJDIR)top.fpga
+OBJDIR	=
+PREFIX	= /usr/local
+DESTDIR	=
+BINDIR	= $(PREFIX)/bin
+SBINDIR	= $(PREFIX)/sbin
+EXEEXT	=
+RM	= rm -f
+LN	= ln -f
+MKDIR	= mkdir -m 0755 -p
+INSTALL	= install
+
+
+all: $(TARGETS)
+
+top.vvp_OBJS = $(OBJDIR)top.vvp
+top.vvp_VFLAGS = $(VFLAGSF) $(VFLAGS)
+
+top.fpga_OBJS = $(OBJDIR)top.fpga
+top.fpga_VFLAGS = $(VFLAGSF) $(VFLAGS) -tfpga
+
+$(OBJDIR)top.vvp: top.v
+	$(VERILOG) $(top.vvp_VFLAGS) -o $(OBJDIR)top.vvp top.v
+
+$(OBJDIR)top.fpga: top.v
+	$(VERILOG) $(top.fpga_VFLAGS) -o $(OBJDIR)top.fpga top.v
+
+clean:
+	$(RM) -- $(top.vvp_OBJS) $(top.fpga_OBJS)
+
+distclean: clean
+	$(RM) -- $(TARGETS)
+
+install: $(TARGETS)
+
+uninstall:
+
+.PHONY: all clean distclean install uninstall

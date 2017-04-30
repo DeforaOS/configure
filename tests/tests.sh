@@ -86,6 +86,7 @@ _tests()
 	_test "NetBSD" "package"				|| ret=2
 	_test "NetBSD" "plugin"					|| ret=2
 	_test "NetBSD" "script"					|| ret=2
+	_test "NetBSD" "verilog"				|| ret=2
 	_test "Windows" "binary"				|| ret=2
 	_test "Windows" "library"				|| ret=2
 	_test "Windows" "libtool"				|| ret=2
