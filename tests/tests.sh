@@ -51,10 +51,13 @@ _test()
 
 	echo
 	echo "Testing: $system $subdir"
-	$CONFIGURE -O "$system" -- "$subdir" 2>&1		|| return 2
-	$DIFF -- "$subdir/Makefile.$system" "$subdir/Makefile" 2>&1
+	$CONFIGURE -O "$system" -- "$subdir" 2>&1
 	res=$?
-	$RM -- "$subdir/Makefile"
+	if [ $res -eq 0 ]; then
+		$DIFF -- "$subdir/Makefile.$system" "$subdir/Makefile" 2>&1
+		res=$?
+		$RM -- "$subdir/Makefile"
+	fi
 	if [ $res -ne 0 ]; then
 		echo "$system $subdir: Failed with error code $res"
 		echo "$system $subdir: FAIL" 1>&2
