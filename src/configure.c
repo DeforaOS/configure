@@ -207,7 +207,7 @@ int configure(Prefs * prefs, char const * directory)
 		else
 		{
 			prefs->flags = PREFS_n;
-			if(_configure_do(&cfgr, ca) == 0)
+			if((ret = _configure_do(&cfgr, ca)) == 0)
 			{
 				prefs->flags = flags;
 				ret = _configure_do(&cfgr, ca);
