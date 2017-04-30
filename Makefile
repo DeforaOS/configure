@@ -98,6 +98,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/plugin/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/script/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/script/Makefile.NetBSD \
+		$(PACKAGE)-$(VERSION)/tests/verilog/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/project.conf \
 		$(PACKAGE)-$(VERSION)/tools/pkg-config.c \
 		$(PACKAGE)-$(VERSION)/tools/Makefile \
