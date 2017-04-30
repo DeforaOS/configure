@@ -505,6 +505,7 @@ static void _targets_cflags(Configure * configure, FILE * fp);
 static void _targets_cxxflags(Configure * configure, FILE * fp);
 static void _targets_exeext(Configure * configure, FILE * fp);
 static void _targets_ldflags(Configure * configure, FILE * fp);
+static void _targets_vflags(Configure * configure, FILE * fp);
 static void _binary_ldflags(Configure * configure, FILE * fp,
 		String const * ldflags);
 static void _variables_binary(Configure * configure, FILE * fp, char * done)
@@ -545,6 +546,7 @@ static void _variables_binary(Configure * configure, FILE * fp, char * done)
 		_targets_cflags(configure, fp);
 		_targets_cxxflags(configure, fp);
 		_targets_ldflags(configure, fp);
+		_targets_vflags(configure, fp);
 		_targets_exeext(configure, fp);
 	}
 }
@@ -659,6 +661,22 @@ static void _targets_ldflags(Configure * configure, FILE * fp)
 	}
 }
 
+static void _targets_vflags(Configure * configure, FILE * fp)
+{
+	String const * p;
+
+	if((p = config_get(configure->config, NULL, "vflags_force")) != NULL)
+	{
+		_makefile_print(fp, "%s", "VFLAGSF=");
+		_makefile_print(fp, "%c", '\n');
+	}
+	if((p = config_get(configure->config, NULL, "vflags")) != NULL)
+	{
+		_makefile_print(fp, "%s", "VFLAGS\t=");
+		_makefile_print(fp, "%c", '\n');
+	}
+}
+
 static void _binary_ldflags(Configure * configure, FILE * fp,
 		String const * ldflags)
 {
@@ -754,6 +772,7 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 		_targets_cflags(configure, fp);
 		_targets_cxxflags(configure, fp);
 		_targets_ldflags(configure, fp);
+		_targets_vflags(configure, fp);
 		_targets_exeext(configure, fp);
 	}
 	if(configure_can_library_static(configure))
@@ -1030,6 +1049,10 @@ static int _objs_source(FILE * fp, String * source, TargetType tt)
 			_makefile_print(fp, "%s%s%s", " $(OBJDIR)", source,
 					(tt == TT_LIBTOOL) ? ".lo" : ".o");
 			break;
+		case OT_VERILOG_SOURCE:
+			_makefile_print(fp, "%s%s%s", " $(OBJDIR)", source,
+					".o");
+			break;
 		case OT_UNKNOWN:
 			ret = 1;
 			fprintf(stderr, "%s%s%s", PROGNAME ": ", source,
@@ -1069,6 +1092,8 @@ static int _target_binary(Configure * configure, FILE * fp,
 static void _flags_asm(Configure * configure, FILE * fp, String const * target);
 static void _flags_c(Configure * configure, FILE * fp, String const * target);
 static void _flags_cxx(Configure * configure, FILE * fp, String const * target);
+static void _flags_verilog(Configure * configure, FILE * fp,
+		String const * target);
 static int _target_flags(Configure * configure, FILE * fp,
 		String const * target)
 {
@@ -1125,6 +1150,10 @@ static int _target_flags(Configure * configure, FILE * fp,
 				case OT_CXX_SOURCE:
 					done[OT_OBJCXX_SOURCE] = 1;
 					_flags_cxx(configure, fp, target);
+					break;
+				case OT_VERILOG_SOURCE:
+					done[OT_VERILOG_SOURCE] = 1;
+					_flags_verilog(configure, fp, target);
 					break;
 				case OT_UNKNOWN:
 					break;
@@ -1184,6 +1213,17 @@ static void _flags_cxx(Configure * configure, FILE * fp, String const * target)
 			"_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
 	if((p = config_get(configure->config, target, "ldflags")) != NULL)
 		_binary_ldflags(configure, fp, p);
+	_makefile_print(fp, "%c", '\n');
+}
+
+static void _flags_verilog(Configure * configure, FILE * fp,
+		String const * target)
+{
+	String const * p;
+
+	_makefile_print(fp, "%s%s", target, "_VFLAGS = $(VFLAGSF) $(VFLAGS)");
+	if((p = config_get(configure->config, target, "vflags")) != NULL)
+		_makefile_print(fp, " %s", p);
 	_makefile_print(fp, "%c", '\n');
 }
 
@@ -1382,6 +1422,16 @@ static int _target_object(Configure * configure, FILE * fp,
 					" $(CXXFLAGS)");
 			if((p = config_get(configure->config, target,
 							"cxxflags")) != NULL)
+				_makefile_print(fp, " %s", p);
+			_makefile_print(fp, "%c", '\n');
+			break;
+		case OT_VERILOG_SOURCE:
+			_makefile_print(fp, "\n%s%s%s%s\n%s%s",
+					target, "_OBJS = ",
+					"$(OBJDIR)", target, target, "_VFLAGS ="
+					" $(VFLAGSF) $(VFLAGS)");
+			if((p = config_get(configure->config, target,
+							"vflags")) != NULL)
 				_makefile_print(fp, " %s", p);
 			_makefile_print(fp, "%c", '\n');
 			break;
@@ -1734,6 +1784,36 @@ static int _target_source(Configure * configure, FILE * fp,
 						source, ".o");
 			_makefile_print(fp, "%s%s%s%s\n", " -c ", source, ".",
 					extension);
+			break;
+		case OT_VERILOG_SOURCE:
+			if(tt == TT_OBJECT)
+				_makefile_print(fp, "%s%s", "\n$(OBJDIR)",
+						target);
+			else
+				_makefile_print(fp, "%s%s%s", "\n$(OBJDIR)",
+						source, ".o");
+			_makefile_print(fp, "%s%s%s%s", ": ", source, ".",
+					extension);
+			source[len] = '.'; /* FIXME ugly */
+			_source_depends(configure, fp, source);
+			_makefile_print(fp, "%s", "\n\t");
+			if(strchr(source, '/') != NULL)
+				ret = _source_subdir(fp, source);
+			q = config_get(configure->config, source, "vflags");
+			source[len] = '\0';
+			_makefile_print(fp, "%s", "$(VERILOG)");
+			_makefile_print(fp, "%s%s%s", " $(", target,
+					"_VFLAGS)");
+			if(q != NULL)
+				_makefile_print(fp, " %s", q);
+			if(tt == TT_OBJECT)
+				_makefile_print(fp, "%s%s",
+						" -o $(OBJDIR)", target);
+			else
+				_makefile_print(fp, "%s%s%s",
+						" -o $(OBJDIR)", source, ".o");
+			_makefile_print(fp, "%s%s%s%s%c", " ", source, ".",
+					extension, '\n');
 			break;
 		case OT_UNKNOWN:
 			fprintf(stderr, "%s%s%s", PROGNAME ": ", target,

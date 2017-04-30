@@ -102,16 +102,17 @@ const String * sTargetType[TT_COUNT] = { "binary", "library", "libtool",
 	"object", "plugin", "script", NULL };
 const struct ExtensionType _sExtensionType[] =
 {
-	{ "c",		OT_C_SOURCE	},
-	{ "cc",		OT_CXX_SOURCE	},
-	{ "cpp",	OT_CXX_SOURCE	},
-	{ "cxx",	OT_CXX_SOURCE	},
-	{ "c++",	OT_CXX_SOURCE	},
-	{ "asm",	OT_ASM_SOURCE	},
-	{ "S",		OT_ASM_SOURCE	},
-	{ "m",		OT_OBJC_SOURCE	},
-	{ "mm",		OT_OBJCXX_SOURCE},
-	{ NULL,		0		}
+	{ "c",		OT_C_SOURCE		},
+	{ "cc",		OT_CXX_SOURCE		},
+	{ "cpp",	OT_CXX_SOURCE		},
+	{ "cxx",	OT_CXX_SOURCE		},
+	{ "c++",	OT_CXX_SOURCE		},
+	{ "asm",	OT_ASM_SOURCE		},
+	{ "S",		OT_ASM_SOURCE		},
+	{ "m",		OT_OBJC_SOURCE		},
+	{ "mm",		OT_OBJCXX_SOURCE	},
+	{ "v",		OT_VERILOG_SOURCE	},
+	{ NULL,		OT_UNKNOWN		}
 };
 const struct ExtensionType * sExtensionType = _sExtensionType;
 

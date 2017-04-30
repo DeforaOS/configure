@@ -107,6 +107,7 @@ typedef enum _ObjectType
 	OT_ASM_SOURCE,
 	OT_OBJC_SOURCE,
 	OT_OBJCXX_SOURCE,
+	OT_VERILOG_SOURCE,
 	OT_UNKNOWN
 } ObjectType;
 # define OT_LAST	OT_UNKNOWN
