@@ -30,7 +30,7 @@ PROGNAME="tests.sh"
 CONFIGURE="$OBJDIR../src/configure"
 DATE="date"
 DIFF="diff"
-RM="rm"
+RM="rm -f"
 
 
 #functions
