@@ -82,8 +82,11 @@ _usage()
 #main
 type=
 variable=
-while getopts "V:" name; do
+while getopts "O:V:" name; do
 	case "$name" in
+		O)
+			export "${OPTARG%%=*}"="${OPTARG#*=}"
+			;;
 		V)
 			type="variable"
 			variable="$OPTARG"

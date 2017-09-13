@@ -112,7 +112,7 @@ _gettext_pot()
 clean=0
 install=0
 uninstall=0
-while getopts "ciuP:" name; do
+while getopts "ciO:uP:" name; do
 	case "$name" in
 		c)
 			clean=1
@@ -120,6 +120,9 @@ while getopts "ciuP:" name; do
 		i)
 			uninstall=0
 			install=1
+			;;
+		O)
+			export "${OPTARG%%=*}"="${OPTARG#*=}"
 			;;
 		u)
 			install=0
