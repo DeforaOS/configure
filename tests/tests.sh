@@ -100,7 +100,7 @@ _tests()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME target" 1>&2
+	echo "Usage: $PROGNAME [-c] target..." 1>&2
 	return 1
 }
 
@@ -122,12 +122,16 @@ while getopts "cP:" name; do
 	esac
 done
 shift $(($OPTIND - 1))
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ]; then
 	_usage
 	exit $?
 fi
 
 [ "$clean" -ne 0 ] && exit 0
 
-target="$1"
-_tests > "$target"
+while [ $# -gt 0 ]; do
+	target="$1"
+	shift
+
+	_tests > "$target"					|| exit 2
+done
