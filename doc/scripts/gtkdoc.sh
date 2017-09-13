@@ -95,7 +95,7 @@ while getopts "ciuP:" name; do
 	esac
 done
 shift $((OPTIND - 1))
-if [ $# -eq 0 ]; then
+if [ $# -lt 1 ]; then
 	_usage
 	exit $?
 fi

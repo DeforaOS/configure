@@ -92,7 +92,7 @@ while getopts "ciuO:P:" name; do
 	esac
 done
 shift $(($OPTIND - 1))
-if [ $# -eq 0 ]; then
+if [ $# -lt 0 ]; then
 	_usage
 	exit $?
 fi

@@ -87,7 +87,7 @@ _debug()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME [-c] target" 1>&2
+	echo "Usage: $PROGNAME [-c] target..." 1>&2
 	return 1
 }
 
@@ -109,14 +109,18 @@ while getopts "cP:" name; do
 	esac
 done
 shift $((OPTIND - 1))
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ]; then
 	_usage
 	exit $?
 fi
-target="$1"
 
 #clean
 [ $clean -ne 0 ] && exit 0
 
 exec 3>&1
-_xmllint > "$target"
+while [ $# -gt 0 ]; do
+	target="$1"
+	shift
+
+	_xmllint > "$target"					|| exit 2
+done
