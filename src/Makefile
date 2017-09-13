@@ -8,7 +8,7 @@ CC	= cc
 CPPFLAGSF=
 CPPFLAGS=
 CFLAGSF	= `pkg-config --cflags libSystem`
-CFLAGS	= -W -Wall -g -O2 -fPIE -D_FORTIFY_SOURCE=2 -fstack-protector-all
+CFLAGS	= -W -Wall -g -O2 -fPIE -D_FORTIFY_SOURCE=2 -fstack-protector
 LDFLAGSF= `pkg-config --libs libSystem`
 LDFLAGS	= -pie -Wl,-z,relro -Wl,-z,now
 EXEEXT	=
