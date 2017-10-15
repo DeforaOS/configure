@@ -29,6 +29,7 @@
 
 
 #include <System.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -2431,19 +2432,20 @@ static int _dist_check(Configure * configure, char const * target,
 	if(mode[0] == '\0' || *p != '\0')
 		return error_set_print(PROGNAME, 1, "%s: %s%s%s", target,
 				"Invalid permissions \"", mode, "\"");
-	if((configure->prefs->flags & PREFS_S) && (m & 04000))
+	if((configure->prefs->flags & PREFS_S) && (m & S_ISUID))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a SUID file");
-	if((configure->prefs->flags & PREFS_S) && (m & 04000))
+	if((configure->prefs->flags & PREFS_S) && (m & S_ISUID))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a SGID file");
-	if((configure->prefs->flags & PREFS_S) && (m & 0111))
+	if((configure->prefs->flags & PREFS_S)
+			&& (m & (S_IXUSR | S_IXGRP | S_IXOTH)))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as an executable file");
-	if((configure->prefs->flags & PREFS_S) && (m & 0020))
+	if((configure->prefs->flags & PREFS_S) && (m & S_IWGRP))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a group-writable file");
-	if((configure->prefs->flags & PREFS_S) && (m & 0002))
+	if((configure->prefs->flags & PREFS_S) && (m & S_IWOTH))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a writable file");
 	return 0;
