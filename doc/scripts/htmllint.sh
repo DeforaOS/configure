@@ -32,7 +32,7 @@ PROJECTCONF="../project.conf"
 DATE="date"
 DEBUG="_debug"
 FIND="find"
-HTMLLINT="xmllint --html"
+HTMLLINT="xmllint --html --nonet"
 SORT="sort -n"
 TR="tr"
 

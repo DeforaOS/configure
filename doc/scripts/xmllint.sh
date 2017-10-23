@@ -34,7 +34,7 @@ DEBUG="_debug"
 FIND="find"
 SORT="sort -n"
 TR="tr"
-XMLLINT="xmllint"
+XMLLINT="xmllint --nonet"
 
 
 #functions
