@@ -24,6 +24,8 @@ install:
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 gtkdoc.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/gtkdoc.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
+	$(INSTALL) -m 0644 htmllint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/htmllint.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 manual.css.xml $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/manual.css.xml
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 phplint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/phplint.sh
@@ -46,6 +48,7 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/docbook.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/gettext.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/gtkdoc.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/htmllint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/manual.css.xml
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/phplint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/pkgconfig.sh
