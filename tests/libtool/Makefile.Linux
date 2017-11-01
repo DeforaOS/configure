@@ -6,6 +6,7 @@ LIBDIR	= $(PREFIX)/lib
 LDFLAGS	= -ldl   -ltest 
 EXEEXT	=
 AR	= ar
+ARFLAGS	= -rc
 RANLIB	= ranlib
 CCSHARED= $(CC) -shared
 SOEXT	= .so

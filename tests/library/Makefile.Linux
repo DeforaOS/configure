@@ -6,6 +6,7 @@ LIBDIR	= $(PREFIX)/lib
 LDFLAGS	= -ldl   -ltest 
 EXEEXT	=
 AR	= ar
+ARFLAGS	= -rc
 RANLIB	= ranlib
 CCSHARED= $(CC) -shared
 SOEXT	= .so
@@ -22,7 +23,7 @@ libtest_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 libtest_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
 $(OBJDIR)libtest.a: $(libtest_OBJS) a.c b.c
-	$(AR) -rc $(OBJDIR)libtest.a $(libtest_OBJS)
+	$(AR) $(ARFLAGS) $(OBJDIR)libtest.a $(libtest_OBJS)
 	$(RANLIB) $(OBJDIR)libtest.a
 
 $(OBJDIR)libtest$(SOEXT).0.0: $(libtest_OBJS) a.c b.c
