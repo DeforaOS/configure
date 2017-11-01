@@ -794,6 +794,7 @@ static void _variables_library_static(Configure * configure, FILE * fp)
 		_makefile_output_variable(fp, "AR", configure->programs.ar);
 	else
 		_makefile_output_variable(fp, "AR", p);
+	_makefile_output_variable(fp, "ARFLAGS", "-rc");
 	if((p = config_get(configure->config, NULL, "ranlib")) == NULL)
 		_makefile_output_variable(fp, "RANLIB",
 				configure->programs.ranlib);
@@ -1333,7 +1334,7 @@ static int _target_library_static(Configure * configure, FILE * fp,
 	_makefile_print(fp, "%c", '\n');
 	/* build the static library */
 	_makefile_print(fp, "%s%s%s%s%s",
-			"\t$(AR) -rc $(OBJDIR)", target, ".a $(",
+			"\t$(AR) $(ARFLAGS) $(OBJDIR)", target, ".a $(",
 			target, "_OBJS)");
 	len = strlen(target) + 3;
 	if((q = malloc(len)) == NULL)
