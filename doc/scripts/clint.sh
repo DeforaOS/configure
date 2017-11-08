@@ -59,7 +59,7 @@ _clint()
 	done < "$PROJECTCONF"
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
-		for filename in $($FIND "../$subdir" -name '*.c' | $SORT); do
+		for filename in $($FIND "../$subdir" -type f -a -name '*.c' | $SORT); do
 			_clint_file "$filename"
 			if [ $? -eq 0 ]; then
 				echo "$filename:"

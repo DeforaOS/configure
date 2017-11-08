@@ -58,7 +58,7 @@ _shlint()
 	done < "$PROJECTCONF"
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
-		for filename in $($FIND "../$subdir" -name '*.sh' | $SORT); do
+		for filename in $($FIND "../$subdir" -type f -a -name '*.sh' | $SORT); do
 			_shlint_file "$filename"
 			if [ $? -eq 0 ]; then
 				echo "$filename:"

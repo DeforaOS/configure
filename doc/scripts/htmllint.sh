@@ -58,7 +58,7 @@ _htmllint()
 	done < "$PROJECTCONF"
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
-		for filename in $($FIND "../$subdir" -iname '*.html' -o -iname '*.htm' | $SORT); do
+		for filename in $($FIND "../$subdir" -type f -a \( -iname '*.html' -o -iname '*.htm' \) | $SORT); do
 			$DEBUG $HTMLLINT "$filename" 2>&1 > "$DEVNULL"
 			if [ $? -eq 0 ]; then
 				echo "$filename:"
