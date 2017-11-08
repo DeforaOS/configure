@@ -18,16 +18,16 @@ subdirs:
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/"; \
 		else $(MAKE); fi) || exit; done
 
-$(OBJDIR)configure.1: configure.xml
+$(OBJDIR)configure.1: scripts/docbook.sh configure.xml
 	./scripts/docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)configure.1"
 
-$(OBJDIR)configure.html: configure.css.xml configure.xml manual.css.xml
+$(OBJDIR)configure.html: scripts/docbook.sh configure.css.xml configure.xml manual.css.xml
 	./scripts/docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)configure.html"
 
-$(OBJDIR)project.conf.5: project.conf.xml
+$(OBJDIR)project.conf.5: scripts/docbook.sh project.conf.xml
 	./scripts/docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)project.conf.5"
 
-$(OBJDIR)project.conf.html: project.conf.css.xml project.conf.xml manual.css.xml
+$(OBJDIR)project.conf.html: scripts/docbook.sh project.conf.css.xml project.conf.xml manual.css.xml
 	./scripts/docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)project.conf.html"
 
 clean:
