@@ -51,12 +51,11 @@ String * sSettingsType[ST_COUNT] =
 
 /* functions */
 /* settings */
-static int _settings_do(ConfigurePrefs const * prefs, Config const * config,
-		String const * directory, String const * package,
-		String const * version, String const * extension);
+static int _settings_do(Configure * configure, String const * directory,
+		String const * package, String const * version,
+		String const * extension);
 
-int settings(ConfigurePrefs const * prefs, Config const * config,
-		String const * directory,
+int settings(Configure * configure, String const * directory,
 		String const * package, String const * version)
 {
 	int ret = 0;
@@ -66,7 +65,7 @@ int settings(ConfigurePrefs const * prefs, Config const * config,
 	unsigned long i;
 	char c;
 
-	if((p = config_get(config, "", "config")) == NULL)
+	if((p = configure_get_config(configure, "", "config")) == NULL)
 		return 0;
 	if((q = string_new(p)) == NULL)
 		return 1;
@@ -77,8 +76,7 @@ int settings(ConfigurePrefs const * prefs, Config const * config,
 			continue;
 		c = r[i];
 		r[i] = '\0';
-		ret |= _settings_do(prefs, config, directory, package, version,
-				r);
+		ret |= _settings_do(configure, directory, package, version, r);
 		if(c == '\0')
 			break;
 		r+=i+1;
@@ -88,13 +86,13 @@ int settings(ConfigurePrefs const * prefs, Config const * config,
 	return ret;
 }
 
-static int _do_h(ConfigurePrefs const * prefs, Config const * config, FILE * fp,
+static int _do_h(Configure * configure, FILE * fp,
 		String const * package, String const * version);
-static int _do_sh(ConfigurePrefs const * prefs, Config const * config,
-		FILE * fp, String const * package, String const * version);
-static int _settings_do(ConfigurePrefs const * prefs, Config const * config,
-		String const * directory, String const * package,
-		String const * version, String const * extension)
+static int _do_sh(Configure * configure, FILE * fp,
+		String const * package, String const * version);
+static int _settings_do(Configure * configure, String const * directory,
+		String const * package, String const * version,
+		String const * extension)
 {
 	int ret = 0;
 	int i;
@@ -110,7 +108,7 @@ static int _settings_do(ConfigurePrefs const * prefs, Config const * config,
 				": Unknown settings type\n");
 		return 1;
 	}
-	if(prefs->flags & PREFS_n)
+	if(configure_is_flag_set(configure, PREFS_n))
 		return 0;
 	if((filename = string_new(directory)) == NULL)
 		return 1;
@@ -125,35 +123,39 @@ static int _settings_do(ConfigurePrefs const * prefs, Config const * config,
 	string_delete(filename);
 	if(fp == NULL)
 		return 1;
-	if(prefs->flags & PREFS_v)
+	if(configure_is_flag_set(configure, PREFS_v))
 		printf("%s%s/%s%s\n", "Creating ", directory, "config.",
 				extension);
 	switch(i)
 	{
 		case ST_H:
-			ret |= _do_h(prefs, config, fp, package, version);
+			ret |= _do_h(configure, fp, package, version);
 			break;
 		case ST_SH:
-			ret |= _do_sh(prefs, config, fp, package, version);
+			ret |= _do_sh(configure, fp, package, version);
 			break;
 	}
 	fclose(fp);
 	return ret;
 }
 
-static int _do_h(ConfigurePrefs const * prefs, Config const * config, FILE * fp,
+static int _do_h(Configure * configure, FILE * fp,
 		String const * package, String const * version)
 {
+	ConfigurePrefs const * prefs;
 	char const * p;
 
+	prefs = configure_get_prefs(configure);
 	fprintf(fp, "%s%s%s%s%s%s", "#define PACKAGE \"", package, "\"\n",
 			"#define VERSION \"", version, "\"\n");
 	if((p = prefs->prefix) != NULL
-			|| (p = config_get(config, "", "prefix")) != NULL)
+			|| (p = configure_get_config(configure, "",
+					"prefix")) != NULL)
 		fprintf(fp, "%s%s%s", "\n#ifndef PREFIX\n\
 # define PREFIX \"", p, "\"\n#endif\n");
 	if((p = prefs->libdir) != NULL
-			|| (p = config_get(config, "", "libdir")) != NULL)
+			|| (p = configure_get_config(configure, "",
+					"libdir")) != NULL)
 	{
 		fprintf(fp, "%s", "\n#ifndef LIBDIR\n# define LIBDIR ");
 		fprintf(fp, "%s%s", p[0] == '/' ? "\"" : "PREFIX \"/", p);
@@ -162,18 +164,22 @@ static int _do_h(ConfigurePrefs const * prefs, Config const * config, FILE * fp,
 	return 0;
 }
 
-static int _do_sh(ConfigurePrefs const * prefs, Config const * config,
-		FILE * fp, String const * package, String const * version)
+static int _do_sh(Configure * configure, FILE * fp,
+		String const * package, String const * version)
 {
+	ConfigurePrefs const * prefs;
 	char const * p;
 
+	prefs = configure_get_prefs(configure);
 	fprintf(fp, "%s%s%s%s%s%s", "PACKAGE=\"", package, "\"\n",
 			"VERSION=\"", version, "\"\n");
 	if((p = prefs->prefix) != NULL
-			|| (p = config_get(config, "", "prefix")) != NULL)
+			|| (p = configure_get_config(configure, "",
+					"prefix")) != NULL)
 		fprintf(fp, "%s%s%s", "\nPREFIX=\"", p, "\"\n");
 	if((p = prefs->libdir) != NULL
-			|| (p = config_get(config, "", "libdir")) != NULL)
+			|| (p = configure_get_config(configure, "",
+					"libdir")) != NULL)
 		fprintf(fp, "%s%s%s%s", "LIBDIR=\"", p[0] == '/' ? ""
 				: "${PREFIX}/", p, "\"\n");
 	return 0;

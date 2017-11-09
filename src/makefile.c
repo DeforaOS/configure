@@ -203,8 +203,7 @@ static int _variables_package(Configure * configure, FILE * fp,
 	_makefile_output_variable(fp, "PACKAGE", package);
 	_makefile_output_variable(fp, "VERSION", version);
 	if((p = _makefile_get_config(configure, NULL, "config")) != NULL)
-		return settings(configure_get_prefs(configure),
-				configure->config, directory, package, version);
+		return settings(configure, directory, package, version);
 	return 0;
 }
 
