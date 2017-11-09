@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)clint.log $(OBJDIR)htmllint.log $(OBJDIR)shlint.log $(OBJDIR)tests.log $(OBJDIR)xmllint.log
+TARGETS	= $(OBJDIR)clint.log $(OBJDIR)htmllint.log $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)tests.log $(OBJDIR)xmllint.log
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -16,6 +16,12 @@ $(OBJDIR)clint.log: ../doc/scripts/clint.sh
 $(OBJDIR)htmllint.log: ../doc/scripts/htmllint.sh
 	../doc/scripts/htmllint.sh -P "$(PREFIX)" -- "$(OBJDIR)htmllint.log"
 
+$(OBJDIR)phplint.log: ../doc/scripts/phplint.sh
+	../doc/scripts/phplint.sh -P "$(PREFIX)" -- "$(OBJDIR)phplint.log"
+
+$(OBJDIR)pylint.log: ../doc/scripts/pylint.sh
+	../doc/scripts/pylint.sh -P "$(PREFIX)" -- "$(OBJDIR)pylint.log"
+
 $(OBJDIR)shlint.log: ../doc/scripts/shlint.sh
 	../doc/scripts/shlint.sh -P "$(PREFIX)" -- "$(OBJDIR)shlint.log"
 
@@ -26,9 +32,11 @@ $(OBJDIR)xmllint.log: ../doc/scripts/xmllint.sh
 	../doc/scripts/xmllint.sh -P "$(PREFIX)" -- "$(OBJDIR)xmllint.log"
 
 clean:
-	$(RM) -- $(clint.log_OBJS) $(htmllint.log_OBJS) $(shlint.log_OBJS) $(tests.log_OBJS) $(xmllint.log_OBJS)
+	$(RM) -- $(clint.log_OBJS) $(htmllint.log_OBJS) $(phplint.log_OBJS) $(pylint.log_OBJS) $(shlint.log_OBJS) $(tests.log_OBJS) $(xmllint.log_OBJS)
 	../doc/scripts/clint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)clint.log"
 	../doc/scripts/htmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)htmllint.log"
+	../doc/scripts/phplint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)phplint.log"
+	../doc/scripts/pylint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)pylint.log"
 	../doc/scripts/shlint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)shlint.log"
 	./tests.sh -c -P "$(PREFIX)" -- "$(OBJDIR)tests.log"
 	../doc/scripts/xmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)xmllint.log"
