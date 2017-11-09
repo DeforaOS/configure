@@ -350,7 +350,7 @@ static int _configure_detect_programs(Configure * configure)
 {
 	int ret = 0;
 	String const section[] = "programs";
-	String const filename[] = DATADIR "/" PACKAGE "/" PACKAGE ".conf";
+	String * filename = DATADIR "/" PACKAGE "/" PACKAGE ".conf";
 	struct
 	{
 		String const * name;
@@ -374,22 +374,12 @@ static int _configure_detect_programs(Configure * configure)
 	if(config_load(configure->programs, filename) != 0)
 		configure_warning(0, "%s: %s", filename,
 				"Could not load program definitions");
-	/* platform-specific */
-	switch(configure->os)
-	{
-		case HO_MACOSX:
-			ret = config_set(configure->programs, section,
-					"ccshared", "$(CC) -dynamiclib");
-			break;
-		case HO_WIN32:
-			ret = config_set(configure->programs, section,
-					"ccshared", "$(CC) -shared"
-					" -Wl,-no-undefined"
-					" -Wl,--enable-runtime-pseudo-reloc");
-			break;
-		default:
-			break;
-	}
+	if((filename = string_new_append(DATADIR "/" PACKAGE "/platform/",
+					sHostOS[configure->os], ".conf", NULL))
+			!= NULL
+			&& config_load(configure->programs, filename) != 0)
+		configure_warning(0, "%s: %s", filename,
+				"Could not load program definitions");
 	return ret;
 }
 
