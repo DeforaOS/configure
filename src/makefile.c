@@ -275,9 +275,9 @@ static int _variables_dist(Configure * configure, FILE * fp)
 				_makefile_output_variable(fp, "DESTDIR",
 						prefs->destdir);
 			}
-			_makefile_output_program(configure, fp, "MKDIR");
-			_makefile_output_program(configure, fp, "INSTALL");
-			_makefile_output_program(configure, fp, "RM");
+			_makefile_output_program(configure, fp, "mkdir");
+			_makefile_output_program(configure, fp, "install");
+			_makefile_output_program(configure, fp, "rm");
 			break;
 		}
 		if(c == '\0')
@@ -440,19 +440,19 @@ static int _variables_executables(Configure * configure, FILE * fp)
 	}
 	if(targets != NULL || includes != NULL || package != NULL)
 	{
-		_makefile_output_program(configure, fp, "RM");
-		_makefile_output_program(configure, fp, "LN");
+		_makefile_output_program(configure, fp, "rm");
+		_makefile_output_program(configure, fp, "ln");
 	}
 	if(package != NULL)
 	{
-		_makefile_output_program(configure, fp, "TAR");
-		_makefile_output_program(configure, fp, "MKDIR");
+		_makefile_output_program(configure, fp, "tar");
+		_makefile_output_program(configure, fp, "mkdir");
 	}
 	if(targets != NULL || includes != NULL)
 	{
 		if(package == NULL)
-			_makefile_output_program(configure, fp, "MKDIR");
-		_makefile_output_program(configure, fp, "INSTALL");
+			_makefile_output_program(configure, fp, "mkdir");
+		_makefile_output_program(configure, fp, "install");
 	}
 	return 0;
 }
@@ -566,7 +566,7 @@ static void _targets_asflags(Configure * configure, FILE * fp)
 	if(as != NULL || asff != NULL || asf != NULL)
 	{
 		_makefile_output_variable(fp, "AS", (as != NULL) ? as
-				: configure_get_program(configure, "AS"));
+				: configure_get_program(configure, "as"));
 		_makefile_output_variable(fp, "ASFLAGSF", asff);
 		_makefile_output_variable(fp, "ASFLAGS", asf);
 	}
@@ -590,7 +590,7 @@ static void _targets_cflags(Configure * configure, FILE * fp)
 			&& cc == NULL)
 		return;
 	if(cc == NULL)
-		_makefile_output_program(configure, fp, "CC");
+		_makefile_output_program(configure, fp, "cc");
 	else
 		_makefile_output_variable(fp, "CC", cc);
 	_makefile_output_variable(fp, "CPPFLAGSF", cppf);
@@ -621,7 +621,7 @@ static void _targets_cxxflags(Configure * configure, FILE * fp)
 	if(cxx != NULL || cxxff != NULL || cxxf != NULL)
 	{
 		if(cxx == NULL)
-			cxx = configure_get_program(configure, "CXX");
+			cxx = configure_get_program(configure, "cxx");
 		_makefile_output_variable(fp, "CXX", cxx);
 	}
 	if(cxxff != NULL)
@@ -785,7 +785,7 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 	if(configure_can_library_static(configure))
 		_variables_library_static(configure, fp);
 	if((p = _makefile_get_config(configure, NULL, "ld")) == NULL)
-		_makefile_output_program(configure, fp, "CCSHARED");
+		_makefile_output_program(configure, fp, "ccshared");
 	else
 		_makefile_output_variable(fp, "CCSHARED", p);
 	_makefile_output_variable(fp, "SOEXT", configure_get_soext(configure));
@@ -796,12 +796,12 @@ static void _variables_library_static(Configure * configure, FILE * fp)
 	String const * p;
 
 	if((p = _makefile_get_config(configure, NULL, "ar")) == NULL)
-		_makefile_output_program(configure, fp, "AR");
+		_makefile_output_program(configure, fp, "ar");
 	else
 		_makefile_output_variable(fp, "AR", p);
 	_makefile_output_variable(fp, "ARFLAGS", "-rc");
 	if((p = _makefile_get_config(configure, NULL, "ranlib")) == NULL)
-		_makefile_output_program(configure, fp, "RANLIB");
+		_makefile_output_program(configure, fp, "ranlib");
 	else
 		_makefile_output_variable(fp, "RANLIB", p);
 }
@@ -815,7 +815,7 @@ static void _variables_libtool(Configure * configure, FILE * fp, char * done)
 	{
 		if((p = _makefile_get_config(configure, NULL, "libtool"))
 				== NULL)
-			_makefile_output_program(configure, fp, "LIBTOOL");
+			_makefile_output_program(configure, fp, "libtool");
 		else
 			_makefile_output_variable(fp, "LIBTOOL", p);
 	}
@@ -880,7 +880,7 @@ static int _variables_subdirs(Configure * configure, FILE * fp)
 		if(q != NULL)
 			return 0;
 	}
-	return _makefile_output_program(configure, fp, "MKDIR");
+	return _makefile_output_program(configure, fp, "mkdir");
 }
 
 static int _targets_all(Configure * configure, FILE * fp);
@@ -2810,10 +2810,17 @@ static int _makefile_link(FILE * fp, int symlink, char const * link,
 static int _makefile_output_program(Configure * configure, FILE * fp,
 		String const * name)
 {
+	int ret;
 	String const * value;
+	String * upper;
 
+	if((upper = string_new(name)) == NULL)
+		return -1;
+	string_toupper(upper);
 	value = configure_get_program(configure, name);
-	return _makefile_output_variable(fp, name, value);
+	ret = _makefile_output_variable(fp, upper, value);
+	string_delete(upper);
+	return ret;
 }
 
 

@@ -60,21 +60,7 @@ struct _Configure {
 		char const * exeext;
 		char const * soext;
 	} extensions;
-	struct
-	{
-		char const * ar;
-		char const * as;
-		char const * cc;
-		char const * ccshared;
-		char const * cxx;
-		char const * install;
-		char const * libtool;
-		char const * ln;
-		char const * mkdir;
-		char const * ranlib;
-		char const * rm;
-		char const * tar;
-	} programs;
+	Config * programs;
 };
 
 
@@ -208,7 +194,7 @@ unsigned int enum_string_short(unsigned int last, const String * strings[],
 static void _configure_detect(Configure * configure);
 static HostKernel _detect_kernel(HostOS os, char const * release);
 static void _configure_detect_extensions(Configure * configure);
-static void _configure_detect_programs(Configure * configure);
+static int _configure_detect_programs(Configure * configure);
 static int _configure_load(ConfigurePrefs * prefs, char const * directory,
 		configArray * ca);
 static int _load_subdirs(ConfigurePrefs * prefs, char const * directory,
@@ -231,8 +217,8 @@ int configure(ConfigurePrefs * prefs, String const * directory)
 	cfgr.prefs = prefs;
 	_configure_detect(&cfgr);
 	_configure_detect_extensions(&cfgr);
-	_configure_detect_programs(&cfgr);
-	if((ret = _configure_load(prefs, directory, ca)) == 0)
+	if((ret = _configure_detect_programs(&cfgr)) != 0
+			|| (ret = _configure_load(prefs, directory, ca)) == 0)
 	{
 		if(prefs->flags & PREFS_n)
 			ret = _configure_do(&cfgr, ca);
@@ -252,6 +238,8 @@ int configure(ConfigurePrefs * prefs, String const * directory)
 		config_delete(p);
 	}
 	array_delete(ca);
+	if(cfgr.programs != NULL)
+		config_delete(cfgr.programs);
 	return ret;
 }
 
@@ -331,34 +319,47 @@ static void _configure_detect_extensions(Configure * configure)
 	}
 }
 
-static void _configure_detect_programs(Configure * configure)
+static int _configure_detect_programs(Configure * configure)
 {
-	configure->programs.ar = "ar";
-	configure->programs.as = "as";
-	configure->programs.cc = "cc";
-	configure->programs.ccshared = "$(CC) -shared";
-	configure->programs.cxx = "c++";
-	configure->programs.install = "install";
-	configure->programs.libtool = "libtool";
-	configure->programs.ln = "ln -f";
-	configure->programs.mkdir = "mkdir -m 0755 -p";
-	configure->programs.ranlib = "ranlib";
-	configure->programs.rm = "rm -f";
-	configure->programs.tar = "tar";
+	int ret = 0;
+	String const section[] = "programs";
+	struct
+	{
+		String const * name;
+		String const * program;
+	} programs[] =
+	{
+		{ "ccshared",	"$(CC) -shared"		},
+		{ "cxx",	"c++"			},
+		{ "ln",		"ln -f"			},
+		{ "mkdir",	"mkdir -m 0755 -p"	},
+		{ "rm",		"rm -f"			},
+	};
+	size_t i;
+
+	if((configure->programs = config_new()) == NULL)
+		return -1;
+	for(i = 0; i < sizeof(programs) / sizeof(*programs); i++)
+		if(config_set(configure->programs, section, programs[i].name,
+					programs[i].program) != 0)
+			return -1;
 	/* platform-specific */
 	switch(configure->os)
 	{
 		case HO_MACOSX:
-			configure->programs.ccshared = "$(CC) -dynamiclib";
+			ret = config_set(configure->programs, section,
+					"ccshared", "$(CC) -dynamiclib");
 			break;
 		case HO_WIN32:
-			configure->programs.ccshared = "$(CC) -shared"
-				" -Wl,-no-undefined"
-				" -Wl,--enable-runtime-pseudo-reloc";
+			ret = config_set(configure->programs, section,
+					"ccshared", "$(CC) -shared"
+					" -Wl,-no-undefined"
+					" -Wl,--enable-runtime-pseudo-reloc");
 			break;
 		default:
 			break;
 	}
+	return ret;
 }
 
 static int _configure_load(ConfigurePrefs * prefs, String const * directory,
@@ -513,32 +514,12 @@ ConfigurePrefs const * configure_get_prefs(Configure * configure)
 /* configure_get_program */
 String const * configure_get_program(Configure * configure, String const * name)
 {
-	/* XXX use a configuration file instead */
-	if(string_compare(name, "AR") == 0)
-		return configure->programs.ar;
-	else if(string_compare(name, "AS") == 0)
-		return configure->programs.as;
-	else if(string_compare(name, "CC") == 0)
-		return configure->programs.cc;
-	else if(string_compare(name, "CCSHARED") == 0)
-		return configure->programs.ccshared;
-	else if(string_compare(name, "CXX") == 0)
-		return configure->programs.cxx;
-	else if(string_compare(name, "INSTALL") == 0)
-		return configure->programs.install;
-	else if(string_compare(name, "LIBTOOL") == 0)
-		return configure->programs.libtool;
-	else if(string_compare(name, "LN") == 0)
-		return configure->programs.ln;
-	else if(string_compare(name, "MKDIR") == 0)
-		return configure->programs.mkdir;
-	else if(string_compare(name, "RANLIB") == 0)
-		return configure->programs.ranlib;
-	else if(string_compare(name, "RM") == 0)
-		return configure->programs.rm;
-	else if(string_compare(name, "TAR") == 0)
-		return configure->programs.tar;
-	return "";
+	String const section[] = "programs";
+	String const * program;
+
+	if((program = config_get(configure->programs, section, name)) != NULL)
+		return program;
+	return name;
 }
 
 
