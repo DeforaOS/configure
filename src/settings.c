@@ -50,11 +50,12 @@ String * sSettingsType[ST_LAST+1] =
 
 /* functions */
 /* settings */
-static int _settings_do(ConfigurePrefs * prefs, Config * config,
+static int _settings_do(ConfigurePrefs const * prefs, Config const * config,
 		String const * directory, String const * package,
 		String const * version, String const * extension);
 
-int settings(ConfigurePrefs * prefs, Config * config, String const * directory,
+int settings(ConfigurePrefs const * prefs, Config const * config,
+		String const * directory,
 		String const * package, String const * version)
 {
 	int ret = 0;
@@ -86,11 +87,11 @@ int settings(ConfigurePrefs * prefs, Config * config, String const * directory,
 	return ret;
 }
 
-static int _do_h(ConfigurePrefs * prefs, Config * config, FILE * fp,
+static int _do_h(ConfigurePrefs const * prefs, Config const * config, FILE * fp,
 		String const * package, String const * version);
-static int _do_sh(ConfigurePrefs * prefs, Config * config, FILE * fp,
-		String const * package, String const * version);
-static int _settings_do(ConfigurePrefs * prefs, Config * config,
+static int _do_sh(ConfigurePrefs const * prefs, Config const * config,
+		FILE * fp, String const * package, String const * version);
+static int _settings_do(ConfigurePrefs const * prefs, Config const * config,
 		String const * directory, String const * package,
 		String const * version, String const * extension)
 {
@@ -139,7 +140,7 @@ static int _settings_do(ConfigurePrefs * prefs, Config * config,
 	return ret;
 }
 
-static int _do_h(ConfigurePrefs * prefs, Config * config, FILE * fp,
+static int _do_h(ConfigurePrefs const * prefs, Config const * config, FILE * fp,
 		String const * package, String const * version)
 {
 	char const * p;
@@ -160,8 +161,8 @@ static int _do_h(ConfigurePrefs * prefs, Config * config, FILE * fp,
 	return 0;
 }
 
-static int _do_sh(ConfigurePrefs * prefs, Config * config, FILE * fp,
-		String const * package, String const * version)
+static int _do_sh(ConfigurePrefs const * prefs, Config const * config,
+		FILE * fp, String const * package, String const * version)
 {
 	char const * p;
 

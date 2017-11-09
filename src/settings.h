@@ -36,7 +36,8 @@
 
 
 /* functions */
-int settings(ConfigurePrefs * prefs, Config * config, String const * directory,
+int settings(ConfigurePrefs const * prefs, Config const * config,
+		String const * directory,
 		String const * package, String const * version);
 
 #endif /* !CONFIGURE_SETTINGS_H */
