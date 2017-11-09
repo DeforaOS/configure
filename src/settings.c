@@ -42,7 +42,8 @@ typedef enum _SETTINGS_TYPE
 	ST_SH
 } SettingsType;
 #define ST_LAST ST_SH
-String * sSettingsType[ST_LAST+1] =
+#define ST_COUNT (ST_LAST + 1)
+String * sSettingsType[ST_COUNT] =
 {
 	"h", "sh"
 };
