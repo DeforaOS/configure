@@ -48,6 +48,8 @@
 
 /* prototypes */
 /* accessors */
+static String const * _makefile_get_config(Configure * configure,
+		String const * section, String const * variable);
 static int _makefile_is_phony(Configure * configure, char const * target);
 
 /* useful */
@@ -114,7 +116,6 @@ static int _write_uninstall(Configure * configure, FILE * fp);
 static int _makefile_write(Configure * configure, FILE * fp, configArray * ca,
 	       	int from, int to)
 {
-	Config * config = configure->config;
 	char const * depends[9] = { "all" };
 	size_t i = 1;
 
@@ -128,12 +129,12 @@ static int _makefile_write(Configure * configure, FILE * fp, configArray * ca,
 			|| _write_install(configure, fp) != 0
 			|| _write_uninstall(configure, fp) != 0)
 		return 1;
-	if(config_get(config, NULL, "subdirs") != NULL)
+	if(_makefile_get_config(configure, NULL, "subdirs") != NULL)
 		depends[i++] = "subdirs";
 	depends[i++] = "clean";
 	depends[i++] = "distclean";
-	if(config_get(config, NULL, "package") != NULL
-			&& config_get(config, NULL, "version") != NULL)
+	if(_makefile_get_config(configure, NULL, "package") != NULL
+			&& _makefile_get_config(configure, NULL, "version") != NULL)
 	{
 		depends[i++] = "dist";
 		depends[i++] = "distcheck";
@@ -160,7 +161,7 @@ static int _write_variables(Configure * configure, FILE * fp)
 	int ret = 0;
 	String const * directory;
 
-	directory = config_get(configure->config, NULL, "directory");
+	directory = _makefile_get_config(configure, NULL, "directory");
 	ret |= _variables_package(configure, fp, directory);
 	ret |= _variables_print(configure, fp, "subdirs", "SUBDIRS");
 	ret |= _variables_dist(configure, fp);
@@ -179,11 +180,11 @@ static int _variables_package(Configure * configure, FILE * fp,
 	String const * version;
 	String const * p;
 
-	if((package = config_get(configure->config, NULL, "package")) == NULL)
+	if((package = _makefile_get_config(configure, NULL, "package")) == NULL)
 		return 0;
 	if(configure->prefs->flags & PREFS_v)
 		printf("%s%s", "Package: ", package);
-	if((version = config_get(configure->config, NULL, "version")) == NULL)
+	if((version = _makefile_get_config(configure, NULL, "version")) == NULL)
 	{
 		if(configure->prefs->flags & PREFS_v)
 			fputc('\n', stdout);
@@ -195,7 +196,7 @@ static int _variables_package(Configure * configure, FILE * fp,
 		printf(" %s\n", version);
 	_makefile_output_variable(fp, "PACKAGE", package);
 	_makefile_output_variable(fp, "VERSION", version);
-	if((p = config_get(configure->config, NULL, "config")) != NULL)
+	if((p = _makefile_get_config(configure, NULL, "config")) != NULL)
 		return settings(configure->prefs, configure->config, directory,
 			       	package, version);
 	return 0;
@@ -210,7 +211,7 @@ static int _variables_print(Configure * configure, FILE * fp,
 	unsigned long i;
 	char c;
 
-	if((p = config_get(configure->config, NULL, input)) == NULL)
+	if((p = _makefile_get_config(configure, NULL, input)) == NULL)
 		return 0;
 	if((prints = string_new(p)) == NULL)
 		return 1;
@@ -244,7 +245,7 @@ static int _variables_dist(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	if((p = config_get(configure->config, NULL, "dist")) == NULL)
+	if((p = _makefile_get_config(configure, NULL, "dist")) == NULL)
 		return 0;
 	if((dist = string_new(p)) == NULL)
 		return 1;
@@ -255,10 +256,10 @@ static int _variables_dist(Configure * configure, FILE * fp)
 			continue;
 		c = dist[i];
 		dist[i] = '\0';
-		if(config_get(configure->config, dist, "install") != NULL)
+		if(_makefile_get_config(configure, dist, "install") != NULL)
 		{
 			/* FIXME may still need to be output */
-			if(config_get(configure->config, NULL, "targets")
+			if(_makefile_get_config(configure, NULL, "targets")
 					== NULL)
 			{
 				_makefile_output_variable(fp, "OBJDIR", "");
@@ -295,7 +296,7 @@ static int _variables_targets(Configure * configure, FILE * fp)
 	String const * type;
 	int phony;
 
-	if((p = config_get(configure->config, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config(configure, NULL, "targets")) == NULL)
 		return 0;
 	if((prints = string_new(p)) == NULL)
 		return 1;
@@ -307,7 +308,7 @@ static int _variables_targets(Configure * configure, FILE * fp)
 			continue;
 		c = prints[i];
 		prints[i] = '\0';
-		if((type = config_get(configure->config, prints, "type"))
+		if((type = _makefile_get_config(configure, prints, "type"))
 			       	== NULL)
 			_makefile_print(fp, " %s", prints);
 		else
@@ -360,7 +361,7 @@ static int _variables_targets_library(Configure * configure, FILE * fp,
 	String * soname;
 	String const * p;
 
-	if((p = config_get(configure->config, target, "soname")) != NULL)
+	if((p = _makefile_get_config(configure, target, "soname")) != NULL)
 		soname = string_new(p);
 	else if(configure->os == HO_MACOSX)
 		/* versioning is different on MacOS X */
@@ -403,9 +404,9 @@ static int _variables_executables(Configure * configure, FILE * fp)
 	char c;
 
 	memset(&done, 0, sizeof(done));
-	targets = config_get(configure->config, NULL, "targets");
-	includes = config_get(configure->config, NULL, "includes");
-	package = config_get(configure->config, NULL, "package");
+	targets = _makefile_get_config(configure, NULL, "targets");
+	includes = _makefile_get_config(configure, NULL, "includes");
+	package = _makefile_get_config(configure, NULL, "package");
 	if(targets != NULL)
 	{
 		if((p = string_new(targets)) == NULL)
@@ -466,7 +467,7 @@ static void _executables_variables(Configure * configure, FILE * fp,
 	String const * type;
 	TargetType tt;
 
-	if((type = config_get(configure->config, target, "type")) == NULL)
+	if((type = _makefile_get_config(configure, target, "type")) == NULL)
 		return;
 	if(done[(tt = enum_string(TT_LAST, sTargetType, type))])
 		return;
@@ -558,9 +559,9 @@ static void _targets_asflags(Configure * configure, FILE * fp)
 	String const * asf;
 	String const * asff;
 
-	as = config_get(configure->config, NULL, "as");
-	asff = config_get(configure->config, NULL, "asflags_force");
-	asf = config_get(configure->config, NULL, "asflags");
+	as = _makefile_get_config(configure, NULL, "as");
+	asff = _makefile_get_config(configure, NULL, "asflags_force");
+	asf = _makefile_get_config(configure, NULL, "asflags");
 	if(as != NULL || asff != NULL || asf != NULL)
 	{
 		_makefile_output_variable(fp, "AS", (as != NULL) ? as
@@ -579,11 +580,11 @@ static void _targets_cflags(Configure * configure, FILE * fp)
 	String const * cpp;
 	String * p;
 
-	cppf = config_get(configure->config, NULL, "cppflags_force");
-	cpp = config_get(configure->config, NULL, "cppflags");
-	cff = config_get(configure->config, NULL, "cflags_force");
-	cf = config_get(configure->config, NULL, "cflags");
-	cc = config_get(configure->config, NULL, "cc");
+	cppf = _makefile_get_config(configure, NULL, "cppflags_force");
+	cpp = _makefile_get_config(configure, NULL, "cppflags");
+	cff = _makefile_get_config(configure, NULL, "cflags_force");
+	cf = _makefile_get_config(configure, NULL, "cflags");
+	cc = _makefile_get_config(configure, NULL, "cc");
 	if(cppf == NULL && cpp == NULL && cff == NULL && cf == NULL
 			&& cc == NULL)
 		return;
@@ -613,9 +614,9 @@ static void _targets_cxxflags(Configure * configure, FILE * fp)
 	String const * cxxff;
 	String const * cxxf;
 
-	cxx = config_get(configure->config, NULL, "cxx");
-	cxxff = config_get(configure->config, NULL, "cxxflags_force");
-	cxxf = config_get(configure->config, NULL, "cxxflags");
+	cxx = _makefile_get_config(configure, NULL, "cxx");
+	cxxff = _makefile_get_config(configure, NULL, "cxxflags_force");
+	cxxf = _makefile_get_config(configure, NULL, "cxxflags");
 	if(cxx != NULL || cxxff != NULL || cxxf != NULL)
 	{
 		if(cxx == NULL)
@@ -648,13 +649,13 @@ static void _targets_ldflags(Configure * configure, FILE * fp)
 {
 	String const * p;
 
-	if((p = config_get(configure->config, NULL, "ldflags_force")) != NULL)
+	if((p = _makefile_get_config(configure, NULL, "ldflags_force")) != NULL)
 	{
 		_makefile_print(fp, "%s", "LDFLAGSF=");
 		_binary_ldflags(configure, fp, p);
 		_makefile_print(fp, "%c", '\n');
 	}
-	if((p = config_get(configure->config, NULL, "ldflags")) != NULL)
+	if((p = _makefile_get_config(configure, NULL, "ldflags")) != NULL)
 	{
 		_makefile_print(fp, "%s", "LDFLAGS\t=");
 		_binary_ldflags(configure, fp, p);
@@ -666,14 +667,14 @@ static void _targets_vflags(Configure * configure, FILE * fp)
 {
 	String const * p;
 
-	if((p = config_get(configure->config, NULL, "verilog")) != NULL)
+	if((p = _makefile_get_config(configure, NULL, "verilog")) != NULL)
 		_makefile_output_variable(fp, "VERILOG", p);
-	if((p = config_get(configure->config, NULL, "vflags_force")) != NULL)
+	if((p = _makefile_get_config(configure, NULL, "vflags_force")) != NULL)
 	{
 		_makefile_print(fp, "%s", "VFLAGSF=");
 		_makefile_print(fp, "%c", '\n');
 	}
-	if((p = config_get(configure->config, NULL, "vflags")) != NULL)
+	if((p = _makefile_get_config(configure, NULL, "vflags")) != NULL)
 	{
 		_makefile_print(fp, "%s", "VFLAGS\t=");
 		_makefile_print(fp, "%c", '\n');
@@ -763,7 +764,7 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 		_makefile_output_variable(fp, "DESTDIR",
 				configure->prefs->destdir);
 	}
-	if((libdir = config_get(configure->config, NULL, "libdir")) == NULL)
+	if((libdir = _makefile_get_config(configure, NULL, "libdir")) == NULL)
 		libdir = configure->prefs->libdir;
 	if(libdir[0] == '/')
 		_makefile_output_variable(fp, "LIBDIR", libdir);
@@ -780,7 +781,7 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 	}
 	if(configure_can_library_static(configure))
 		_variables_library_static(configure, fp);
-	if((p = config_get(configure->config, NULL, "ld")) == NULL)
+	if((p = _makefile_get_config(configure, NULL, "ld")) == NULL)
 		_makefile_output_variable(fp, "CCSHARED",
 				configure->programs.ccshared);
 	else
@@ -792,12 +793,12 @@ static void _variables_library_static(Configure * configure, FILE * fp)
 {
 	String const * p;
 
-	if((p = config_get(configure->config, NULL, "ar")) == NULL)
+	if((p = _makefile_get_config(configure, NULL, "ar")) == NULL)
 		_makefile_output_variable(fp, "AR", configure->programs.ar);
 	else
 		_makefile_output_variable(fp, "AR", p);
 	_makefile_output_variable(fp, "ARFLAGS", "-rc");
-	if((p = config_get(configure->config, NULL, "ranlib")) == NULL)
+	if((p = _makefile_get_config(configure, NULL, "ranlib")) == NULL)
 		_makefile_output_variable(fp, "RANLIB",
 				configure->programs.ranlib);
 	else
@@ -811,7 +812,8 @@ static void _variables_libtool(Configure * configure, FILE * fp, char * done)
 	_variables_library(configure, fp, done);
 	if(!done[TT_LIBTOOL])
 	{
-		if((p = config_get(configure->config, NULL, "libtool")) == NULL)
+		if((p = _makefile_get_config(configure, NULL, "libtool"))
+				== NULL)
 			_makefile_output_variable(fp, "LIBTOOL",
 					configure->programs.libtool);
 		else
@@ -835,7 +837,8 @@ static int _variables_includes(Configure * configure, FILE * fp)
 {
 	String const * includes;
 
-	if((includes = config_get(configure->config, NULL, "includes")) == NULL)
+	if((includes = _makefile_get_config(configure, NULL, "includes"))
+			== NULL)
 		return 0;
 	if(fp == NULL)
 		return 0;
@@ -850,25 +853,26 @@ static int _variables_includes(Configure * configure, FILE * fp)
 
 static int _variables_subdirs(Configure * configure, FILE * fp)
 {
-	Config * config = configure->config;
 	String const * sections[] = { "dist" };
 	size_t i;
 	String * p;
 	String const * q;
 
-	if(config_get(config, NULL, "subdirs") == NULL
-			|| config_get(config, NULL, "package") != NULL
-			|| config_get(config, NULL, "targets") != NULL
-			|| config_get(config, NULL, "includes") != NULL)
+	if(_makefile_get_config(configure, NULL, "subdirs") == NULL
+			|| _makefile_get_config(configure, NULL, "package") != NULL
+			|| _makefile_get_config(configure, NULL, "targets") != NULL
+			|| _makefile_get_config(configure, NULL, "includes") != NULL)
 		return 0;
 	for(i = 0; i < sizeof(sections) / sizeof(*sections); i++)
 	{
-		if((q = config_get(config, NULL, sections[i])) == NULL)
+		if((q = _makefile_get_config(configure, NULL, sections[i]))
+				== NULL)
 			continue;
 		if((p = strdup(q)) == NULL)
 			return -1;
 		for(q = strtok(p, ","); q != NULL; q = strtok(NULL, ","))
-			if(config_get(config, q, "install") != NULL)
+			if(_makefile_get_config(configure, q, "install")
+					!= NULL)
 				break;
 		free(p);
 		if(q != NULL)
@@ -894,7 +898,7 @@ static int _write_targets(Configure * configure, FILE * fp)
 	if(_targets_all(configure, fp) != 0
 			|| _targets_subdirs(configure, fp) != 0)
 		return 1;
-	if((p = config_get(configure->config, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config(configure, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -920,9 +924,9 @@ static int _targets_all(Configure * configure, FILE * fp)
 	char const * depends[] = { NULL, NULL };
 	size_t i = 0;
 
-	if(config_get(configure->config, NULL, "subdirs") != NULL)
+	if(_makefile_get_config(configure, NULL, "subdirs") != NULL)
 		depends[i++] = "subdirs";
-	if(config_get(configure->config, NULL, "targets") != NULL)
+	if(_makefile_get_config(configure, NULL, "targets") != NULL)
 		depends[i++] = "$(TARGETS)";
 	_makefile_target(fp, "all", depends[0], depends[1], NULL);
 	return 0;
@@ -932,7 +936,7 @@ static int _targets_subdirs(Configure * configure, FILE * fp)
 {
 	String const * subdirs;
 
-	if((subdirs = config_get(configure->config, NULL, "subdirs")) != NULL)
+	if((subdirs = _makefile_get_config(configure, NULL, "subdirs")) != NULL)
 	{
 		_makefile_target(fp, "subdirs", NULL);
 		_makefile_subdirs(fp, NULL);
@@ -962,7 +966,7 @@ static int _targets_target(Configure * configure, FILE * fp,
 	String const * type;
 	TargetType tt;
 
-	if((type = config_get(configure->config, target, "type")) == NULL)
+	if((type = _makefile_get_config(configure, target, "type")) == NULL)
 	{
 		fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
 				": no type defined for target\n");
@@ -1003,9 +1007,9 @@ static int _target_objs(Configure * configure, FILE * fp,
 	size_t i;
 	char c;
 
-	if((p = config_get(configure->config, target, "type")) != NULL)
+	if((p = _makefile_get_config(configure, target, "type")) != NULL)
 		tt = enum_string(TT_LAST, sTargetType, p);
-	if((p = config_get(configure->config, target, "sources")) == NULL)
+	if((p = _makefile_get_config(configure, target, "sources")) == NULL)
 		/* a binary target may have no sources */
 		return 0;
 	if((sources = string_new(p)) == NULL)
@@ -1082,7 +1086,7 @@ static int _target_binary(Configure * configure, FILE * fp,
 	/* output the binary target */
 	_makefile_print(fp, "%s%s%s%s%s%s", "$(OBJDIR)", target, "$(EXEEXT)",
 			": $(", target, "_OBJS)");
-	if((p = config_get(configure->config, target, "depends")) != NULL
+	if((p = _makefile_get_config(configure, target, "depends")) != NULL
 			&& _makefile_expand(fp, p) != 0)
 		return error_print(PROGNAME);
 	_makefile_print(fp, "%c", '\n');
@@ -1111,10 +1115,10 @@ static int _target_flags(Configure * configure, FILE * fp,
 	size_t i;
 
 	memset(&done, 0, sizeof(done));
-	if((p = config_get(configure->config, target, "sources")) == NULL
+	if((p = _makefile_get_config(configure, target, "sources")) == NULL
 			|| string_length(p) == 0)
 	{
-		if((p = config_get(configure->config, target, "type")) != NULL
+		if((p = _makefile_get_config(configure, target, "type")) != NULL
 				&& string_compare(p, "binary") == 0)
 			_flags_c(configure, fp, target);
 		return 0;
@@ -1178,7 +1182,7 @@ static void _flags_asm(Configure * configure, FILE * fp, String const * target)
 
 	_makefile_print(fp, "%s%s", target, "_ASFLAGS = $(CPPFLAGSF)"
 			" $(CPPFLAGS) $(ASFLAGSF) $(ASFLAGS)");
-	if((p = config_get(configure->config, target, "asflags")) != NULL)
+	if((p = _makefile_get_config(configure, target, "asflags")) != NULL)
 		_makefile_print(fp, " %s", p);
 	_makefile_print(fp, "%c", '\n');
 }
@@ -1189,10 +1193,10 @@ static void _flags_c(Configure * configure, FILE * fp, String const * target)
 
 	_makefile_print(fp, "%s%s", target, "_CFLAGS = $(CPPFLAGSF)"
 			" $(CPPFLAGS)");
-	if((p = config_get(configure->config, target, "cppflags")) != NULL)
+	if((p = _makefile_get_config(configure, target, "cppflags")) != NULL)
 		_makefile_print(fp, " %s", p);
 	_makefile_print(fp, "%s", " $(CFLAGSF) $(CFLAGS)");
-	if((p = config_get(configure->config, target, "cflags")) != NULL)
+	if((p = _makefile_get_config(configure, target, "cflags")) != NULL)
 	{
 		_makefile_print(fp, " %s", p);
 		if(configure->os == HO_GNU_LINUX && string_find(p, "-ansi"))
@@ -1200,7 +1204,7 @@ static void _flags_c(Configure * configure, FILE * fp, String const * target)
 	}
 	_makefile_print(fp, "\n%s%s", target,
 			"_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
-	if((p = config_get(configure->config, target, "ldflags")) != NULL)
+	if((p = _makefile_get_config(configure, target, "ldflags")) != NULL)
 		_binary_ldflags(configure, fp, p);
 	_makefile_print(fp, "%c", '\n');
 }
@@ -1211,11 +1215,11 @@ static void _flags_cxx(Configure * configure, FILE * fp, String const * target)
 
 	_makefile_print(fp, "%s%s", target, "_CXXFLAGS = $(CPPFLAGSF)"
 			" $(CPPFLAGS) $(CXXFLAGSF) $(CXXFLAGS)");
-	if((p = config_get(configure->config, target, "cxxflags")) != NULL)
+	if((p = _makefile_get_config(configure, target, "cxxflags")) != NULL)
 		_makefile_print(fp, " %s", p);
 	_makefile_print(fp, "\n%s%s", target,
 			"_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
-	if((p = config_get(configure->config, target, "ldflags")) != NULL)
+	if((p = _makefile_get_config(configure, target, "ldflags")) != NULL)
 		_binary_ldflags(configure, fp, p);
 	_makefile_print(fp, "%c", '\n');
 }
@@ -1226,7 +1230,7 @@ static void _flags_verilog(Configure * configure, FILE * fp,
 	String const * p;
 
 	_makefile_print(fp, "%s%s", target, "_VFLAGS = $(VFLAGSF) $(VFLAGS)");
-	if((p = config_get(configure->config, target, "vflags")) != NULL)
+	if((p = _makefile_get_config(configure, target, "vflags")) != NULL)
 		_makefile_print(fp, " %s", p);
 	_makefile_print(fp, "%c", '\n');
 }
@@ -1246,7 +1250,7 @@ static int _target_library(Configure * configure, FILE * fp,
 			/* generate a static library */
 			&& _target_library_static(configure, fp, target) != 0)
 		return 1;
-	if((p = config_get(configure->config, target, "soname")) != NULL)
+	if((p = _makefile_get_config(configure, target, "soname")) != NULL)
 		soname = string_new(p);
 	else if(configure->os == HO_MACOSX)
 		/* versioning is different on MacOS X */
@@ -1267,7 +1271,7 @@ static int _target_library(Configure * configure, FILE * fp,
 	else
 		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
 				".0: $(", target, "_OBJS)");
-	if((p = config_get(configure->config, target, "depends")) != NULL
+	if((p = _makefile_get_config(configure, target, "depends")) != NULL
 			&& _makefile_expand(fp, p) != 0)
 		return error_print(PROGNAME);
 	_makefile_print(fp, "%c", '\n');
@@ -1275,7 +1279,7 @@ static int _target_library(Configure * configure, FILE * fp,
 	_makefile_print(fp, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname,
 			(configure->os != HO_MACOSX
 			 && configure->os != HO_WIN32) ? ".0" : "");
-	if((p = config_get(configure->config, target, "install")) != NULL)
+	if((p = _makefile_get_config(configure, target, "install")) != NULL)
 	{
 		/* soname is not available on MacOS X */
 		if(configure->os == HO_MACOSX)
@@ -1291,7 +1295,7 @@ static int _target_library(Configure * configure, FILE * fp,
 		string_delete(soname);
 		return 1;
 	}
-	if((p = config_get(configure->config, q, "ldflags")) != NULL)
+	if((p = _makefile_get_config(configure, q, "ldflags")) != NULL)
 		_binary_ldflags(configure, fp, p);
 	string_delete(q);
 	_makefile_print(fp, "%c", '\n');
@@ -1330,7 +1334,7 @@ static int _target_library_static(Configure * configure, FILE * fp,
 
 	_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
 			".a: $(", target, "_OBJS)");
-	if((p = config_get(configure->config, target, "depends")) != NULL
+	if((p = _makefile_get_config(configure, target, "depends")) != NULL
 			&& _makefile_expand(fp, p) != 0)
 		return error_print(PROGNAME);
 	_makefile_print(fp, "%c", '\n');
@@ -1342,7 +1346,7 @@ static int _target_library_static(Configure * configure, FILE * fp,
 	if((q = malloc(len)) == NULL)
 		return 1;
 	snprintf(q, len, "%s.a", target);
-	if((p = config_get(configure->config, q, "ldflags"))
+	if((p = _makefile_get_config(configure, q, "ldflags"))
 			!= NULL)
 		_binary_ldflags(configure, fp, p);
 	free(q);
@@ -1365,7 +1369,7 @@ static int _target_libtool(Configure * configure, FILE * fp,
 	_makefile_print(fp, "%s%s%s%s%s",
 			"\t$(LIBTOOL) --mode=link $(CC) -o $(OBJDIR)", target,
 			".la $(", target, "_OBJS)");
-	if((p = config_get(configure->config, target, "ldflags")) != NULL)
+	if((p = _makefile_get_config(configure, target, "ldflags")) != NULL)
 		_binary_ldflags(configure, fp, p);
 	_makefile_print(fp, "%s%s%s", " -rpath $(LIBDIR) $(", target,
 			"_LDFLAGS)\n");
@@ -1378,7 +1382,7 @@ static int _target_object(Configure * configure, FILE * fp,
 	String const * p;
 	String const * extension;
 
-	if((p = config_get(configure->config, target, "sources")) == NULL)
+	if((p = _makefile_get_config(configure, target, "sources")) == NULL)
 	{
 		fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
 				": No sources for target\n");
@@ -1400,7 +1404,7 @@ static int _target_object(Configure * configure, FILE * fp,
 					target, "_ASFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS) $(ASFLAGSF)"
 					" $(ASFLAGS)");
-			if((p = config_get(configure->config, target,
+			if((p = _makefile_get_config(configure, target,
 							"asflags")) != NULL)
 				_makefile_print(fp, " %s", p);
 			_makefile_print(fp, "%c", '\n');
@@ -1412,8 +1416,8 @@ static int _target_object(Configure * configure, FILE * fp,
 					target, "_CFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF)"
 					" $(CFLAGS)");
-			if((p = config_get(configure->config, target, "cflags"))
-					!= NULL)
+			if((p = _makefile_get_config(configure, target,
+							"cflags")) != NULL)
 				_makefile_print(fp, " %s", p);
 			_makefile_print(fp, "%c", '\n');
 			break;
@@ -1424,7 +1428,7 @@ static int _target_object(Configure * configure, FILE * fp,
 					target, "_CXXFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS) $(CXXFLAGSF)"
 					" $(CXXFLAGS)");
-			if((p = config_get(configure->config, target,
+			if((p = _makefile_get_config(configure, target,
 							"cxxflags")) != NULL)
 				_makefile_print(fp, " %s", p);
 			_makefile_print(fp, "%c", '\n');
@@ -1434,7 +1438,7 @@ static int _target_object(Configure * configure, FILE * fp,
 					target, "_OBJS = ",
 					"$(OBJDIR)", target, target, "_VFLAGS ="
 					" $(VFLAGSF) $(VFLAGS)");
-			if((p = config_get(configure->config, target,
+			if((p = _makefile_get_config(configure, target,
 							"vflags")) != NULL)
 				_makefile_print(fp, " %s", p);
 			_makefile_print(fp, "%c", '\n');
@@ -1459,7 +1463,7 @@ static int _target_plugin(Configure * configure, FILE * fp,
 		return 1;
 	_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
 			"$(SOEXT): $(", target, "_OBJS)");
-	if((p = config_get(configure->config, target, "depends")) != NULL
+	if((p = _makefile_get_config(configure, target, "depends")) != NULL
 			&& _makefile_expand(fp, p) != 0)
 		return error_print(PROGNAME);
 	_makefile_print(fp, "%c", '\n');
@@ -1469,7 +1473,7 @@ static int _target_plugin(Configure * configure, FILE * fp,
 			"_LDFLAGS)");
 	if((q = string_new_append(target, "$(SOEXT)", NULL)) == NULL)
 		return error_print(PROGNAME);
-	if((p = config_get(configure->config, q, "ldflags")) != NULL)
+	if((p = _makefile_get_config(configure, q, "ldflags")) != NULL)
 		_binary_ldflags(configure, fp, p);
 	string_delete(q);
 	_makefile_print(fp, "%c", '\n');
@@ -1487,7 +1491,7 @@ static int _write_objects(Configure * configure, FILE * fp)
 	size_t i;
 	int ret = 0;
 
-	if((p = config_get(configure->config, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config(configure, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -1522,7 +1526,7 @@ static int _target_script(Configure * configure, FILE * fp,
 	String const * script;
 	int phony;
 
-	if((script = config_get(configure->config, target, "script")) == NULL)
+	if((script = _makefile_get_config(configure, target, "script")) == NULL)
 	{
 		fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
 				": No script for target\n");
@@ -1536,7 +1540,7 @@ static int _target_script(Configure * configure, FILE * fp,
 	_makefile_print(fp, "\n%s%s:", phony ? "" : "$(OBJDIR)",
 			target);
 	_script_depends(configure, fp, target);
-	if((prefix = config_get(configure->config, target, "prefix")) == NULL)
+	if((prefix = _makefile_get_config(configure, target, "prefix")) == NULL)
 		prefix = "$(PREFIX)";
 	_makefile_print(fp, "\n\t%s -P \"%s\" -- \"%s%s\"\n", script, prefix,
 			phony ? "" : "$(OBJDIR)", target);
@@ -1568,10 +1572,9 @@ static void _script_check(Configure * configure, String const * target,
 static int _script_depends(Configure * configure, FILE * fp,
 		String const * target)
 {
-	Config * config = configure->config;
 	String const * p;
 
-	if((p = config_get(config, target, "depends")) != NULL
+	if((p = _makefile_get_config(configure, target, "depends")) != NULL
 			&& _makefile_expand(fp, p) != 0)
 		return error_print(PROGNAME);
 	return 0;
@@ -1584,7 +1587,7 @@ static String * _script_path(Configure * configure, String const * script)
 	ssize_t i;
 	String * p = NULL;
 
-	if((directory = config_get(configure->config, NULL, "directory"))
+	if((directory = _makefile_get_config(configure, NULL, "directory"))
 			== NULL)
 	{
 		error_print(PROGNAME);
@@ -1637,7 +1640,7 @@ static int _objects_target(Configure * configure, FILE * fp,
 	size_t i;
 	char c;
 
-	if((p = config_get(configure->config, target, "sources")) == NULL)
+	if((p = _makefile_get_config(configure, target, "sources")) == NULL)
 		return 0;
 	if((sources = string_new(p)) == NULL)
 		return 1;
@@ -1673,7 +1676,7 @@ static int _target_source(Configure * configure, FILE * fp,
 	String const * p;
 	String const * q;
 
-	if((p = config_get(configure->config, target, "type")) != NULL)
+	if((p = _makefile_get_config(configure, target, "type")) != NULL)
 			tt = enum_string(TT_LAST, sTargetType, p);
 	if((extension = _source_extension(source)) == NULL)
 		return 1;
@@ -1731,8 +1734,8 @@ static int _target_source(Configure * configure, FILE * fp,
 			if(strchr(source, '/') != NULL)
 				ret = _source_subdir(fp, source);
 			/* FIXME do both wherever also relevant */
-			p = config_get(configure->config, source, "cppflags");
-			q = config_get(configure->config, source, "cflags");
+			p = _makefile_get_config(configure, source, "cppflags");
+			q = _makefile_get_config(configure, source, "cflags");
 			source[len] = '\0';
 			if(tt == TT_LIBTOOL)
 				_makefile_print(fp, "%s",
@@ -1771,7 +1774,7 @@ static int _target_source(Configure * configure, FILE * fp,
 					extension);
 			source[len] = '.'; /* FIXME ugly */
 			_source_depends(configure, fp, source);
-			p = config_get(configure->config, source, "cxxflags");
+			p = _makefile_get_config(configure, source, "cxxflags");
 			source[len] = '\0';
 			_makefile_print(fp, "%s", "\n\t");
 			if(strchr(source, '/') != NULL)
@@ -1803,7 +1806,7 @@ static int _target_source(Configure * configure, FILE * fp,
 			_makefile_print(fp, "%s", "\n\t");
 			if(strchr(source, '/') != NULL)
 				ret = _source_subdir(fp, source);
-			q = config_get(configure->config, source, "vflags");
+			q = _makefile_get_config(configure, source, "vflags");
 			source[len] = '\0';
 			_makefile_print(fp, "%s", "$(VERILOG)");
 			_makefile_print(fp, "%s%s%s", " $(", target,
@@ -1832,10 +1835,9 @@ static int _target_source(Configure * configure, FILE * fp,
 static int _source_depends(Configure * configure, FILE * fp,
 		String const * target)
 {
-	Config * config = configure->config;
 	String const * p;
 
-	if((p = config_get(config, target, "depends")) != NULL
+	if((p = _makefile_get_config(configure, target, "depends")) != NULL
 			&& _makefile_expand(fp, p) != 0)
 		return error_print(PROGNAME);
 	return 0;
@@ -1859,14 +1861,13 @@ static int _clean_targets(Configure * configure, FILE * fp);
 static int _write_clean(Configure * configure, FILE * fp)
 {
 	_makefile_target(fp, "clean", NULL);
-	if(config_get(configure->config, NULL, "subdirs") != NULL)
+	if(_makefile_get_config(configure, NULL, "subdirs") != NULL)
 		_makefile_subdirs(fp, "clean");
 	return _clean_targets(configure, fp);
 }
 
 static int _clean_targets(Configure * configure, FILE * fp)
 {
-	Config * config = configure->config;
 	String const * prefix;
 	String const * p;
 	String * targets;
@@ -1874,7 +1875,7 @@ static int _clean_targets(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	if((p = config_get(config, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config(configure, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -1903,13 +1904,13 @@ static int _clean_targets(Configure * configure, FILE * fp)
 			continue;
 		c = targets[i];
 		targets[i] = '\0';
-		if((p = config_get(config, targets, "type")) != NULL
+		if((p = _makefile_get_config(configure, targets, "type")) != NULL
 				&& strcmp(p, "script") == 0
-				&& (p = config_get(config, targets, "script"))
-				!= NULL)
+				&& (p = _makefile_get_config(configure, targets,
+						"script")) != NULL)
 		{
-			if((prefix = config_get(config, targets, "prefix"))
-					== NULL)
+			if((prefix = _makefile_get_config(configure, targets,
+							"prefix")) == NULL)
 				prefix = "$(PREFIX)";
 			_makefile_print(fp, "\t%s%s%s%s%s%s\n", p, " -c -P \"",
 					prefix, "\" -- \"$(OBJDIR)", targets,
@@ -1930,7 +1931,7 @@ static int _write_distclean(Configure * configure, FILE * fp)
 	String const * subdirs;
 
 	/* only depend on the "clean" target if we do not have subfolders */
-	if((subdirs = config_get(configure->config, NULL, "subdirs")) == NULL)
+	if((subdirs = _makefile_get_config(configure, NULL, "subdirs")) == NULL)
 		_makefile_target(fp, "distclean", "clean", NULL);
 	else
 	{
@@ -1939,7 +1940,7 @@ static int _write_distclean(Configure * configure, FILE * fp)
 		_clean_targets(configure, fp);
 	}
 	/* FIXME do not erase targets that need be distributed */
-	if(config_get(configure->config, NULL, "targets") != NULL)
+	if(_makefile_get_config(configure, NULL, "targets") != NULL)
 		_makefile_remove(fp, 0, "$(TARGETS)", NULL);
 	return 0;
 }
@@ -1953,8 +1954,8 @@ static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 	Config * p;
 	int i;
 
-	package = config_get(configure->config, NULL, "package");
-	version = config_get(configure->config, NULL, "version");
+	package = _makefile_get_config(configure, NULL, "package");
+	version = _makefile_get_config(configure, NULL, "version");
 	if(package == NULL || version == NULL)
 		return 0;
 	_makefile_target(fp, "dist", NULL);
@@ -1993,8 +1994,8 @@ static int _write_distcheck(Configure * configure, FILE * fp)
 		"\tcd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) dist\n";
 	const char posttarget[] = "\t$(RM) -r -- $(PACKAGE)-$(VERSION)\n";
 
-	package = config_get(configure->config, NULL, "package");
-	version = config_get(configure->config, NULL, "version");
+	package = _makefile_get_config(configure, NULL, "package");
+	version = _makefile_get_config(configure, NULL, "version");
 	if(package == NULL || version == NULL)
 		return 0;
 	_makefile_print(fp, "%s%s%s", pretarget, target, posttarget);
@@ -2005,7 +2006,6 @@ static int _dist_subdir_dist(FILE * fp, String const * path,
 		String const * dist);
 static int _dist_subdir(Configure * configure, FILE * fp, Config * subdir)
 {
-	Config * config = configure->config;
 	String const * path;
 	size_t len;
 	String const * p;
@@ -2017,7 +2017,7 @@ static int _dist_subdir(Configure * configure, FILE * fp, Config * subdir)
 	char c;
 	String const * quote;
 
-	path = config_get(config, NULL, "directory");
+	path = _makefile_get_config(configure, NULL, "directory");
 	len = string_length(path);
 	path = config_get(subdir, NULL, "directory");
 	path = &path[len];
@@ -2100,10 +2100,10 @@ static int _write_install(Configure * configure, FILE * fp)
 	int ret = 0;
 	char const * targets;
 
-	targets = config_get(configure->config, NULL, "targets");
+	targets = _makefile_get_config(configure, NULL, "targets");
 	_makefile_target(fp, "install", (targets != NULL) ? "$(TARGETS)" : NULL,
 			NULL);
-	if(config_get(configure->config, NULL, "subdirs") != NULL)
+	if(_makefile_get_config(configure, NULL, "subdirs") != NULL)
 		_makefile_subdirs(fp, "install");
 	ret |= _install_targets(configure, fp);
 	ret |= _install_includes(configure, fp);
@@ -2122,7 +2122,7 @@ static int _install_targets(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	if((p = config_get(configure->config, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config(configure, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -2162,7 +2162,7 @@ static int _install_target(Configure * configure, FILE * fp,
 	String const * type;
 	TargetType tt;
 
-	if((type = config_get(configure->config, target, "type")) == NULL)
+	if((type = _makefile_get_config(configure, target, "type")) == NULL)
 		return 1;
 	switch((tt = enum_string(TT_LAST, sTargetType, type)))
 	{
@@ -2195,7 +2195,7 @@ static void _install_target_binary(Configure * configure, FILE * fp,
 {
 	String const * path;
 
-	if((path = config_get(configure->config, target, "install")) == NULL)
+	if((path = _makefile_get_config(configure, target, "install")) == NULL)
 		return;
 	_makefile_mkdir(fp, path);
 	_makefile_print(fp, "%s%s%s%s/%s%s\n",
@@ -2210,7 +2210,7 @@ static int _install_target_library(Configure * configure, FILE * fp,
 	String const * p;
 	String * soname;
 
-	if((path = config_get(configure->config, target, "install")) == NULL)
+	if((path = _makefile_get_config(configure, target, "install")) == NULL)
 		return 0;
 	_makefile_mkdir(fp, path);
 	if(configure_can_library_static(configure))
@@ -2218,7 +2218,7 @@ static int _install_target_library(Configure * configure, FILE * fp,
 		_makefile_print(fp, "%s%s%s%s/%s%s",
 				"\t$(INSTALL) -m 0644 $(OBJDIR)", target,
 				".a $(DESTDIR)", path, target, ".a\n");
-	if((p = config_get(configure->config, target, "soname")) != NULL)
+	if((p = _makefile_get_config(configure, target, "soname")) != NULL)
 		soname = string_new(p);
 	else if(configure->os == HO_MACOSX)
 		/* versioning is different on MacOS X */
@@ -2261,7 +2261,7 @@ static void _install_target_libtool(Configure * configure, FILE * fp,
 {
 	String const * path;
 
-	if((path = config_get(configure->config, target, "install")) == NULL)
+	if((path = _makefile_get_config(configure, target, "install")) == NULL)
 		return;
 	_makefile_mkdir(fp, path);
 	_makefile_print(fp, "%s%s%s%s/%s%s",
@@ -2277,7 +2277,7 @@ static void _install_target_object(Configure * configure, FILE * fp,
 {
 	String const * path;
 
-	if((path = config_get(configure->config, target, "install")) == NULL)
+	if((path = _makefile_get_config(configure, target, "install")) == NULL)
 		return;
 	_makefile_mkdir(fp, path);
 	_makefile_print(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 $(OBJDIR)",
@@ -2292,9 +2292,9 @@ static void _install_target_plugin(Configure * configure, FILE * fp,
 	mode_t m = 0755;
 	String * p;
 
-	if((path = config_get(configure->config, target, "install")) == NULL)
+	if((path = _makefile_get_config(configure, target, "install")) == NULL)
 		return;
-	if((mode = config_get(configure->config, target, "mode")) == NULL
+	if((mode = _makefile_get_config(configure, target, "mode")) == NULL
 			/* XXX these tests are not sufficient */
 			|| mode[0] == '\0'
 			|| (m = strtol(mode, &p, 8)) == 0
@@ -2313,9 +2313,9 @@ static void _install_target_script(Configure * configure, FILE * fp,
 	String const * script;
 	int phony;
 
-	if((path = config_get(configure->config, target, "install")) == NULL)
+	if((path = _makefile_get_config(configure, target, "install")) == NULL)
 		return;
-	if((script = config_get(configure->config, target, "script")) == NULL)
+	if((script = _makefile_get_config(configure, target, "script")) == NULL)
 		return;
 	phony = _makefile_is_phony(configure, target);
 	_makefile_print(fp, "\t%s%s%s%s%s%s%s", script, " -P \"$(DESTDIR)",
@@ -2335,7 +2335,7 @@ static int _install_includes(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	if((p = config_get(configure->config, NULL, "includes")) == NULL)
+	if((p = _makefile_get_config(configure, NULL, "includes")) == NULL)
 		return 0;
 	if((includes = string_new(p)) == NULL)
 		return 1;
@@ -2359,12 +2359,12 @@ static int _install_includes(Configure * configure, FILE * fp)
 static int _install_include(Configure * configure, FILE * fp,
 		String const * include)
 {
-	Config * config = configure->config;
 	char const * install;
 	ssize_t i;
 	String * p = NULL;
 
-	if((install = config_get(config, include, "install")) == NULL)
+	if((install = _makefile_get_config(configure, include, "install"))
+			== NULL)
 	{
 		install = "$(INCLUDEDIR)";
 		if((i = string_rindex(include, "/")) >= 0)
@@ -2400,7 +2400,7 @@ static int _install_dist(Configure * configure, FILE * fp)
 	String const * d;
 	String const * mode;
 
-	if((p = config_get(configure->config, NULL, "dist")) == NULL)
+	if((p = _makefile_get_config(configure, NULL, "dist")) == NULL)
 		return 0;
 	if((dist = string_new(p)) == NULL)
 		return 1;
@@ -2411,10 +2411,12 @@ static int _install_dist(Configure * configure, FILE * fp)
 			continue;
 		c = dist[i];
 		dist[i] = '\0';
-		if((mode = config_get(configure->config, dist, "mode")) == NULL)
+		if((mode = _makefile_get_config(configure, dist, "mode"))
+				== NULL)
 			mode = "0644";
 		ret |= _dist_check(configure, dist, mode);
-		if((d = config_get(configure->config, dist, "install")) != NULL)
+		if((d = _makefile_get_config(configure, dist, "install"))
+				!= NULL)
 			_dist_install(configure, fp, d, mode, dist);
 		if(c == '\0')
 			break;
@@ -2501,7 +2503,7 @@ static int _write_phony_targets(Configure * configure, FILE * fp)
 	char c;
 	String const * type;
 
-	if((p = config_get(configure->config, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config(configure, NULL, "targets")) == NULL)
 		return 0;
 	if((prints = string_new(p)) == NULL)
 		return 1;
@@ -2511,7 +2513,7 @@ static int _write_phony_targets(Configure * configure, FILE * fp)
 			continue;
 		c = prints[i];
 		prints[i] = '\0';
-		if((type = config_get(configure->config, prints, "type"))
+		if((type = _makefile_get_config(configure, prints, "type"))
 				!= NULL)
 			switch(enum_string(TT_LAST, sTargetType, type))
 			{
@@ -2548,9 +2550,9 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 	char c;
 
 	_makefile_target(fp, "uninstall", NULL);
-	if(config_get(configure->config, NULL, "subdirs") != NULL)
+	if(_makefile_get_config(configure, NULL, "subdirs") != NULL)
 		_makefile_subdirs(fp, "uninstall");
-	if((p = config_get(configure->config, NULL, "targets")) != NULL)
+	if((p = _makefile_get_config(configure, NULL, "targets")) != NULL)
 	{
 		if((targets = string_new(p)) == NULL)
 			return 1;
@@ -2569,7 +2571,7 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 		}
 		string_delete(q);
 	}
-	if((p = config_get(configure->config, NULL, "includes")) != NULL)
+	if((p = _makefile_get_config(configure, NULL, "includes")) != NULL)
 	{
 		if((includes = string_new(p)) == NULL)
 			return 1;
@@ -2588,7 +2590,7 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 		}
 		string_delete(q);
 	}
-	if((p = config_get(configure->config, NULL, "dist")) != NULL)
+	if((p = _makefile_get_config(configure, NULL, "dist")) != NULL)
 	{
 		if((dist = string_new(p)) == NULL)
 			return 1;
@@ -2622,9 +2624,9 @@ static int _uninstall_target(Configure * configure, FILE * fp,
 	TargetType tt;
 	const String rm_destdir[] = "$(RM) -- $(DESTDIR)";
 
-	if((type = config_get(configure->config, target, "type")) == NULL)
+	if((type = _makefile_get_config(configure, target, "type")) == NULL)
 		return 1;
-	if((path = config_get(configure->config, target, "install")) == NULL)
+	if((path = _makefile_get_config(configure, target, "install")) == NULL)
 		return 0;
 	tt = enum_string(TT_LAST, sTargetType, type);
 	switch(tt)
@@ -2672,7 +2674,7 @@ static int _uninstall_target_library(Configure * configure, FILE * fp,
 		/* uninstall the static library */
 		_makefile_print(fp, format, rm_destdir, path, target, ".a\n",
 				"", "");
-	if((p = config_get(configure->config, target, "soname")) != NULL)
+	if((p = _makefile_get_config(configure, target, "soname")) != NULL)
 		soname = string_new(p);
 	else if(configure->os == HO_MACOSX)
 		/* versioning is different on MacOS X */
@@ -2710,7 +2712,7 @@ static void _uninstall_target_script(Configure * configure, FILE * fp,
 {
 	String const * script;
 
-	if((script = config_get(configure->config, target, "script")) == NULL)
+	if((script = _makefile_get_config(configure, target, "script")) == NULL)
 		return;
 	_makefile_print(fp, "\t%s%s%s%s%s%s", script, " -P \"$(DESTDIR)",
 			(path[0] != '\0') ? path : "$(PREFIX)", "\" -u -- \"",
@@ -2720,10 +2722,10 @@ static void _uninstall_target_script(Configure * configure, FILE * fp,
 static int _uninstall_include(Configure * configure, FILE * fp,
 		String const * include)
 {
-	Config * config = configure->config;
 	String const * install;
 
-	if((install = config_get(config, include, "install")) == NULL)
+	if((install = _makefile_get_config(configure, include, "install"))
+			== NULL)
 		install = "$(INCLUDEDIR)";
 	_makefile_print(fp, "%s%s/%s\n", "\t$(RM) -- $(DESTDIR)", install,
 			include);
@@ -2733,14 +2735,22 @@ static int _uninstall_include(Configure * configure, FILE * fp,
 static int _uninstall_dist(Configure * configure, FILE * fp,
 		String const * dist)
 {
-	Config * config = configure->config;
 	String const * install;
 
-	if((install = config_get(config, dist, "install")) == NULL)
+	if((install = _makefile_get_config(configure, dist, "install")) == NULL)
 		return 0;
 	_makefile_print(fp, "%s%s/%s\n", "\t$(RM) -- $(DESTDIR)", install,
 			dist);
 	return 0;
+}
+
+
+/* accessors */
+/* makefile_get_config */
+static String const * _makefile_get_config(Configure * configure,
+		String const * section, String const * variable)
+{
+	return configure_get_config(configure, section, variable);
 }
 
 
@@ -2749,7 +2759,7 @@ static int _makefile_is_phony(Configure * configure, char const * target)
 {
 	String const * p;
 
-	if((p = config_get(configure->config, target, "phony")) != NULL
+	if((p = _makefile_get_config(configure, target, "phony")) != NULL
 			&& strtol(p, NULL, 10) == 1)
 		return 1;
 	return 0;
