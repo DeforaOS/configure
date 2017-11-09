@@ -111,14 +111,9 @@ static int _settings_do(Configure * configure, String const * directory,
 	}
 	if(configure_is_flag_set(configure, PREFS_n))
 		return 0;
-	if((filename = string_new(directory)) == NULL)
+	if((filename = string_new_append(directory, "/config.", extension,
+					NULL)) == NULL)
 		return 1;
-	if(string_append(&filename, "/config.") != 0
-			|| string_append(&filename, extension) != 0)
-	{
-		string_delete(filename);
-		return 1;
-	}
 	if((fp = fopen(filename, "w")) == NULL)
 		configure_error(0, "%s: %s", filename, strerror(errno));
 	string_delete(filename);

@@ -401,11 +401,10 @@ static int _configure_load(ConfigurePrefs * prefs, String const * directory,
 	String * path;
 	String const * subdirs = NULL;
 
-	if((path = string_new(directory)) == NULL)
+	if((path = string_new_append(directory, "/", PROJECT_CONF, NULL))
+			== NULL)
 		return configure_error(1, "%s", error_get(NULL));
-	if(string_append(&path, "/") != 0
-			|| string_append(&path, PROJECT_CONF) != 0
-			|| (config = config_new()) == NULL)
+	if((config = config_new()) == NULL)
 	{
 		string_delete(path);
 		return configure_error(1, "%s", error_get(NULL));
