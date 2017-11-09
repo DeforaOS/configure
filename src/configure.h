@@ -141,34 +141,7 @@ typedef struct _ConfigurePrefs
 # define PREFS_n	0x1
 # define PREFS_S	0x2
 # define PREFS_v	0x4
-typedef struct _Configure
-{
-	ConfigurePrefs * prefs;
-	Config * config;
-	HostArch arch;
-	HostOS os;
-	HostKernel kernel;
-	struct
-	{
-		char const * exeext;
-		char const * soext;
-	} extensions;
-	struct
-	{
-		char const * ar;
-		char const * as;
-		char const * cc;
-		char const * ccshared;
-		char const * cxx;
-		char const * install;
-		char const * libtool;
-		char const * ln;
-		char const * mkdir;
-		char const * ranlib;
-		char const * rm;
-		char const * tar;
-	} programs;
-} Configure;
+typedef struct _Configure Configure;
 
 
 /* functions */

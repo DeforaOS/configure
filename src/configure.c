@@ -46,7 +46,39 @@
 #endif
 
 
-/* configure */
+/* Configure */
+/* private */
+/* types */
+struct _Configure {
+	ConfigurePrefs * prefs;
+	Config * config;
+	HostArch arch;
+	HostOS os;
+	HostKernel kernel;
+	struct
+	{
+		char const * exeext;
+		char const * soext;
+	} extensions;
+	struct
+	{
+		char const * ar;
+		char const * as;
+		char const * cc;
+		char const * ccshared;
+		char const * cxx;
+		char const * install;
+		char const * libtool;
+		char const * ln;
+		char const * mkdir;
+		char const * ranlib;
+		char const * rm;
+		char const * tar;
+	} programs;
+};
+
+
+/* public */
 /* constants */
 const String * sHostArch[HA_COUNT] =
 {
