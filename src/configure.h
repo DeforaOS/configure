@@ -130,6 +130,7 @@ extern const struct ExtensionType * sExtensionType;
 typedef struct _ConfigurePrefs
 {
 	int flags;
+	char * basedir;
 	char * bindir;
 	char * destdir;
 	char * includedir;

@@ -371,15 +371,32 @@ static int _configure_detect_programs(Configure * configure)
 		if(config_set(configure->programs, section, programs[i].name,
 					programs[i].program) != 0)
 			return -1;
-	if(config_load(configure->programs, filename) != 0)
+	/* load the global database */
+	if(configure->prefs->basedir != NULL
+			&& (filename = string_new_append(
+					configure->prefs->basedir,
+					"../data/" PACKAGE ".conf",
+					NULL)) == NULL)
+		return -configure_error(1, "%s", error_get(NULL));
+	if(filename != NULL && config_load(configure->programs, filename) != 0)
+		configure_warning(0, "%s: %s", filename,
+			"Could not load program definitions");
+	if(configure->prefs->basedir != NULL)
+		string_delete(filename);
+	/* load the database for the current system */
+	if(configure->prefs->basedir != NULL)
+		filename = string_new_append(configure->prefs->basedir,
+				"/platform/", sHostOS[configure->os], ".conf",
+				NULL);
+	else
+		filename = string_new_append(DATADIR "/" PACKAGE "/platform/",
+				sHostOS[configure->os], ".conf", NULL);
+	if(filename == NULL)
+		return -configure_error(1, "%s", error_get(NULL));
+	else if(config_load(configure->programs, filename) != 0)
 		configure_warning(0, "%s: %s", filename,
 				"Could not load program definitions");
-	if((filename = string_new_append(DATADIR "/" PACKAGE "/platform/",
-					sHostOS[configure->os], ".conf", NULL))
-			!= NULL
-			&& config_load(configure->programs, filename) != 0)
-		configure_warning(0, "%s: %s", filename,
-				"Could not load program definitions");
+	string_delete(filename);
 	return ret;
 }
 
