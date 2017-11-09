@@ -478,6 +478,38 @@ ConfigurePrefs const * configure_get_prefs(Configure * configure)
 }
 
 
+/* configure_get_program */
+String const * configure_get_program(Configure * configure, String const * name)
+{
+	/* XXX use a configuration file instead */
+	if(string_compare(name, "AR") == 0)
+		return configure->programs.ar;
+	else if(string_compare(name, "AS") == 0)
+		return configure->programs.as;
+	else if(string_compare(name, "CC") == 0)
+		return configure->programs.cc;
+	else if(string_compare(name, "CCSHARED") == 0)
+		return configure->programs.ccshared;
+	else if(string_compare(name, "CXX") == 0)
+		return configure->programs.cxx;
+	else if(string_compare(name, "INSTALL") == 0)
+		return configure->programs.install;
+	else if(string_compare(name, "LIBTOOL") == 0)
+		return configure->programs.libtool;
+	else if(string_compare(name, "LN") == 0)
+		return configure->programs.ln;
+	else if(string_compare(name, "MKDIR") == 0)
+		return configure->programs.mkdir;
+	else if(string_compare(name, "RANLIB") == 0)
+		return configure->programs.ranlib;
+	else if(string_compare(name, "RM") == 0)
+		return configure->programs.rm;
+	else if(string_compare(name, "TAR") == 0)
+		return configure->programs.tar;
+	return "";
+}
+
+
 /* configure_get_soext */
 String const * configure_get_soext(Configure * configure)
 {

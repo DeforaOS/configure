@@ -60,8 +60,10 @@ static int _makefile_is_phony(Configure * configure, char const * target);
 static int _makefile_expand(FILE * fp, char const * field);
 static int _makefile_link(FILE * fp, int symlink, char const * link,
 		char const * path);
-static int _makefile_output_variable(FILE * fp, char const * name,
-		char const * value);
+static int _makefile_output_program(Configure * configure, FILE * fp,
+		String const * name);
+static int _makefile_output_variable(FILE * fp, String const * name,
+		String const * value);
 static int _makefile_mkdir(FILE * fp, char const * directory);
 static int _makefile_print(FILE * fp, char const * format, ...);
 static int _makefile_remove(FILE * fp, int recursive, ...);
@@ -274,12 +276,9 @@ static int _variables_dist(Configure * configure, FILE * fp)
 				_makefile_output_variable(fp, "DESTDIR",
 						prefs->destdir);
 			}
-			_makefile_output_variable(fp, "MKDIR",
-					configure->programs.mkdir);
-			_makefile_output_variable(fp, "INSTALL",
-					configure->programs.install);
-			_makefile_output_variable(fp, "RM",
-					configure->programs.rm);
+			_makefile_output_program(configure, fp, "MKDIR");
+			_makefile_output_program(configure, fp, "INSTALL");
+			_makefile_output_program(configure, fp, "RM");
 			break;
 		}
 		if(c == '\0')
@@ -442,22 +441,19 @@ static int _variables_executables(Configure * configure, FILE * fp)
 	}
 	if(targets != NULL || includes != NULL || package != NULL)
 	{
-		_makefile_output_variable(fp, "RM", configure->programs.rm);
-		_makefile_output_variable(fp, "LN", configure->programs.ln);
+		_makefile_output_program(configure, fp, "RM");
+		_makefile_output_program(configure, fp, "LN");
 	}
 	if(package != NULL)
 	{
-		_makefile_output_variable(fp, "TAR", configure->programs.tar);
-		_makefile_output_variable(fp, "MKDIR",
-				configure->programs.mkdir);
+		_makefile_output_program(configure, fp, "TAR");
+		_makefile_output_program(configure, fp, "MKDIR");
 	}
 	if(targets != NULL || includes != NULL)
 	{
 		if(package == NULL)
-			_makefile_output_variable(fp, "MKDIR",
-					configure->programs.mkdir);
-		_makefile_output_variable(fp, "INSTALL",
-				configure->programs.install);
+			_makefile_output_program(configure, fp, "MKDIR");
+		_makefile_output_program(configure, fp, "INSTALL");
 	}
 	return 0;
 }
@@ -571,7 +567,7 @@ static void _targets_asflags(Configure * configure, FILE * fp)
 	if(as != NULL || asff != NULL || asf != NULL)
 	{
 		_makefile_output_variable(fp, "AS", (as != NULL) ? as
-				: configure->programs.as);
+				: configure_get_program(configure, "AS"));
 		_makefile_output_variable(fp, "ASFLAGSF", asff);
 		_makefile_output_variable(fp, "ASFLAGS", asf);
 	}
@@ -595,7 +591,7 @@ static void _targets_cflags(Configure * configure, FILE * fp)
 			&& cc == NULL)
 		return;
 	if(cc == NULL)
-		_makefile_output_variable(fp, "CC", configure->programs.cc);
+		_makefile_output_program(configure, fp, "CC");
 	else
 		_makefile_output_variable(fp, "CC", cc);
 	_makefile_output_variable(fp, "CPPFLAGSF", cppf);
@@ -626,7 +622,7 @@ static void _targets_cxxflags(Configure * configure, FILE * fp)
 	if(cxx != NULL || cxxff != NULL || cxxf != NULL)
 	{
 		if(cxx == NULL)
-			cxx = configure->programs.cxx;
+			cxx = configure_get_program(configure, "CXX");
 		_makefile_output_variable(fp, "CXX", cxx);
 	}
 	if(cxxff != NULL)
@@ -790,8 +786,7 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 	if(configure_can_library_static(configure))
 		_variables_library_static(configure, fp);
 	if((p = _makefile_get_config(configure, NULL, "ld")) == NULL)
-		_makefile_output_variable(fp, "CCSHARED",
-				configure->programs.ccshared);
+		_makefile_output_program(configure, fp, "CCSHARED");
 	else
 		_makefile_output_variable(fp, "CCSHARED", p);
 	_makefile_output_variable(fp, "SOEXT", configure_get_soext(configure));
@@ -802,13 +797,12 @@ static void _variables_library_static(Configure * configure, FILE * fp)
 	String const * p;
 
 	if((p = _makefile_get_config(configure, NULL, "ar")) == NULL)
-		_makefile_output_variable(fp, "AR", configure->programs.ar);
+		_makefile_output_program(configure, fp, "AR");
 	else
 		_makefile_output_variable(fp, "AR", p);
 	_makefile_output_variable(fp, "ARFLAGS", "-rc");
 	if((p = _makefile_get_config(configure, NULL, "ranlib")) == NULL)
-		_makefile_output_variable(fp, "RANLIB",
-				configure->programs.ranlib);
+		_makefile_output_program(configure, fp, "RANLIB");
 	else
 		_makefile_output_variable(fp, "RANLIB", p);
 }
@@ -822,8 +816,7 @@ static void _variables_libtool(Configure * configure, FILE * fp, char * done)
 	{
 		if((p = _makefile_get_config(configure, NULL, "libtool"))
 				== NULL)
-			_makefile_output_variable(fp, "LIBTOOL",
-					configure->programs.libtool);
+			_makefile_output_program(configure, fp, "LIBTOOL");
 		else
 			_makefile_output_variable(fp, "LIBTOOL", p);
 	}
@@ -888,8 +881,7 @@ static int _variables_subdirs(Configure * configure, FILE * fp)
 		if(q != NULL)
 			return 0;
 	}
-	return _makefile_output_variable(fp, "MKDIR",
-			configure->programs.mkdir);
+	return _makefile_output_program(configure, fp, "MKDIR");
 }
 
 static int _targets_all(Configure * configure, FILE * fp);
@@ -2815,9 +2807,20 @@ static int _makefile_link(FILE * fp, int symlink, char const * link,
 }
 
 
+/* makefile_output_program */
+static int _makefile_output_program(Configure * configure, FILE * fp,
+		String const * name)
+{
+	String const * value;
+
+	value = configure_get_program(configure, name);
+	return _makefile_output_variable(fp, name, value);
+}
+
+
 /* makefile_output_variable */
-static int _makefile_output_variable(FILE * fp, char const * name,
-		char const * value)
+static int _makefile_output_variable(FILE * fp, String const * name,
+		String const * value)
 {
 	int res;
 	char const * align;
