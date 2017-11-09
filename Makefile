@@ -1,6 +1,6 @@
 PACKAGE	= configure
 VERSION	= 0.2.3
-SUBDIRS	= doc src tests tools
+SUBDIRS	= data doc src tests tools
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -38,6 +38,9 @@ dist:
 	$(RM) -r -- $(OBJDIR)$(PACKAGE)-$(VERSION)
 	$(LN) -s -- "$$PWD" $(OBJDIR)$(PACKAGE)-$(VERSION)
 	@cd $(OBJDIR). && $(TAR) -czvf $(PACKAGE)-$(VERSION).tar.gz -- \
+		$(PACKAGE)-$(VERSION)/data/Makefile \
+		$(PACKAGE)-$(VERSION)/data/configure.conf \
+		$(PACKAGE)-$(VERSION)/data/project.conf \
 		$(PACKAGE)-$(VERSION)/doc/Makefile \
 		$(PACKAGE)-$(VERSION)/doc/configure.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/configure.xml \
