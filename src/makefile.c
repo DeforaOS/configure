@@ -201,8 +201,8 @@ static int _variables_package(Configure * configure, FILE * fp,
 	_makefile_output_variable(fp, "PACKAGE", package);
 	_makefile_output_variable(fp, "VERSION", version);
 	if((p = _makefile_get_config(configure, NULL, "config")) != NULL)
-		return settings(configure->prefs, configure->config, directory,
-			       	package, version);
+		return settings(configure_get_prefs(configure),
+				configure->config, directory, package, version);
 	return 0;
 }
 
@@ -243,6 +243,7 @@ static int _variables_print(Configure * configure, FILE * fp,
 
 static int _variables_dist(Configure * configure, FILE * fp)
 {
+	ConfigurePrefs const * prefs;
 	String const * p;
 	String * dist;
 	String * q;
@@ -253,6 +254,7 @@ static int _variables_dist(Configure * configure, FILE * fp)
 		return 0;
 	if((dist = string_new(p)) == NULL)
 		return 1;
+	prefs = configure_get_prefs(configure);
 	q = dist;
 	for(i = 0;; i++)
 	{
@@ -268,9 +270,9 @@ static int _variables_dist(Configure * configure, FILE * fp)
 			{
 				_makefile_output_variable(fp, "OBJDIR", "");
 				_makefile_output_variable(fp, "PREFIX",
-						configure->prefs->prefix);
+						prefs->prefix);
 				_makefile_output_variable(fp, "DESTDIR",
-						configure->prefs->destdir);
+						prefs->destdir);
 			}
 			_makefile_output_variable(fp, "MKDIR",
 					configure->programs.mkdir);
@@ -398,6 +400,7 @@ static void _executables_variables(Configure * configure, FILE * fp,
 	       	String const * target, char * done);
 static int _variables_executables(Configure * configure, FILE * fp)
 {
+	ConfigurePrefs const * prefs;
 	char done[TT_LAST]; /* FIXME even better if'd be variable by variable */
 	String const * targets;
 	String const * includes;
@@ -407,6 +410,7 @@ static int _variables_executables(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
+	prefs = configure_get_prefs(configure);
 	memset(&done, 0, sizeof(done));
 	targets = _makefile_get_config(configure, NULL, "targets");
 	includes = _makefile_get_config(configure, NULL, "includes");
@@ -433,10 +437,8 @@ static int _variables_executables(Configure * configure, FILE * fp)
 	else if(includes != NULL)
 	{
 		_makefile_output_variable(fp, "OBJDIR", "");
-		_makefile_output_variable(fp, "PREFIX",
-				configure->prefs->prefix);
-		_makefile_output_variable(fp, "DESTDIR",
-				configure->prefs->destdir);
+		_makefile_output_variable(fp, "PREFIX", prefs->prefix);
+		_makefile_output_variable(fp, "DESTDIR", prefs->destdir);
 	}
 	if(targets != NULL || includes != NULL || package != NULL)
 	{
@@ -516,31 +518,31 @@ static void _binary_ldflags(Configure * configure, FILE * fp,
 		String const * ldflags);
 static void _variables_binary(Configure * configure, FILE * fp, char * done)
 {
+	ConfigurePrefs const * prefs;
 	String * p;
 
+	prefs = configure_get_prefs(configure);
 	if(!done[TT_LIBRARY] && !done[TT_SCRIPT])
 	{
 		_makefile_output_variable(fp, "OBJDIR", "");
-		_makefile_output_variable(fp, "PREFIX",
-				configure->prefs->prefix);
-		_makefile_output_variable(fp, "DESTDIR",
-				configure->prefs->destdir);
+		_makefile_output_variable(fp, "PREFIX", prefs->prefix);
+		_makefile_output_variable(fp, "DESTDIR", prefs->destdir);
 	}
 	/* BINDIR */
-	if(configure->prefs->bindir[0] == '/')
+	if(prefs->bindir[0] == '/')
 		_makefile_output_variable(fp, "BINDIR",
-				configure->prefs->bindir);
-	else if((p = string_new_append("$(PREFIX)/", configure->prefs->bindir,
+				prefs->bindir);
+	else if((p = string_new_append("$(PREFIX)/", prefs->bindir,
 					NULL)) != NULL)
 	{
 		_makefile_output_variable(fp, "BINDIR", p);
 		string_delete(p);
 	}
 	/* SBINDIR */
-	if(configure->prefs->sbindir[0] == '/')
+	if(prefs->sbindir[0] == '/')
 		_makefile_output_variable(fp, "SBINDIR",
-				configure->prefs->sbindir);
-	else if((p = string_new_append("$(PREFIX)/", configure->prefs->sbindir,
+				prefs->sbindir);
+	else if((p = string_new_append("$(PREFIX)/", prefs->sbindir,
 					NULL)) != NULL)
 	{
 		_makefile_output_variable(fp, "SBINDIR", p);
@@ -759,19 +761,19 @@ static void _binary_ldflags(Configure * configure, FILE * fp,
 
 static void _variables_library(Configure * configure, FILE * fp, char * done)
 {
+	ConfigurePrefs const * prefs;
 	String const * libdir;
 	String const * p;
 
+	prefs = configure_get_prefs(configure);
 	if(!done[TT_LIBRARY] && !done[TT_SCRIPT])
 	{
 		_makefile_output_variable(fp, "OBJDIR", "");
-		_makefile_output_variable(fp, "PREFIX",
-				configure->prefs->prefix);
-		_makefile_output_variable(fp, "DESTDIR",
-				configure->prefs->destdir);
+		_makefile_output_variable(fp, "PREFIX", prefs->prefix);
+		_makefile_output_variable(fp, "DESTDIR", prefs->destdir);
 	}
 	if((libdir = _makefile_get_config(configure, NULL, "libdir")) == NULL)
-		libdir = configure->prefs->libdir;
+		libdir = prefs->libdir;
 	if(libdir[0] == '/')
 		_makefile_output_variable(fp, "LIBDIR", libdir);
 	else
@@ -829,18 +831,20 @@ static void _variables_libtool(Configure * configure, FILE * fp, char * done)
 
 static void _variables_script(Configure * configure, FILE * fp, char * done)
 {
+	ConfigurePrefs const * prefs;
+
 	if(!done[TT_BINARY] && !done[TT_LIBRARY] && !done[TT_SCRIPT])
 	{
+		prefs = configure_get_prefs(configure);
 		_makefile_output_variable(fp, "OBJDIR", "");
-		_makefile_output_variable(fp, "PREFIX",
-				configure->prefs->prefix);
-		_makefile_output_variable(fp, "DESTDIR",
-				configure->prefs->destdir);
+		_makefile_output_variable(fp, "PREFIX", prefs->prefix);
+		_makefile_output_variable(fp, "DESTDIR", prefs->destdir);
 	}
 }
 
 static int _variables_includes(Configure * configure, FILE * fp)
 {
+	ConfigurePrefs const * prefs;
 	String const * includes;
 
 	if((includes = _makefile_get_config(configure, NULL, "includes"))
@@ -848,12 +852,12 @@ static int _variables_includes(Configure * configure, FILE * fp)
 		return 0;
 	if(fp == NULL)
 		return 0;
-	if(configure->prefs->includedir[0] == '/')
-		_makefile_output_variable(fp, "INCLUDEDIR",
-				configure->prefs->includedir);
+	prefs = configure_get_prefs(configure);
+	if(prefs->includedir[0] == '/')
+		_makefile_output_variable(fp, "INCLUDEDIR", prefs->includedir);
 	else
 		_makefile_print(fp, "%s%s\n", "INCLUDEDIR= $(PREFIX)/",
-				configure->prefs->includedir);
+				prefs->includedir);
 	return 0;
 }
 

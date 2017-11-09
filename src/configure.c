@@ -471,6 +471,13 @@ HostOS configure_get_os(Configure * configure)
 }
 
 
+/* configure_get_prefs */
+ConfigurePrefs const * configure_get_prefs(Configure * configure)
+{
+	return configure->prefs;
+}
+
+
 /* configure_get_soext */
 String const * configure_get_soext(Configure * configure)
 {
