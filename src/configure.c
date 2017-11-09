@@ -157,6 +157,15 @@ int configure_error(char const * message, int ret)
 }
 
 
+/* configure_warning */
+int configure_warning(char const * message, int ret)
+{
+	fputs(PROGNAME ": warning: ", stderr);
+	perror(message);
+	return ret;
+}
+
+
 /* enum_map_find */
 unsigned int enum_map_find(unsigned int last, EnumMap const * map,
 		String const * str)
@@ -352,7 +361,7 @@ static int _configure_detect_programs(Configure * configure)
 					programs[i].program) != 0)
 			return -1;
 	if(config_load(configure->programs, filename) != 0)
-		configure_error(DATADIR "/" PACKAGE "/" PACKAGE ".conf: "
+		configure_warning(DATADIR "/" PACKAGE "/" PACKAGE ".conf: "
 				"Could not load program definitions", 0);
 	/* platform-specific */
 	switch(configure->os)
