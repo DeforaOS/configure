@@ -367,10 +367,10 @@ static int _variables_targets_library(Configure * configure, FILE * fp,
 
 	if((p = _makefile_get_config(configure, target, "soname")) != NULL)
 		soname = string_new(p);
-	else if(configure->os == HO_MACOSX)
+	else if(configure_get_os(configure) == HO_MACOSX)
 		/* versioning is different on MacOS X */
 		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
-	else if(configure->os == HO_WIN32)
+	else if(configure_get_os(configure) == HO_WIN32)
 		/* and on Windows */
 		soname = string_new_append(target, "$(SOEXT)", NULL);
 	else
@@ -380,11 +380,11 @@ static int _variables_targets_library(Configure * configure, FILE * fp,
 	if(configure_can_library_static(configure))
 		/* generate a static library */
 		_makefile_print(fp, "%s%s%s", " $(OBJDIR)", target, ".a");
-	if(configure->os == HO_MACOSX)
+	if(configure_get_os(configure) == HO_MACOSX)
 		_makefile_print(fp, "%s%s%s%s%s%s%s", " $(OBJDIR)", soname,
 				" $(OBJDIR)", target, ".0$(SOEXT) $(OBJDIR)",
 				target, "$(SOEXT)");
-	else if(configure->os == HO_WIN32)
+	else if(configure_get_os(configure) == HO_WIN32)
 		_makefile_print(fp, "%s%s", " $(OBJDIR)", soname);
 	else
 		_makefile_print(fp, "%s%s%s%s%s%s%s", " $(OBJDIR)", soname,
@@ -599,13 +599,13 @@ static void _targets_cflags(Configure * configure, FILE * fp)
 	_makefile_output_variable(fp, "CPPFLAGSF", cppf);
 	_makefile_output_variable(fp, "CPPFLAGS", cpp);
 	p = NULL;
-	if(configure->os == HO_GNU_LINUX && cff != NULL
+	if(configure_get_os(configure) == HO_GNU_LINUX && cff != NULL
 			&& string_find(cff, "-ansi"))
 		p = string_new_append(cff, " -D _GNU_SOURCE");
 	_makefile_output_variable(fp, "CFLAGSF", (p != NULL) ? p : cff);
 	string_delete(p);
 	p = NULL;
-	if(configure->os == HO_GNU_LINUX && cf != NULL
+	if(configure_get_os(configure) == HO_GNU_LINUX && cf != NULL
 			&& string_find(cf, "-ansi"))
 		p = string_new_append(cf, " -D _GNU_SOURCE");
 	_makefile_output_variable(fp, "CFLAGS", (p != NULL) ? p : cf);
@@ -630,14 +630,16 @@ static void _targets_cxxflags(Configure * configure, FILE * fp)
 	if(cxxff != NULL)
 	{
 		_makefile_print(fp, "%s%s", "CXXFLAGSF= ", cxxff);
-		if(configure->os == HO_GNU_LINUX && string_find(cxxff, "-ansi"))
+		if(configure_get_os(configure) == HO_GNU_LINUX
+				&& string_find(cxxff, "-ansi"))
 			_makefile_print(fp, "%s", " -D _GNU_SOURCE");
 		_makefile_print(fp, "%c", '\n');
 	}
 	if(cxxf != NULL)
 	{
 		_makefile_print(fp, "%s%s", "CXXFLAGS= ", cxxf);
-		if(configure->os == HO_GNU_LINUX && string_find(cxxf, "-ansi"))
+		if(configure_get_os(configure) == HO_GNU_LINUX
+				&& string_find(cxxf, "-ansi"))
 			_makefile_print(fp, "%s", " -D _GNU_SOURCE");
 		_makefile_print(fp, "%c", '\n');
 	}
@@ -711,7 +713,7 @@ static void _binary_ldflags(Configure * configure, FILE * fp,
 		_makefile_print(fp, " %s%s", ldflags, "\n");
 		return;
 	}
-	switch(configure->os)
+	switch(configure_get_os(configure))
 	{
 		case HO_DEFORAOS:
 			libs = libs_deforaos;
@@ -1203,7 +1205,8 @@ static void _flags_c(Configure * configure, FILE * fp, String const * target)
 	if((p = _makefile_get_config(configure, target, "cflags")) != NULL)
 	{
 		_makefile_print(fp, " %s", p);
-		if(configure->os == HO_GNU_LINUX && string_find(p, "-ansi"))
+		if(configure_get_os(configure) == HO_GNU_LINUX
+				&& string_find(p, "-ansi"))
 			_makefile_print(fp, "%s", " -D _GNU_SOURCE");
 	}
 	_makefile_print(fp, "\n%s%s", target,
@@ -1256,20 +1259,20 @@ static int _target_library(Configure * configure, FILE * fp,
 		return 1;
 	if((p = _makefile_get_config(configure, target, "soname")) != NULL)
 		soname = string_new(p);
-	else if(configure->os == HO_MACOSX)
+	else if(configure_get_os(configure) == HO_MACOSX)
 		/* versioning is different on MacOS X */
 		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
-	else if(configure->os == HO_WIN32)
+	else if(configure_get_os(configure) == HO_WIN32)
 		/* and on Windows */
 		soname = string_new_append(target, "$(SOEXT)", NULL);
 	else
 		soname = string_new_append(target, "$(SOEXT)", ".0", NULL);
 	if(soname == NULL)
 		return 1;
-	if(configure->os == HO_MACOSX)
+	if(configure_get_os(configure) == HO_MACOSX)
 		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname, ": $(",
 				target, "_OBJS)");
-	else if(configure->os == HO_WIN32)
+	else if(configure_get_os(configure) == HO_WIN32)
 		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname, ": $(",
 				target, "_OBJS)");
 	else
@@ -1281,15 +1284,16 @@ static int _target_library(Configure * configure, FILE * fp,
 	_makefile_print(fp, "%c", '\n');
 	/* build the shared library */
 	_makefile_print(fp, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname,
-			(configure->os != HO_MACOSX
-			 && configure->os != HO_WIN32) ? ".0" : "");
+			(configure_get_os(configure) != HO_MACOSX
+			 && configure_get_os(configure) != HO_WIN32)
+			? ".0" : "");
 	if((p = _makefile_get_config(configure, target, "install")) != NULL)
 	{
 		/* soname is not available on MacOS X */
-		if(configure->os == HO_MACOSX)
+		if(configure_get_os(configure) == HO_MACOSX)
 			_makefile_print(fp, "%s%s%s%s%s", " -install_name ",
 					p, "/", target, ".0$(SOEXT)");
-		else if(configure->os != HO_WIN32)
+		else if(configure_get_os(configure) != HO_WIN32)
 			_makefile_print(fp, "%s%s", " -Wl,-soname,", soname);
 	}
 	_makefile_print(fp, "%s%s%s%s%s", " $(", target, "_OBJS) $(", target,
@@ -1303,7 +1307,7 @@ static int _target_library(Configure * configure, FILE * fp,
 		_binary_ldflags(configure, fp, p);
 	string_delete(q);
 	_makefile_print(fp, "%c", '\n');
-	if(configure->os == HO_MACOSX)
+	if(configure_get_os(configure) == HO_MACOSX)
 	{
 		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
 				".0$(SOEXT): $(OBJDIR)", soname, "\n");
@@ -1314,7 +1318,7 @@ static int _target_library(Configure * configure, FILE * fp,
 		_makefile_print(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				" $(OBJDIR)", target, "$(SOEXT)\n");
 	}
-	else if(configure->os != HO_WIN32)
+	else if(configure_get_os(configure) != HO_WIN32)
 	{
 		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
 				": $(OBJDIR)", soname, ".0\n");
@@ -1752,7 +1756,7 @@ static int _target_source(Configure * configure, FILE * fp,
 			if(q != NULL)
 			{
 				_makefile_print(fp, " %s", q);
-				if(configure->os == HO_GNU_LINUX
+				if(configure_get_os(configure) == HO_GNU_LINUX
 					       	&& string_find(q, "-ansi"))
 					_makefile_print(fp, "%s",
 							" -D _GNU_SOURCE");
@@ -2224,10 +2228,10 @@ static int _install_target_library(Configure * configure, FILE * fp,
 				".a $(DESTDIR)", path, target, ".a\n");
 	if((p = _makefile_get_config(configure, target, "soname")) != NULL)
 		soname = string_new(p);
-	else if(configure->os == HO_MACOSX)
+	else if(configure_get_os(configure) == HO_MACOSX)
 		/* versioning is different on MacOS X */
 		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
-	else if(configure->os == HO_WIN32)
+	else if(configure_get_os(configure) == HO_WIN32)
 		/* and on Windows */
 		soname = string_new_append(target, "$(SOEXT)", NULL);
 	else
@@ -2235,7 +2239,7 @@ static int _install_target_library(Configure * configure, FILE * fp,
 	if(soname == NULL)
 		return 1;
 	/* install the shared library */
-	if(configure->os == HO_MACOSX)
+	if(configure_get_os(configure) == HO_MACOSX)
 	{
 		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
 				soname, " $(DESTDIR)", path, soname, "\n");
@@ -2244,7 +2248,7 @@ static int _install_target_library(Configure * configure, FILE * fp,
 		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
 				" $(DESTDIR)", path, target, "$(SOEXT)\n");
 	}
-	else if(configure->os == HO_WIN32)
+	else if(configure_get_os(configure) == HO_WIN32)
 		_makefile_print(fp, "%s%s%s%s%s%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
 				soname, " $(DESTDIR)", path, "/", soname, "\n");
 	else
@@ -2464,7 +2468,7 @@ static int _dist_install(Configure * configure, FILE * fp,
 		char const * directory, char const * mode,
 		char const * filename)
 {
-	char sep = (configure->os != HO_WIN32) ? '/' : '\\';
+	char sep = (configure_get_os(configure) != HO_WIN32) ? '/' : '\\';
 	String * p;
 	char const * q;
 
@@ -2680,10 +2684,10 @@ static int _uninstall_target_library(Configure * configure, FILE * fp,
 				"", "");
 	if((p = _makefile_get_config(configure, target, "soname")) != NULL)
 		soname = string_new(p);
-	else if(configure->os == HO_MACOSX)
+	else if(configure_get_os(configure) == HO_MACOSX)
 		/* versioning is different on MacOS X */
 		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
-	else if(configure->os == HO_WIN32)
+	else if(configure_get_os(configure) == HO_WIN32)
 		/* and on Windows */
 		soname = string_new_append(target, "$(SOEXT)", NULL);
 	else
@@ -2691,14 +2695,14 @@ static int _uninstall_target_library(Configure * configure, FILE * fp,
 	if(soname == NULL)
 		return 1;
 	/* uninstall the shared library */
-	if(configure->os == HO_MACOSX)
+	if(configure_get_os(configure) == HO_MACOSX)
 	{
 		_makefile_print(fp, format, rm_destdir, path, soname, "\n", "",
 				"");
 		_makefile_print(fp, format, rm_destdir, path, target, ".0",
 				"$(SOEXT)", "\n");
 	}
-	else if(configure->os != HO_WIN32)
+	else if(configure_get_os(configure) != HO_WIN32)
 	{
 		_makefile_print(fp, format, rm_destdir, path, soname, ".0\n",
 				"", "");

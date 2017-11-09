@@ -180,6 +180,7 @@ int configure_can_library_static(Configure * configure);
 String const * configure_get_config(Configure * configure,
 		String const * section, String const * variable);
 String const * configure_get_exeext(Configure * configure);
+HostOS configure_get_os(Configure * configure);
 String const * configure_get_soext(Configure * configure);
 
 unsigned int configure_is_flag_set(Configure * configure, unsigned int flags);

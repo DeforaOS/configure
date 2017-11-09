@@ -464,6 +464,13 @@ String const * configure_get_exeext(Configure * configure)
 }
 
 
+/* configure_get_os */
+HostOS configure_get_os(Configure * configure)
+{
+	return configure->os;
+}
+
+
 /* configure_get_soext */
 String const * configure_get_soext(Configure * configure)
 {
