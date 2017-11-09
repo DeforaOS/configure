@@ -31,6 +31,7 @@
 #include <System.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include "configure.h"
 #include "settings.h"
 
@@ -119,7 +120,7 @@ static int _settings_do(Configure * configure, String const * directory,
 		return 1;
 	}
 	if((fp = fopen(filename, "w")) == NULL)
-		configure_error(filename, 0);
+		configure_error(0, "%s: %s", filename, strerror(errno));
 	string_delete(filename);
 	if(fp == NULL)
 		return 1;

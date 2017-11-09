@@ -93,7 +93,7 @@ int makefile(Configure * configure, String const * directory, configArray * ca,
 		return -1;
 	if(!_makefile_is_flag_set(configure, PREFS_n)
 			&& (fp = fopen(makefile, "w")) == NULL)
-		ret = configure_error(makefile, 1);
+		ret = configure_error(1, "%s: %s", makefile, strerror(errno));
 	else
 	{
 		if(_makefile_is_flag_set(configure, PREFS_v))

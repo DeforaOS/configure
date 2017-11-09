@@ -34,6 +34,7 @@
 # include <sys/utsname.h>
 #endif
 #include <unistd.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -149,19 +150,29 @@ ObjectType _source_type(String const * source);
 
 /* functions */
 /* configure_error */
-int configure_error(char const * message, int ret)
+int configure_error(int ret, char const * format, ...)
 {
+	va_list ap;
+
 	fputs(PROGNAME ": ", stderr);
-	perror(message);
+	va_start(ap, format);
+	vfprintf(stderr, format, ap);
+	fputc('\n', stderr);
+	va_end(ap);
 	return ret;
 }
 
 
 /* configure_warning */
-int configure_warning(char const * message, int ret)
+int configure_warning(int ret, char const * format, ...)
 {
+	va_list ap;
+
 	fputs(PROGNAME ": warning: ", stderr);
-	perror(message);
+	va_start(ap, format);
+	vfprintf(stderr, format, ap);
+	fputc('\n', stderr);
+	va_end(ap);
 	return ret;
 }
 
@@ -273,7 +284,7 @@ static void _configure_detect(Configure * configure)
 
 	if(uname(&un) < 0)
 	{
-		configure_error("system detection failed", 0);
+		configure_error(0, "%s", "system detection failed");
 		configure->arch = HA_UNKNOWN;
 		configure->os = HO_UNKNOWN;
 		configure->kernel = HK_UNKNOWN;
@@ -361,8 +372,8 @@ static int _configure_detect_programs(Configure * configure)
 					programs[i].program) != 0)
 			return -1;
 	if(config_load(configure->programs, filename) != 0)
-		configure_warning(DATADIR "/" PACKAGE "/" PACKAGE ".conf: "
-				"Could not load program definitions", 0);
+		configure_warning(0, "%s: %s", filename,
+				"Could not load program definitions");
 	/* platform-specific */
 	switch(configure->os)
 	{
@@ -391,13 +402,13 @@ static int _configure_load(ConfigurePrefs * prefs, String const * directory,
 	String const * subdirs = NULL;
 
 	if((path = string_new(directory)) == NULL)
-		return configure_error(directory, 1);
+		return configure_error(1, "%s", error_get(NULL));
 	if(string_append(&path, "/") != 0
 			|| string_append(&path, PROJECT_CONF) != 0
 			|| (config = config_new()) == NULL)
 	{
 		string_delete(path);
-		return configure_error(directory, 1);
+		return configure_error(1, "%s", error_get(NULL));
 	}
 	config_set(config, "", "directory", directory);
 	if(prefs->flags & PREFS_v)

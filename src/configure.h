@@ -162,8 +162,8 @@ String const * configure_get_soext(Configure * configure);
 unsigned int configure_is_flag_set(Configure * configure, unsigned int flags);
 
 /* useful */
-int configure_error(char const * message, int ret);
-int configure_warning(char const * message, int ret);
+int configure_error(int ret, char const * format, ...);
+int configure_warning(int ret, char const * format, ...);
 
 /* generic */
 unsigned int enum_map_find(unsigned int last, EnumMap const * map,
