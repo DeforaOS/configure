@@ -1,4 +1,6 @@
 /htmllint.log
+/phplint.log
+/pylint.log
 /shlint.log
 /tests.log
 /xmllint.log
