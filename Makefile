@@ -1,6 +1,6 @@
 PACKAGE	= configure
 VERSION	= 0.2.3
-SUBDIRS	= data doc src tests tools
+SUBDIRS	= data doc src tools tests
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -82,6 +82,10 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/makefile.h \
 		$(PACKAGE)-$(VERSION)/src/settings.h \
 		$(PACKAGE)-$(VERSION)/src/project.conf \
+		$(PACKAGE)-$(VERSION)/tools/configure.c \
+		$(PACKAGE)-$(VERSION)/tools/pkg-config.c \
+		$(PACKAGE)-$(VERSION)/tools/Makefile \
+		$(PACKAGE)-$(VERSION)/tools/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/Makefile \
 		$(PACKAGE)-$(VERSION)/tests/tests.sh \
 		$(PACKAGE)-$(VERSION)/tests/binary/project.conf \
@@ -112,9 +116,6 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/script/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/verilog/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/project.conf \
-		$(PACKAGE)-$(VERSION)/tools/pkg-config.c \
-		$(PACKAGE)-$(VERSION)/tools/Makefile \
-		$(PACKAGE)-$(VERSION)/tools/project.conf \
 		$(PACKAGE)-$(VERSION)/Makefile \
 		$(PACKAGE)-$(VERSION)/AUTHORS \
 		$(PACKAGE)-$(VERSION)/BUGS \
