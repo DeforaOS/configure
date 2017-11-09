@@ -45,6 +45,13 @@
 # define PROGNAME PACKAGE
 #endif
 
+#ifndef PREFIX
+# define PREFIX		"/usr/local"
+#endif
+#ifndef DATADIR
+# define DATADIR	PREFIX "/share"
+#endif
+
 
 /* Configure */
 /* private */
@@ -323,6 +330,7 @@ static int _configure_detect_programs(Configure * configure)
 {
 	int ret = 0;
 	String const section[] = "programs";
+	String const filename[] = DATADIR "/" PACKAGE "/" PACKAGE ".conf";
 	struct
 	{
 		String const * name;
@@ -343,6 +351,9 @@ static int _configure_detect_programs(Configure * configure)
 		if(config_set(configure->programs, section, programs[i].name,
 					programs[i].program) != 0)
 			return -1;
+	if(config_load(configure->programs, filename) != 0)
+		configure_error(DATADIR "/" PACKAGE "/" PACKAGE ".conf: "
+				"Could not load program definitions", 0);
 	/* platform-specific */
 	switch(configure->os)
 	{
