@@ -38,7 +38,7 @@ makefile.o_OBJS = $(OBJDIR)makefile.o
 makefile.o_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 
 $(OBJDIR)configure.o: configure.c configure.h makefile.h ../config.h
-	$(CC) $(configure_CFLAGS) -o $(OBJDIR)configure.o -c configure.c
+	$(CC) -D PREFIX=\"$(PREFIX)\" $(configure_CFLAGS) -o $(OBJDIR)configure.o -c configure.c
 
 $(OBJDIR)settings.o: settings.c settings.h
 	$(CC) $(configure_CFLAGS) -o $(OBJDIR)settings.o -c settings.c
