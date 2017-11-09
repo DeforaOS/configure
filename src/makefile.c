@@ -46,10 +46,14 @@
 #endif
 
 
+/* private */
 /* prototypes */
 /* accessors */
 static String const * _makefile_get_config(Configure * configure,
 		String const * section, String const * variable);
+
+static unsigned int _makefile_is_flag_set(Configure * configure,
+		unsigned int flag);
 static int _makefile_is_phony(Configure * configure, char const * target);
 
 /* useful */
@@ -85,12 +89,12 @@ int makefile(Configure * configure, String const * directory, configArray * ca,
 	if((makefile = string_new_append(directory, "/", MAKEFILE, NULL))
 			== NULL)
 		return -1;
-	if(!(configure->prefs->flags & PREFS_n)
+	if(!_makefile_is_flag_set(configure, PREFS_n)
 			&& (fp = fopen(makefile, "w")) == NULL)
 		ret = configure_error(makefile, 1);
 	else
 	{
-		if(configure->prefs->flags & PREFS_v)
+		if(_makefile_is_flag_set(configure, PREFS_v))
 			printf("%s%s/%s", "Creating ", directory,
 					MAKEFILE "\n");
 		ret |= _makefile_write(configure, fp, ca, from, to);
@@ -182,17 +186,17 @@ static int _variables_package(Configure * configure, FILE * fp,
 
 	if((package = _makefile_get_config(configure, NULL, "package")) == NULL)
 		return 0;
-	if(configure->prefs->flags & PREFS_v)
+	if(_makefile_is_flag_set(configure, PREFS_v))
 		printf("%s%s", "Package: ", package);
 	if((version = _makefile_get_config(configure, NULL, "version")) == NULL)
 	{
-		if(configure->prefs->flags & PREFS_v)
+		if(_makefile_is_flag_set(configure, PREFS_v))
 			fputc('\n', stdout);
 		fprintf(stderr, "%s%s%s", PROGNAME ": ", directory,
 				": \"package\" needs \"version\"\n");
 		return 1;
 	}
-	if(configure->prefs->flags & PREFS_v)
+	if(_makefile_is_flag_set(configure, PREFS_v))
 		printf(" %s\n", version);
 	_makefile_output_variable(fp, "PACKAGE", package);
 	_makefile_output_variable(fp, "VERSION", version);
@@ -1534,7 +1538,7 @@ static int _target_script(Configure * configure, FILE * fp,
 	}
 	if(fp == NULL)
 		_script_check(configure, target, script);
-	if(configure->prefs->flags & PREFS_S)
+	if(_makefile_is_flag_set(configure, PREFS_S))
 		_script_security(configure, target, script);
 	phony = _makefile_is_phony(configure, target);
 	_makefile_print(fp, "\n%s%s:", phony ? "" : "$(OBJDIR)",
@@ -2437,20 +2441,20 @@ static int _dist_check(Configure * configure, char const * target,
 	if(mode[0] == '\0' || *p != '\0')
 		return error_set_print(PROGNAME, 1, "%s: %s%s%s", target,
 				"Invalid permissions \"", mode, "\"");
-	if((configure->prefs->flags & PREFS_S) && (m & S_ISUID))
+	if(_makefile_is_flag_set(configure, PREFS_S) && (m & S_ISUID))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a SUID file");
-	if((configure->prefs->flags & PREFS_S) && (m & S_ISUID))
+	if(_makefile_is_flag_set(configure, PREFS_S) && (m & S_ISUID))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a SGID file");
-	if((configure->prefs->flags & PREFS_S)
+	if(_makefile_is_flag_set(configure, PREFS_S)
 			&& (m & (S_IXUSR | S_IXGRP | S_IXOTH)))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as an executable file");
-	if((configure->prefs->flags & PREFS_S) && (m & S_IWGRP))
+	if(_makefile_is_flag_set(configure, PREFS_S) && (m & S_IWGRP))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a group-writable file");
-	if((configure->prefs->flags & PREFS_S) && (m & S_IWOTH))
+	if(_makefile_is_flag_set(configure, PREFS_S) && (m & S_IWOTH))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a writable file");
 	return 0;
@@ -2751,6 +2755,14 @@ static String const * _makefile_get_config(Configure * configure,
 		String const * section, String const * variable)
 {
 	return configure_get_config(configure, section, variable);
+}
+
+
+/* makefile_is_flag_set */
+static unsigned int _makefile_is_flag_set(Configure * configure,
+		unsigned int flag)
+{
+	return configure_is_flag_set(configure, flag);
 }
 
 

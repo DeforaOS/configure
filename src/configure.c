@@ -471,6 +471,13 @@ String const * configure_get_soext(Configure * configure)
 }
 
 
+/* configure_is_flag_set */
+unsigned int configure_is_flag_set(Configure * configure, unsigned int flags)
+{
+	return configure->prefs->flags & flags;
+}
+
+
 /* source_extension */
 String const * _source_extension(String const * source)
 {

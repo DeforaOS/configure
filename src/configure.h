@@ -182,6 +182,8 @@ String const * configure_get_config(Configure * configure,
 String const * configure_get_exeext(Configure * configure);
 String const * configure_get_soext(Configure * configure);
 
+unsigned int configure_is_flag_set(Configure * configure, unsigned int flags);
+
 /* useful */
 int configure_error(char const * message, int ret);
 
