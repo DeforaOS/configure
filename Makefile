@@ -43,6 +43,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/data/project.conf \
 		$(PACKAGE)-$(VERSION)/data/platform/Makefile \
 		$(PACKAGE)-$(VERSION)/data/platform/Darwin.conf \
+		$(PACKAGE)-$(VERSION)/data/platform/DeforaOS.conf \
 		$(PACKAGE)-$(VERSION)/data/platform/FreeBSD.conf \
 		$(PACKAGE)-$(VERSION)/data/platform/Linux.conf \
 		$(PACKAGE)-$(VERSION)/data/platform/NetBSD.conf \

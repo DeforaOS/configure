@@ -16,6 +16,8 @@ install:
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/configure/platform
 	$(INSTALL) -m 0644 Darwin.conf $(DESTDIR)$(PREFIX)/share/configure/platform/Darwin.conf
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/configure/platform
+	$(INSTALL) -m 0644 DeforaOS.conf $(DESTDIR)$(PREFIX)/share/configure/platform/DeforaOS.conf
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/configure/platform
 	$(INSTALL) -m 0644 FreeBSD.conf $(DESTDIR)$(PREFIX)/share/configure/platform/FreeBSD.conf
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/configure/platform
 	$(INSTALL) -m 0644 Linux.conf $(DESTDIR)$(PREFIX)/share/configure/platform/Linux.conf
@@ -28,6 +30,7 @@ install:
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/configure/platform/Darwin.conf
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/configure/platform/DeforaOS.conf
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/configure/platform/FreeBSD.conf
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/configure/platform/Linux.conf
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/configure/platform/NetBSD.conf
