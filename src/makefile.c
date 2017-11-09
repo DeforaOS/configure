@@ -80,9 +80,9 @@ int makefile(Configure * configure, String const * directory, configArray * ca,
 	FILE * fp = NULL;
 	int ret = 0;
 
-	makefile = string_new(directory);
-	string_append(&makefile, "/"); /* FIXME check for errors */
-	string_append(&makefile, MAKEFILE);
+	if((makefile = string_new_append(directory, "/", MAKEFILE, NULL))
+			== NULL)
+		return -1;
 	if(!(configure->prefs->flags & PREFS_n)
 			&& (fp = fopen(makefile, "w")) == NULL)
 		ret = configure_error(makefile, 1);
