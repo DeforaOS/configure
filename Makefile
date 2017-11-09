@@ -41,6 +41,14 @@ dist:
 		$(PACKAGE)-$(VERSION)/data/Makefile \
 		$(PACKAGE)-$(VERSION)/data/configure.conf \
 		$(PACKAGE)-$(VERSION)/data/project.conf \
+		$(PACKAGE)-$(VERSION)/data/platform/Makefile \
+		$(PACKAGE)-$(VERSION)/data/platform/Darwin.conf \
+		$(PACKAGE)-$(VERSION)/data/platform/FreeBSD.conf \
+		$(PACKAGE)-$(VERSION)/data/platform/Linux.conf \
+		$(PACKAGE)-$(VERSION)/data/platform/NetBSD.conf \
+		$(PACKAGE)-$(VERSION)/data/platform/OpenBSD.conf \
+		$(PACKAGE)-$(VERSION)/data/platform/Windows.conf \
+		$(PACKAGE)-$(VERSION)/data/platform/project.conf \
 		$(PACKAGE)-$(VERSION)/doc/Makefile \
 		$(PACKAGE)-$(VERSION)/doc/configure.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/configure.xml \
