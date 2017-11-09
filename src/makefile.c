@@ -666,6 +666,8 @@ static void _targets_vflags(Configure * configure, FILE * fp)
 {
 	String const * p;
 
+	if((p = config_get(configure->config, NULL, "verilog")) != NULL)
+		_makefile_output_variable(fp, "VERILOG", p);
 	if((p = config_get(configure->config, NULL, "vflags_force")) != NULL)
 	{
 		_makefile_print(fp, "%s", "VFLAGSF=");
