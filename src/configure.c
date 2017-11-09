@@ -177,15 +177,15 @@ static void _configure_detect(Configure * configure);
 static HostKernel _detect_kernel(HostOS os, char const * release);
 static void _configure_detect_extensions(Configure * configure);
 static void _configure_detect_programs(Configure * configure);
-static int _configure_load(Prefs * prefs, char const * directory,
+static int _configure_load(ConfigurePrefs * prefs, char const * directory,
 		configArray * ca);
-static int _load_subdirs(Prefs * prefs, char const * directory,
+static int _load_subdirs(ConfigurePrefs * prefs, char const * directory,
 		configArray * ca, String const * subdirs);
-static int _load_subdirs_subdir(Prefs * prefs, char const * directory,
+static int _load_subdirs_subdir(ConfigurePrefs * prefs, char const * directory,
 		configArray * ca, char const * subdir);
 static int _configure_do(Configure * configure, configArray * ca);
 
-int configure(Prefs * prefs, char const * directory)
+int configure(ConfigurePrefs * prefs, String const * directory)
 {
 	int ret;
 	Configure cfgr;
@@ -329,7 +329,7 @@ static void _configure_detect_programs(Configure * configure)
 	}
 }
 
-static int _configure_load(Prefs * prefs, String const * directory,
+static int _configure_load(ConfigurePrefs * prefs, String const * directory,
 		configArray * ca)
 {
 	int ret = 0;
@@ -362,7 +362,7 @@ static int _configure_load(Prefs * prefs, String const * directory,
 	return _load_subdirs(prefs, directory, ca, subdirs);
 }
 
-static int _load_subdirs(Prefs * prefs, char const * directory,
+static int _load_subdirs(ConfigurePrefs * prefs, char const * directory,
 		configArray * ca, String const * subdirs)
 {
 	int ret = 0;
@@ -390,7 +390,7 @@ static int _load_subdirs(Prefs * prefs, char const * directory,
 	return ret;
 }
 
-static int _load_subdirs_subdir(Prefs * prefs, char const * directory,
+static int _load_subdirs_subdir(ConfigurePrefs * prefs, char const * directory,
 		configArray * ca, char const * subdir)
 	/* FIXME error checking */
 {

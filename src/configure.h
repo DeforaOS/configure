@@ -127,7 +127,7 @@ extern const struct ExtensionType * sExtensionType;
 
 /* configure */
 /* types */
-typedef struct _Prefs
+typedef struct _ConfigurePrefs
 {
 	int flags;
 	char * bindir;
@@ -137,13 +137,13 @@ typedef struct _Prefs
 	char * prefix;
 	char * os;
 	char * sbindir;
-} Prefs;
+} ConfigurePrefs;
 # define PREFS_n	0x1
 # define PREFS_S	0x2
 # define PREFS_v	0x4
 typedef struct _Configure
 {
-	Prefs * prefs;
+	ConfigurePrefs * prefs;
 	Config * config;
 	HostArch arch;
 	HostOS os;
@@ -172,7 +172,7 @@ typedef struct _Configure
 
 
 /* functions */
-int configure(Prefs * prefs, char const * directory);
+int configure(ConfigurePrefs * prefs, String const * directory);
 
 /* accessors */
 int configure_can_library_static(Configure * configure);

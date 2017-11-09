@@ -43,14 +43,14 @@
 /* configure */
 /* private */
 /* prototypes */
-static void _prefs_init(Prefs * prefs);
+static void _prefs_init(ConfigurePrefs * prefs);
 
 static int _usage(void);
 
 
 /* functions */
 /* prefs_init */
-static void _prefs_init(Prefs * prefs)
+static void _prefs_init(ConfigurePrefs * prefs)
 {
 	struct stat st;
 
@@ -79,7 +79,7 @@ static void _prefs_init(Prefs * prefs)
 /* usage */
 static int _usage(void)
 {
-	Prefs prefs;
+	ConfigurePrefs prefs;
 
 	_prefs_init(&prefs);
 	fprintf(stderr, "%s%s%s%s%s%s%s%s%s%s%s",
@@ -106,7 +106,7 @@ static int _usage(void)
 int main(int argc, char * argv[])
 {
 	int ret = 0;
-	Prefs prefs;
+	ConfigurePrefs prefs;
 	int o;
 
 	_prefs_init(&prefs);
