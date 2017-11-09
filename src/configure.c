@@ -520,7 +520,7 @@ String const * configure_get_soext(Configure * configure)
 /* configure_is_flag_set */
 unsigned int configure_is_flag_set(Configure * configure, unsigned int flags)
 {
-	return configure->prefs->flags & flags;
+	return (configure->prefs->flags & flags) ? 1 : 0;
 }
 
 
