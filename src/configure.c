@@ -375,7 +375,7 @@ static int _configure_detect_programs(Configure * configure)
 	if(configure->prefs->basedir != NULL
 			&& (filename = string_new_append(
 					configure->prefs->basedir,
-					"../data/" PACKAGE ".conf",
+					"/data/" PACKAGE ".conf",
 					NULL)) == NULL)
 		return -configure_error(1, "%s", error_get(NULL));
 	if(filename != NULL && config_load(configure->programs, filename) != 0)
@@ -386,8 +386,8 @@ static int _configure_detect_programs(Configure * configure)
 	/* load the database for the current system */
 	if(configure->prefs->basedir != NULL)
 		filename = string_new_append(configure->prefs->basedir,
-				"/platform/", sHostOS[configure->os], ".conf",
-				NULL);
+				"/data/platform/", sHostOS[configure->os],
+				".conf", NULL);
 	else
 		filename = string_new_append(DATADIR "/" PACKAGE "/platform/",
 				sHostOS[configure->os], ".conf", NULL);

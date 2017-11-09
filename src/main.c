@@ -55,6 +55,9 @@ static void _prefs_init(ConfigurePrefs * prefs)
 	struct stat st;
 
 	memset(prefs, 0, sizeof(*prefs));
+#ifdef BASEDIR
+	prefs->basedir = BASEDIR;
+#endif
 	prefs->destdir = "";
 	if(stat("/Apps", &st) == 0)
 	{
