@@ -28,10 +28,25 @@
 CONFIGSH="${0%/platform.sh}/config.sh"
 PREFIX="/usr/local"
 PROGNAME="platform.sh"
+SOEXT=".so"
 [ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
 #functions
+#platform_library
+_platform_library()
+{
+	library="$1"
+	libdir=$(_platform_variable "LIBDIR")
+
+	if [ -f "/lib/lib$library$SOEXT" \
+		-o -f "/usr/lib/lib$library$SOEXT" \
+		-o -f "$libdir/lib$library$SOEXT" ]; then
+		echo "-l$library"
+	fi
+}
+
+
 #platform_variable
 _platform_variable()
 {
@@ -74,7 +89,7 @@ _platform_variable()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME -V variable" 1>&2
+	echo "Usage: $PROGNAME -l library -V variable" 1>&2
 	return 1
 }
 
@@ -82,7 +97,7 @@ _usage()
 #main
 type=
 variable=
-while getopts "O:V:" name; do
+while getopts "l:O:V:" name; do
 	case "$name" in
 		O)
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
@@ -90,6 +105,10 @@ while getopts "O:V:" name; do
 		V)
 			type="variable"
 			variable="$OPTARG"
+			;;
+		l)
+			type="library"
+			library="$OPTARG"
 			;;
 		?)
 			_usage
@@ -104,6 +123,9 @@ if [ $# -ne 0 ]; then
 fi
 
 case "$type" in
+	library)
+		"_platform_$type" "$library"
+		;;
 	variable)
 		"_platform_$type" "$variable"
 		;;
