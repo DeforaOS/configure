@@ -89,7 +89,8 @@ _platform_variable()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME -l library -V variable" 1>&2
+	echo "Usage: $PROGNAME -l library" 1>&2
+	echo "       $PROGNAME -V variable" 1>&2
 	return 1
 }
 
