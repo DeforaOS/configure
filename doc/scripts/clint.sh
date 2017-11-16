@@ -60,9 +60,9 @@ _clint()
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
 		for filename in $($FIND "../$subdir" -type f -a -name '*.c' | $SORT); do
-			_clint_file "$filename"
+			(_clint_file "$filename")
 			if [ $? -eq 0 ]; then
-				echo "$filename:"
+				echo "$PROGNAME: $filename: OK" 1>&2
 			else
 				echo "$PROGNAME: $filename: FAIL" 1>&2
 				ret=2
@@ -76,6 +76,13 @@ _clint_file()
 {
 	echo
 	$DEBUG $LINT $CPPFLAGS $CFLAGS "$filename" 2>&1
+	ret=$?
+	if [ $ret -eq 0 ]; then
+		echo "OK"
+	else
+		echo "FAIL"
+	fi
+	return $ret
 }
 
 
