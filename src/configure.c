@@ -63,7 +63,7 @@ struct _Configure {
 	HostArch arch;
 	HostOS os;
 	HostKernel kernel;
-	Config * programs;
+	Config * config;
 };
 
 
@@ -258,8 +258,8 @@ int configure(ConfigurePrefs * prefs, String const * directory)
 		config_delete(p);
 	}
 	array_delete(ca);
-	if(cfgr.programs != NULL)
-		config_delete(cfgr.programs);
+	if(cfgr.config != NULL)
+		config_delete(cfgr.config);
 	return ret;
 }
 
@@ -339,10 +339,10 @@ static int _configure_detect_programs(Configure * configure)
 	};
 	size_t i;
 
-	if((configure->programs = config_new()) == NULL)
+	if((configure->config = config_new()) == NULL)
 		return -1;
 	for(i = 0; i < sizeof(programs) / sizeof(*programs); i++)
-		if(config_set(configure->programs, section, programs[i].name,
+		if(config_set(configure->config, section, programs[i].name,
 					programs[i].program) != 0)
 			return -1;
 	/* load the global database */
@@ -352,7 +352,7 @@ static int _configure_detect_programs(Configure * configure)
 					"/data/" PACKAGE ".conf",
 					NULL)) == NULL)
 		return -configure_error(1, "%s", error_get(NULL));
-	if(filename != NULL && config_load(configure->programs, filename) != 0)
+	if(filename != NULL && config_load(configure->config, filename) != 0)
 		configure_warning(0, "%s: %s", filename,
 			"Could not load program definitions");
 	if(configure->prefs->basedir != NULL)
@@ -367,7 +367,7 @@ static int _configure_detect_programs(Configure * configure)
 				sHostOS[configure->os], ".conf", NULL);
 	if(filename == NULL)
 		return -configure_error(1, "%s", error_get(NULL));
-	else if(config_load(configure->programs, filename) != 0)
+	else if(config_load(configure->config, filename) != 0)
 		configure_warning(0, "%s: %s", filename,
 				"Could not load program definitions");
 	string_delete(filename);
@@ -507,7 +507,7 @@ String const * configure_get_extension(Configure * configure,
 {
 	String const section[] = "extensions";
 
-	return config_get(configure->programs, section, extension);
+	return config_get(configure->config, section, extension);
 }
 
 
@@ -531,7 +531,7 @@ String const * configure_get_program(Configure * configure, String const * name)
 	String const section[] = "programs";
 	String const * program;
 
-	if((program = config_get(configure->programs, section, name)) != NULL)
+	if((program = config_get(configure->config, section, name)) != NULL)
 		return program;
 	return name;
 }
