@@ -60,6 +60,8 @@ static int _makefile_is_phony(Configure * configure, char const * target);
 static int _makefile_expand(FILE * fp, char const * field);
 static int _makefile_link(FILE * fp, int symlink, char const * link,
 		char const * path);
+static int _makefile_output_extension(Configure * configure, FILE * fp,
+		String const * extension);
 static int _makefile_output_program(Configure * configure, FILE * fp,
 		String const * name);
 static int _makefile_output_variable(FILE * fp, String const * name,
@@ -446,6 +448,7 @@ static int _variables_executables(Configure * configure, FILE * fp)
 	if(package != NULL)
 	{
 		_makefile_output_program(configure, fp, "tar");
+		_makefile_output_extension(configure, fp, "tgz");
 		_makefile_output_program(configure, fp, "mkdir");
 	}
 	if(targets != NULL || includes != NULL)
@@ -644,8 +647,7 @@ static void _targets_cxxflags(Configure * configure, FILE * fp)
 
 static void _targets_exeext(Configure * configure, FILE * fp)
 {
-	_makefile_output_variable(fp, "EXEEXT",
-			configure_get_extension(configure, "exe"));
+	_makefile_output_extension(configure, fp, "exe");
 }
 
 static void _targets_ldflags(Configure * configure, FILE * fp)
@@ -788,8 +790,7 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 		_makefile_output_program(configure, fp, "ccshared");
 	else
 		_makefile_output_variable(fp, "CCSHARED", p);
-	_makefile_output_variable(fp, "SOEXT",
-			configure_get_extension(configure, "so"));
+	_makefile_output_extension(configure, fp, "so");
 }
 
 static void _variables_library_static(Configure * configure, FILE * fp)
@@ -1966,7 +1967,7 @@ static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 	_makefile_remove(fp, 1, "$(OBJDIR)$(PACKAGE)-$(VERSION)", NULL);
 	_makefile_link(fp, 1, "\"$$PWD\"", "$(OBJDIR)$(PACKAGE)-$(VERSION)");
 	_makefile_print(fp, "%s", "\t@cd $(OBJDIR). && $(TAR) -czvf"
-			" $(PACKAGE)-$(VERSION).tar.gz -- \\\n");
+			" $(PACKAGE)-$(VERSION)$(TGZEXT) -- \\\n");
 	for(i = from + 1; i < to; i++)
 	{
 		array_get_copy(ca, i, &p);
@@ -1988,7 +1989,7 @@ static int _write_distcheck(Configure * configure, FILE * fp)
 	String const * package;
 	String const * version;
 	const char pretarget[] = "\ndistcheck: dist\n"
-		"\t$(TAR) -xzvf $(OBJDIR)$(PACKAGE)-$(VERSION).tar.gz\n"
+		"\t$(TAR) -xzvf $(OBJDIR)$(PACKAGE)-$(VERSION)$(TGZEXT)\n"
 		"\t$(MKDIR) -- $(PACKAGE)-$(VERSION)/objdir\n"
 		"\t$(MKDIR) -- $(PACKAGE)-$(VERSION)/destdir\n";
 	const char target[] = "\tcd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) OBJDIR=\"$$PWD/objdir/\"\n"
@@ -2804,6 +2805,24 @@ static int _makefile_link(FILE * fp, int symlink, char const * link,
 	_makefile_print(fp, "\t$(LN)%s -- %s %s\n", symlink ? " -s" : "", link,
 			path);
 	return 0;
+}
+
+
+/* makefile_output_extension */
+static int _makefile_output_extension(Configure * configure, FILE * fp,
+		String const * extension)
+{
+	int ret;
+	String const * value;
+	String * upper;
+
+	if((upper = string_new_append(extension, "EXT", NULL)) == NULL)
+		return -1;
+	string_toupper(upper);
+	value = configure_get_extension(configure, extension);
+	ret = _makefile_output_variable(fp, upper, value);
+	string_delete(upper);
+	return ret;
 }
 
 
