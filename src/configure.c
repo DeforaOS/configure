@@ -215,9 +215,9 @@ unsigned int enum_string_short(unsigned int last, const String * strings[],
 /* configure */
 static void _configure_detect(Configure * configure);
 static HostKernel _detect_kernel(HostOS os, char const * release);
-static int _configure_detect_programs(Configure * configure);
-static int _configure_load(ConfigurePrefs * prefs, char const * directory,
-		configArray * ca);
+static int _configure_load_config(Configure * configure);
+static int _configure_load_project(ConfigurePrefs * prefs,
+		char const * directory, configArray * ca);
 static int _load_subdirs(ConfigurePrefs * prefs, char const * directory,
 		configArray * ca, String const * subdirs);
 static int _load_subdirs_subdir(ConfigurePrefs * prefs, char const * directory,
@@ -227,7 +227,7 @@ static int _configure_do(Configure * configure, configArray * ca);
 int configure(ConfigurePrefs * prefs, String const * directory)
 {
 	int ret;
-	Configure cfgr;
+	Configure configure;
 	configArray * ca;
 	const int flags = prefs->flags;
 	int i;
@@ -235,20 +235,21 @@ int configure(ConfigurePrefs * prefs, String const * directory)
 
 	if((ca = configarray_new()) == NULL)
 		return error_print(PROGNAME);
-	cfgr.prefs = prefs;
-	_configure_detect(&cfgr);
-	if((ret = _configure_detect_programs(&cfgr)) != 0
-			|| (ret = _configure_load(prefs, directory, ca)) == 0)
+	configure.prefs = prefs;
+	_configure_detect(&configure);
+	if((ret = _configure_load_config(&configure)) != 0
+			|| (ret = _configure_load_project(prefs, directory,
+					ca)) == 0)
 	{
 		if(prefs->flags & PREFS_n)
-			ret = _configure_do(&cfgr, ca);
+			ret = _configure_do(&configure, ca);
 		else
 		{
 			prefs->flags = PREFS_n;
-			if((ret = _configure_do(&cfgr, ca)) == 0)
+			if((ret = _configure_do(&configure, ca)) == 0)
 			{
 				prefs->flags = flags;
-				ret = _configure_do(&cfgr, ca);
+				ret = _configure_do(&configure, ca);
 			}
 		}
 	}
@@ -258,8 +259,8 @@ int configure(ConfigurePrefs * prefs, String const * directory)
 		config_delete(p);
 	}
 	array_delete(ca);
-	if(cfgr.config != NULL)
-		config_delete(cfgr.config);
+	if(configure.config != NULL)
+		config_delete(configure.config);
 	return ret;
 }
 
@@ -320,7 +321,7 @@ static HostKernel _detect_kernel(HostOS os, char const * release)
 	return i;
 }
 
-static int _configure_detect_programs(Configure * configure)
+static int _configure_load_config(Configure * configure)
 {
 	int ret = 0;
 	String const section[] = "programs";
@@ -374,8 +375,8 @@ static int _configure_detect_programs(Configure * configure)
 	return ret;
 }
 
-static int _configure_load(ConfigurePrefs * prefs, String const * directory,
-		configArray * ca)
+static int _configure_load_project(ConfigurePrefs * prefs,
+		String const * directory, configArray * ca)
 {
 	int ret = 0;
 	Config * config;
@@ -444,7 +445,7 @@ static int _load_subdirs_subdir(ConfigurePrefs * prefs, char const * directory,
 	p = string_new(directory);
 	string_append(&p, "/");
 	string_append(&p, subdir);
-	ret = _configure_load(prefs, p, ca);
+	ret = _configure_load_project(prefs, p, ca);
 	string_delete(p);
 	return ret;
 }
