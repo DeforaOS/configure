@@ -59,7 +59,7 @@
 /* types */
 struct _Configure {
 	ConfigurePrefs * prefs;
-	Config * config;
+	Config * project;
 	HostArch arch;
 	HostOS os;
 	HostKernel kernel;
@@ -460,8 +460,8 @@ static int _configure_do(Configure * configure, configArray * ca)
 
 	for(i = 0; i < cnt; i++)
 	{
-		array_get_copy(ca, i, &configure->config);
-		if((di = config_get(configure->config, "", "directory"))
+		array_get_copy(ca, i, &configure->project);
+		if((di = config_get(configure->project, "", "directory"))
 				== NULL)
 			continue;
 		for(j = i; j < cnt; j++)
@@ -497,7 +497,7 @@ int configure_can_library_static(Configure * configure)
 String const * configure_get_config(Configure * configure,
 		String const * section, String const * variable)
 {
-	return config_get(configure->config, section, variable);
+	return config_get(configure->project, section, variable);
 }
 
 
