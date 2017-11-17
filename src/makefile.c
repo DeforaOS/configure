@@ -645,7 +645,7 @@ static void _targets_cxxflags(Configure * configure, FILE * fp)
 static void _targets_exeext(Configure * configure, FILE * fp)
 {
 	_makefile_output_variable(fp, "EXEEXT",
-			configure_get_exeext(configure));
+			configure_get_extension(configure, "exe"));
 }
 
 static void _targets_ldflags(Configure * configure, FILE * fp)
@@ -788,7 +788,8 @@ static void _variables_library(Configure * configure, FILE * fp, char * done)
 		_makefile_output_program(configure, fp, "ccshared");
 	else
 		_makefile_output_variable(fp, "CCSHARED", p);
-	_makefile_output_variable(fp, "SOEXT", configure_get_soext(configure));
+	_makefile_output_variable(fp, "SOEXT",
+			configure_get_extension(configure, "so"));
 }
 
 static void _variables_library_static(Configure * configure, FILE * fp)

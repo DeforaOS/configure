@@ -63,11 +63,6 @@ struct _Configure {
 	HostArch arch;
 	HostOS os;
 	HostKernel kernel;
-	struct
-	{
-		char const * exeext;
-		char const * soext;
-	} extensions;
 	Config * programs;
 };
 
@@ -220,7 +215,6 @@ unsigned int enum_string_short(unsigned int last, const String * strings[],
 /* configure */
 static void _configure_detect(Configure * configure);
 static HostKernel _detect_kernel(HostOS os, char const * release);
-static void _configure_detect_extensions(Configure * configure);
 static int _configure_detect_programs(Configure * configure);
 static int _configure_load(ConfigurePrefs * prefs, char const * directory,
 		configArray * ca);
@@ -243,7 +237,6 @@ int configure(ConfigurePrefs * prefs, String const * directory)
 		return error_print(PROGNAME);
 	cfgr.prefs = prefs;
 	_configure_detect(&cfgr);
-	_configure_detect_extensions(&cfgr);
 	if((ret = _configure_detect_programs(&cfgr)) != 0
 			|| (ret = _configure_load(prefs, directory, ca)) == 0)
 	{
@@ -325,25 +318,6 @@ static HostKernel _detect_kernel(HostOS os, char const * release)
 			return i;
 	}
 	return i;
-}
-
-static void _configure_detect_extensions(Configure * configure)
-{
-	configure->extensions.exeext = "";
-	configure->extensions.soext = ".so";
-	/* platform-specific */
-	switch(configure->os)
-	{
-		case HO_MACOSX:
-			configure->extensions.soext = ".dylib";
-			break;
-		case HO_WIN32:
-			configure->extensions.exeext = ".exe";
-			configure->extensions.soext = ".dll";
-			break;
-		default:
-			break;
-	}
 }
 
 static int _configure_detect_programs(Configure * configure)
@@ -528,9 +502,12 @@ String const * configure_get_config(Configure * configure,
 
 
 /* configure_get_exeext */
-String const * configure_get_exeext(Configure * configure)
+String const * configure_get_extension(Configure * configure,
+		String const * extension)
 {
-	return configure->extensions.exeext;
+	String const section[] = "extensions";
+
+	return config_get(configure->programs, section, extension);
 }
 
 
@@ -557,13 +534,6 @@ String const * configure_get_program(Configure * configure, String const * name)
 	if((program = config_get(configure->programs, section, name)) != NULL)
 		return program;
 	return name;
-}
-
-
-/* configure_get_soext */
-String const * configure_get_soext(Configure * configure)
-{
-	return configure->extensions.soext;
 }
 
 
