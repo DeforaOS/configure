@@ -10,6 +10,7 @@ RM	= rm -f
 RM	= rm -f
 LN	= ln -f
 TAR	= tar
+TGZEXT	=
 MKDIR	= mkdir -m 0755 -p
 
 
@@ -37,7 +38,7 @@ distclean:
 dist:
 	$(RM) -r -- $(OBJDIR)$(PACKAGE)-$(VERSION)
 	$(LN) -s -- "$$PWD" $(OBJDIR)$(PACKAGE)-$(VERSION)
-	@cd $(OBJDIR). && $(TAR) -czvf $(PACKAGE)-$(VERSION).tar.gz -- \
+	@cd $(OBJDIR). && $(TAR) -czvf $(PACKAGE)-$(VERSION)$(TGZEXT) -- \
 		$(PACKAGE)-$(VERSION)/data/Makefile \
 		$(PACKAGE)-$(VERSION)/data/configure.conf \
 		$(PACKAGE)-$(VERSION)/data/project.conf \
@@ -131,7 +132,7 @@ dist:
 	$(RM) -- $(OBJDIR)$(PACKAGE)-$(VERSION)
 
 distcheck: dist
-	$(TAR) -xzvf $(OBJDIR)$(PACKAGE)-$(VERSION).tar.gz
+	$(TAR) -xzvf $(OBJDIR)$(PACKAGE)-$(VERSION)$(TGZEXT)
 	$(MKDIR) -- $(PACKAGE)-$(VERSION)/objdir
 	$(MKDIR) -- $(PACKAGE)-$(VERSION)/destdir
 	cd "$(PACKAGE)-$(VERSION)" && $(MAKE) OBJDIR="$$PWD/objdir/"
