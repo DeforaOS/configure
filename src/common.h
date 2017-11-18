@@ -28,10 +28,31 @@
 
 
 
-#define BASEDIR ".."
+#ifndef CONFIGURE_COMMON_H
+# define CONFIGURE_COMMON_H
 
-#include "../src/common.c"
-#include "../src/configure.c"
-#include "../src/makefile.c"
-#include "../src/settings.c"
-#include "../src/main.c"
+# include <System.h>
+# include "configure.h"
+
+
+/* public */
+/* types */
+typedef struct _EnumMap
+{
+	unsigned int value;
+	String const * string;
+} EnumMap;
+
+
+/* functions */
+unsigned int enum_map_find(unsigned int last, EnumMap const * map,
+		String const * str);
+unsigned int enum_string(unsigned int last, const String * strings[],
+		String const * str);
+unsigned int enum_string_short(unsigned int last, const String * strings[],
+		String const * str);
+
+String const * source_extension(String const * source);
+ObjectType source_type(String const * source);
+
+#endif /* !CONFIGURE_COMMON_H */

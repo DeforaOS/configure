@@ -37,6 +37,7 @@
 #include <string.h>
 #include <libgen.h>
 #include <errno.h>
+#include "common.h"
 #include "settings.h"
 #include "configure.h"
 #include "../config.h"
@@ -998,7 +999,7 @@ static int _objs_source(Makefile * makefile, String * source, TargetType tt)
 	String const * extension;
 	size_t len;
 
-	if((extension = _source_extension(source)) == NULL)
+	if((extension = source_extension(source)) == NULL)
 	{
 		fprintf(stderr, "%s%s%s", PROGNAME ": ", source,
 				": no extension for source\n");
@@ -1006,7 +1007,7 @@ static int _objs_source(Makefile * makefile, String * source, TargetType tt)
 	}
 	len = string_length(source) - string_length(extension) - 1;
 	source[len] = '\0';
-	switch(_source_type(extension))
+	switch(source_type(extension))
 	{
 		case OT_ASM_SOURCE:
 		case OT_C_SOURCE:
@@ -1088,13 +1089,13 @@ static int _target_flags(Makefile * makefile, String const * target)
 			continue;
 		c = sources[i];
 		sources[i] = '\0';
-		extension = _source_extension(sources);
+		extension = source_extension(sources);
 		if(extension == NULL)
 		{
 			sources[i] = c;
 			continue;
 		}
-		type = _source_type(extension);
+		type = source_type(extension);
 		if(!done[type])
 			switch(type)
 			{
@@ -1354,9 +1355,9 @@ static int _target_object(Makefile * makefile,
 				": An object can have only one source file\n");
 		return 1;
 	}
-	if((extension = _source_extension(p)) == NULL)
+	if((extension = source_extension(p)) == NULL)
 		return 1;
-	switch(_source_type(extension))
+	switch(source_type(extension))
 	{
 		case OT_ASM_SOURCE:
 			_makefile_print(makefile, "\n%s%s%s%s\n%s%s",
@@ -1636,11 +1637,11 @@ static int _target_source(Makefile * makefile,
 
 	if((p = _makefile_get_config(makefile, target, "type")) != NULL)
 			tt = enum_string(TT_LAST, sTargetType, p);
-	if((extension = _source_extension(source)) == NULL)
+	if((extension = source_extension(source)) == NULL)
 		return 1;
 	len = string_length(source) - string_length(extension) - 1;
 	source[len] = '\0';
-	switch((ot = _source_type(extension)))
+	switch((ot = source_type(extension)))
 	{
 		case OT_ASM_SOURCE:
 			if(tt == TT_OBJECT)

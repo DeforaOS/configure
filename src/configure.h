@@ -37,12 +37,6 @@
 /* types */
 ARRAY(Config *, config)
 
-typedef struct _EnumMap
-{
-	unsigned int value;
-	String const * string;
-} EnumMap;
-
 typedef enum _HostArch
 {
 	HA_AMD64 = 0,
@@ -173,16 +167,5 @@ int configure_error(int ret, char const * format, ...);
 int configure_warning(int ret, char const * format, ...);
 
 int configure_project(Configure * configure, String const * directory);
-
-/* generic */
-unsigned int enum_map_find(unsigned int last, EnumMap const * map,
-		String const * str);
-unsigned int enum_string(unsigned int last, const String * strings[],
-		String const * str);
-unsigned int enum_string_short(unsigned int last, const String * strings[],
-		String const * str);
-
-String const * _source_extension(String const * source);
-ObjectType _source_type(String const * source);
 
 #endif /* !CONFIGURE_CONFIGURE_H */

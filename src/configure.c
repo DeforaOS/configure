@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "common.h"
 #include "makefile.h"
 #include "configure.h"
 #include "../config.h"
@@ -138,52 +139,7 @@ const struct ExtensionType _sExtensionType[] =
 const struct ExtensionType * sExtensionType = _sExtensionType;
 
 
-/* prototypes */
-String const * _source_extension(String const * source);
-ObjectType _source_type(String const * source);
-
-
 /* functions */
-/* enum_map_find */
-unsigned int enum_map_find(unsigned int last, EnumMap const * map,
-		String const * str)
-{
-	unsigned int i;
-
-	for(i = 0; map[i].value != last; i++)
-		if(string_compare(map[i].string, str) == 0)
-			return map[i].value;
-	return last;
-}
-
-
-/* enum_string */
-unsigned int enum_string(unsigned int last, const String * strings[],
-		String const * str)
-{
-	unsigned int i;
-
-	for(i = 0; i < last; i++)
-		if(string_compare(strings[i], str) == 0)
-			return i;
-	return last;
-}
-
-
-/* enum_string_short */
-unsigned int enum_string_short(unsigned int last, const String * strings[],
-		String const * str)
-{
-	unsigned int i;
-
-	for(i = 0; i < last; i++)
-		if(string_compare_length(strings[i], str,
-					string_length(strings[i])) == 0)
-			return i;
-	return last;
-}
-
-
 /* configure_new */
 static void _new_detect(Configure * configure);
 static HostKernel _new_detect_kernel(HostOS os, char const * release);
@@ -567,31 +523,4 @@ int configure_warning(int ret, char const * format, ...)
 	fputc('\n', stderr);
 	va_end(ap);
 	return ret;
-}
-
-
-/* source_extension */
-String const * _source_extension(String const * source)
-{
-	size_t len;
-
-	for(len = string_length(source); len > 0; len--)
-		if(source[len - 1] == '.')
-			return &source[len];
-	return NULL;
-}
-
-
-/* source_type */
-ObjectType _source_type(String const * source)
-{
-	String const * extension;
-	size_t i;
-
-	if((extension = _source_extension(source)) == NULL)
-		extension = source;
-	for(i = 0; sExtensionType[i].extension != NULL; i++)
-		if(string_compare(sExtensionType[i].extension, extension) == 0)
-			return sExtensionType[i].type;
-	return OT_UNKNOWN;
 }
