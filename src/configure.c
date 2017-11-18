@@ -262,6 +262,13 @@ static int _new_load_config(Configure * configure)
 	/* we can ignore errors */
 	config_load(configure->config, filename);
 	string_delete(filename);
+	if((filename = string_new_append(SYSCONFDIR "/" PACKAGE "/platform/",
+					sHostOS[configure->os], CONFEXT, NULL))
+			== NULL)
+		return -configure_error(1, "%s", error_get(NULL));
+	/* we can ignore errors */
+	config_load(configure->config, filename);
+	string_delete(filename);
 #endif
 	return 0;
 }
