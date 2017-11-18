@@ -129,7 +129,7 @@ extern const struct ExtensionType * sExtensionType;
 /* types */
 typedef struct _ConfigurePrefs
 {
-	int flags;
+	unsigned int flags;
 	char * basedir;
 	char * bindir;
 	char * destdir;

@@ -229,7 +229,7 @@ int configure(ConfigurePrefs * prefs, String const * directory)
 	int ret;
 	Configure configure;
 	configArray * ca;
-	const int flags = prefs->flags;
+	const unsigned int flags = prefs->flags;
 	int i;
 	Config * p;
 
