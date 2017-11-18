@@ -20,7 +20,7 @@ INSTALL	= install
 
 all: $(TARGETS)
 
-configure_OBJS = $(OBJDIR)configure.o $(OBJDIR)settings.o $(OBJDIR)main.o
+configure_OBJS = $(OBJDIR)common.o $(OBJDIR)configure.o $(OBJDIR)settings.o $(OBJDIR)main.o
 configure_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 configure_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) $(OBJDIR)makefile.o
 
@@ -37,7 +37,10 @@ $(OBJDIR)makedepend$(EXEEXT): $(makedepend_OBJS)
 makefile.o_OBJS = $(OBJDIR)makefile.o
 makefile.o_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 
-$(OBJDIR)configure.o: configure.c configure.h makefile.h ../config.h
+$(OBJDIR)common.o: common.c common.h
+	$(CC) $(configure_CFLAGS) -o $(OBJDIR)common.o -c common.c
+
+$(OBJDIR)configure.o: configure.c common.h configure.h makefile.h ../config.h
 	$(CC) -D PREFIX=\"$(PREFIX)\" $(configure_CFLAGS) -o $(OBJDIR)configure.o -c configure.c
 
 $(OBJDIR)settings.o: settings.c settings.h

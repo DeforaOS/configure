@@ -74,12 +74,14 @@ dist:
 		$(PACKAGE)-$(VERSION)/doc/scripts/subst.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/xmllint.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/project.conf \
+		$(PACKAGE)-$(VERSION)/src/common.c \
 		$(PACKAGE)-$(VERSION)/src/configure.c \
 		$(PACKAGE)-$(VERSION)/src/settings.c \
 		$(PACKAGE)-$(VERSION)/src/main.c \
 		$(PACKAGE)-$(VERSION)/src/makedepend.c \
 		$(PACKAGE)-$(VERSION)/src/makefile.c \
 		$(PACKAGE)-$(VERSION)/src/Makefile \
+		$(PACKAGE)-$(VERSION)/src/common.h \
 		$(PACKAGE)-$(VERSION)/src/configure.h \
 		$(PACKAGE)-$(VERSION)/src/makefile.h \
 		$(PACKAGE)-$(VERSION)/src/settings.h \

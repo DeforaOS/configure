@@ -33,7 +33,7 @@ pkg-config_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 $(OBJDIR)pkg-config$(EXEEXT): $(pkg-config_OBJS)
 	$(CC) -o $(OBJDIR)pkg-config$(EXEEXT) $(pkg-config_OBJS) $(pkg-config_LDFLAGS)
 
-$(OBJDIR)configure.o: configure.c ../src/configure.c ../src/configure.h ../src/main.c ../src/makefile.c ../src/makefile.h ../src/settings.c ../src/settings.h
+$(OBJDIR)configure.o: configure.c ../src/common.c ../src/common.h ../src/configure.c ../src/configure.h ../src/main.c ../src/makefile.c ../src/makefile.h ../src/settings.c ../src/settings.h
 	$(CC) $(configure_CFLAGS) -o $(OBJDIR)configure.o -c configure.c
 
 $(OBJDIR)pkg-config.o: pkg-config.c ../config.h
