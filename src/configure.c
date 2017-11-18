@@ -325,7 +325,7 @@ static int _configure_load_config(Configure * configure)
 {
 	int ret = 0;
 	String const section[] = "programs";
-	String * filename = DATADIR "/" PACKAGE "/" PACKAGE ".conf";
+	String * filename = DATADIR "/" PACKAGE "/" PACKAGE CONFEXT;
 	struct
 	{
 		String const * name;
@@ -350,7 +350,7 @@ static int _configure_load_config(Configure * configure)
 	if(configure->prefs->basedir != NULL
 			&& (filename = string_new_append(
 					configure->prefs->basedir,
-					"/data/" PACKAGE ".conf",
+					"/data/" PACKAGE CONFEXT,
 					NULL)) == NULL)
 		return -configure_error(1, "%s", error_get(NULL));
 	if(filename != NULL && config_load(configure->config, filename) != 0)
@@ -362,10 +362,10 @@ static int _configure_load_config(Configure * configure)
 	if(configure->prefs->basedir != NULL)
 		filename = string_new_append(configure->prefs->basedir,
 				"/data/platform/", sHostOS[configure->os],
-				".conf", NULL);
+				CONFEXT, NULL);
 	else
 		filename = string_new_append(DATADIR "/" PACKAGE "/platform/",
-				sHostOS[configure->os], ".conf", NULL);
+				sHostOS[configure->os], CONFEXT, NULL);
 	if(filename == NULL)
 		return -configure_error(1, "%s", error_get(NULL));
 	else if(config_load(configure->config, filename) != 0)

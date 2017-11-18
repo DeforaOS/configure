@@ -121,8 +121,15 @@ extern const struct ExtensionType * sExtensionType;
 
 
 /* constants */
-# define PROJECT_CONF	"project.conf"
-# define MAKEFILE	"Makefile"
+# ifndef CONFEXT
+#  define CONFEXT	".conf"
+# endif
+# ifndef PROJECT_CONF
+#  define PROJECT_CONF	"project" CONFEXT
+# endif
+# ifndef MAKEFILE
+#  define MAKEFILE	"Makefile"
+# endif
 
 
 /* configure */
