@@ -4,6 +4,7 @@ PREFIX	= /usr/local
 DESTDIR	=
 BINDIR	= $(PREFIX)/bin
 SBINDIR	= $(PREFIX)/sbin
+VERILOG	= iverilog
 EXEEXT	=
 RM	= rm -f
 LN	= ln -f
