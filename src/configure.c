@@ -50,6 +50,9 @@
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
 #endif
+#ifndef SYSCONFDIR
+# define SYSCONFDIR	PREFIX "/etc"
+#endif
 #ifndef DATADIR
 # define DATADIR	PREFIX "/share"
 #endif
@@ -252,6 +255,14 @@ static int _new_load_config(Configure * configure)
 		configure_warning(0, "%s: %s", filename,
 				"Could not load program definitions");
 	string_delete(filename);
+#ifndef BASEDIR
+	if((filename = string_new(SYSCONFDIR "/" PACKAGE "/" PACKAGE CONFEXT))
+			== NULL)
+		return -configure_error(1, "%s", error_get(NULL));
+	/* we can ignore errors */
+	config_load(configure->config, filename);
+	string_delete(filename);
+#endif
 	return 0;
 }
 
