@@ -47,102 +47,112 @@
 
 
 /* private */
+/* types */
+typedef struct _Makefile
+{
+	Configure * configure;
+	FILE * fp;
+} Makefile;
+
+
 /* prototypes */
 /* accessors */
-static String const * _makefile_get_config(Configure * configure,
+static String const * _makefile_get_config(Makefile * makefile,
 		String const * section, String const * variable);
 
-static unsigned int _makefile_is_flag_set(Configure * configure,
+static unsigned int _makefile_is_flag_set(Makefile * makefile,
 		unsigned int flag);
-static int _makefile_is_phony(Configure * configure, char const * target);
+static int _makefile_is_phony(Makefile * makefile, char const * target);
 
 /* useful */
-static int _makefile_expand(FILE * fp, char const * field);
-static int _makefile_link(FILE * fp, int symlink, char const * link,
+static int _makefile_expand(Makefile * makefile, char const * field);
+static int _makefile_link(Makefile * makefile, int symlink, char const * link,
 		char const * path);
-static int _makefile_output_extension(Configure * configure, FILE * fp,
+static int _makefile_output_extension(Makefile * makefile,
 		String const * extension);
-static int _makefile_output_program(Configure * configure, FILE * fp,
-		String const * name);
-static int _makefile_output_variable(FILE * fp, String const * name,
+static int _makefile_output_program(Makefile * makefile, String const * name);
+static int _makefile_output_variable(Makefile * makefile, String const * name,
 		String const * value);
-static int _makefile_mkdir(FILE * fp, char const * directory);
-static int _makefile_print(FILE * fp, char const * format, ...);
-static int _makefile_remove(FILE * fp, int recursive, ...);
-static int _makefile_subdirs(FILE * fp, char const * target);
-static int _makefile_target(FILE * fp, char const * target, ...);
+static int _makefile_mkdir(Makefile * makefile, char const * directory);
+static int _makefile_print(Makefile * makefile, char const * format, ...);
+static int _makefile_remove(Makefile * makefile, int recursive, ...);
+static int _makefile_subdirs(Makefile * makefile, char const * target);
+static int _makefile_target(Makefile * makefile, char const * target, ...);
 #ifdef WITH_UNUSED
-static int _makefile_targetv(FILE * fp, char const * target,
+static int _makefile_targetv(Makefile * makefile, char const * target,
 		char const ** depends);
 #endif
 
 
 /* functions */
 /* makefile */
-static int _makefile_write(Configure * configure, FILE * fp, configArray * ca,
+static int _makefile_write(Makefile * makefile, configArray * ca,
 	       	int from, int to);
 
 int makefile(Configure * configure, String const * directory, configArray * ca,
 	       	int from, int to)
 		
 {
-	String * makefile;
-	FILE * fp = NULL;
+	Makefile makefile;
+	String * filename;
 	int ret = 0;
 
-	if((makefile = string_new_append(directory, "/", MAKEFILE, NULL))
+	if((filename = string_new_append(directory, "/", MAKEFILE, NULL))
 			== NULL)
 		return -1;
-	if(!_makefile_is_flag_set(configure, PREFS_n)
-			&& (fp = fopen(makefile, "w")) == NULL)
-		ret = configure_error(1, "%s: %s", makefile, strerror(errno));
+	makefile.configure = configure;
+	makefile.fp = NULL;
+	if(!_makefile_is_flag_set(&makefile, PREFS_n)
+			&& (makefile.fp = fopen(filename, "w")) == NULL)
+		ret = configure_error(1, "%s: %s", filename, strerror(errno));
 	else
 	{
-		if(_makefile_is_flag_set(configure, PREFS_v))
+		if(_makefile_is_flag_set(&makefile, PREFS_v))
 			printf("%s%s/%s", "Creating ", directory,
 					MAKEFILE "\n");
-		ret |= _makefile_write(configure, fp, ca, from, to);
-		if(fp != NULL)
-			fclose(fp);
+		ret |= _makefile_write(&makefile, ca, from, to);
+		if(makefile.fp != NULL)
+			fclose(makefile.fp);
 	}
-	string_delete(makefile);
+	string_delete(filename);
 	return ret;
 }
 
-static int _write_variables(Configure * configure, FILE * fp);
-static int _write_targets(Configure * configure, FILE * fp);
-static int _write_objects(Configure * configure, FILE * fp);
-static int _write_clean(Configure * configure, FILE * fp);
-static int _write_distclean(Configure * configure, FILE * fp);
-static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
+static int _write_variables(Makefile * makefile);
+static int _write_targets(Makefile * makefile);
+static int _write_objects(Makefile * makefile);
+static int _write_clean(Makefile * makefile);
+static int _write_distclean(Makefile * makefile);
+static int _write_dist(Makefile * makefile, configArray * ca,
 	       	int from, int to);
-static int _write_distcheck(Configure * configure, FILE * fp);
-static int _write_install(Configure * configure, FILE * fp);
-static int _write_phony(Configure * configure, FILE * fp,
+static int _write_distcheck(Makefile * makefile);
+static int _write_install(Makefile * makefile);
+static int _write_phony(Makefile * makefile,
 		char const ** targets);
-static int _write_uninstall(Configure * configure, FILE * fp);
-static int _makefile_write(Configure * configure, FILE * fp, configArray * ca,
+static int _write_uninstall(Makefile * makefile);
+static int _makefile_write(Makefile * makefile, configArray * ca,
 	       	int from, int to)
 {
 	char const * depends[9] = { "all" };
 	size_t i = 1;
 
-	if(_write_variables(configure, fp) != 0
-			|| _write_targets(configure, fp) != 0
-			|| _write_objects(configure, fp) != 0
-			|| _write_clean(configure, fp) != 0
-			|| _write_distclean(configure, fp) != 0
-			|| _write_dist(configure, fp, ca, from, to) != 0
-			|| _write_distcheck(configure, fp) != 0
-			|| _write_install(configure, fp) != 0
-			|| _write_uninstall(configure, fp) != 0)
+	if(_write_variables(makefile) != 0
+			|| _write_targets(makefile) != 0
+			|| _write_objects(makefile) != 0
+			|| _write_clean(makefile) != 0
+			|| _write_distclean(makefile) != 0
+			|| _write_dist(makefile, ca, from, to) != 0
+			|| _write_distcheck(makefile) != 0
+			|| _write_install(makefile) != 0
+			|| _write_uninstall(makefile) != 0)
 		return 1;
-	if(_makefile_get_config(configure, NULL, "subdirs") != NULL)
+	if(_makefile_get_config(makefile, NULL, "subdirs") != NULL)
 		depends[i++] = "subdirs";
 	depends[i++] = "clean";
 	depends[i++] = "distclean";
-	if(_makefile_get_config(configure, NULL, "package") != NULL
-			&& _makefile_get_config(configure, NULL, "version") != NULL)
+	if(_makefile_get_config(makefile, NULL, "package") != NULL
+			&& _makefile_get_config(makefile, NULL,
+				"version") != NULL)
 	{
 		depends[i++] = "dist";
 		depends[i++] = "distcheck";
@@ -150,66 +160,67 @@ static int _makefile_write(Configure * configure, FILE * fp, configArray * ca,
 	depends[i++] = "install";
 	depends[i++] = "uninstall";
 	depends[i++] = NULL;
-	return _write_phony(configure, fp, depends);
+	return _write_phony(makefile, depends);
 }
 
-static int _variables_package(Configure * configure, FILE * fp,
+static int _variables_package(Makefile * makefile,
 		String const * directory);
-static int _variables_print(Configure * configure, FILE * fp,
+static int _variables_print(Makefile * makefile,
 	       	char const * input, char const * output);
-static int _variables_dist(Configure * configure, FILE * fp);
-static int _variables_targets(Configure * configure, FILE * fp);
-static int _variables_targets_library(Configure * configure, FILE * fp,
+static int _variables_dist(Makefile * makefile);
+static int _variables_targets(Makefile * makefile);
+static int _variables_targets_library(Makefile * makefile,
 		char const * target);
-static int _variables_executables(Configure * configure, FILE * fp);
-static int _variables_includes(Configure * configure, FILE * fp);
-static int _variables_subdirs(Configure * configure, FILE * fp);
-static int _write_variables(Configure * configure, FILE * fp)
+static int _variables_executables(Makefile * makefile);
+static int _variables_includes(Makefile * makefile);
+static int _variables_subdirs(Makefile * makefile);
+static int _write_variables(Makefile * makefile)
 {
 	int ret = 0;
 	String const * directory;
 
-	directory = _makefile_get_config(configure, NULL, "directory");
-	ret |= _variables_package(configure, fp, directory);
-	ret |= _variables_print(configure, fp, "subdirs", "SUBDIRS");
-	ret |= _variables_dist(configure, fp);
-	ret |= _variables_targets(configure, fp);
-	ret |= _variables_executables(configure, fp);
-	ret |= _variables_includes(configure, fp);
-	ret |= _variables_subdirs(configure, fp);
-	_makefile_print(fp, "%c", '\n');
+	directory = _makefile_get_config(makefile, NULL, "directory");
+	ret |= _variables_package(makefile, directory);
+	ret |= _variables_print(makefile, "subdirs", "SUBDIRS");
+	ret |= _variables_dist(makefile);
+	ret |= _variables_targets(makefile);
+	ret |= _variables_executables(makefile);
+	ret |= _variables_includes(makefile);
+	ret |= _variables_subdirs(makefile);
+	_makefile_print(makefile, "%c", '\n');
 	return ret;
 }
 
-static int _variables_package(Configure * configure, FILE * fp,
+static int _variables_package(Makefile * makefile,
 		String const * directory)
 {
 	String const * package;
 	String const * version;
 	String const * p;
 
-	if((package = _makefile_get_config(configure, NULL, "package")) == NULL)
+	if((package = _makefile_get_config(makefile, NULL, "package")) == NULL)
 		return 0;
-	if(_makefile_is_flag_set(configure, PREFS_v))
+	if(_makefile_is_flag_set(makefile, PREFS_v))
 		printf("%s%s", "Package: ", package);
-	if((version = _makefile_get_config(configure, NULL, "version")) == NULL)
+	if((version = _makefile_get_config(makefile, NULL, "version")) == NULL)
 	{
-		if(_makefile_is_flag_set(configure, PREFS_v))
+		if(_makefile_is_flag_set(makefile, PREFS_v))
 			fputc('\n', stdout);
 		fprintf(stderr, "%s%s%s", PROGNAME ": ", directory,
 				": \"package\" needs \"version\"\n");
 		return 1;
 	}
-	if(_makefile_is_flag_set(configure, PREFS_v))
+	if(_makefile_is_flag_set(makefile, PREFS_v))
 		printf(" %s\n", version);
-	_makefile_output_variable(fp, "PACKAGE", package);
-	_makefile_output_variable(fp, "VERSION", version);
-	if((p = _makefile_get_config(configure, NULL, "config")) != NULL)
-		return settings(configure, directory, package, version);
+	_makefile_output_variable(makefile, "PACKAGE", package);
+	_makefile_output_variable(makefile, "VERSION", version);
+	if((p = _makefile_get_config(makefile, NULL, "config")) != NULL)
+		return settings(makefile->configure, directory, package,
+				version);
 	return 0;
 }
 
-static int _variables_print(Configure * configure, FILE * fp,
+static int _variables_print(Makefile * makefile,
 		char const * input, char const * output)
 {
 	String const * p;
@@ -218,12 +229,12 @@ static int _variables_print(Configure * configure, FILE * fp,
 	unsigned long i;
 	char c;
 
-	if((p = _makefile_get_config(configure, NULL, input)) == NULL)
+	if((p = _makefile_get_config(makefile, NULL, input)) == NULL)
 		return 0;
 	if((prints = string_new(p)) == NULL)
 		return 1;
 	q = prints;
-	_makefile_print(fp, "%s%s", output, "\t=");
+	_makefile_print(makefile, "%s%s", output, "\t=");
 	for(i = 0;; i++)
 	{
 		if(prints[i] != ',' && prints[i] != '\0')
@@ -231,20 +242,20 @@ static int _variables_print(Configure * configure, FILE * fp,
 		c = prints[i];
 		prints[i] = '\0';
 		if(strchr(prints, ' ') != NULL)
-			_makefile_print(fp, " \"%s\"", prints);
+			_makefile_print(makefile, " \"%s\"", prints);
 		else
-			_makefile_print(fp, " %s", prints);
+			_makefile_print(makefile, " %s", prints);
 		if(c == '\0')
 			break;
 		prints += i + 1;
 		i = 0;
 	}
-	_makefile_print(fp, "%c", '\n');
+	_makefile_print(makefile, "%c", '\n');
 	string_delete(q);
 	return 0;
 }
 
-static int _variables_dist(Configure * configure, FILE * fp)
+static int _variables_dist(Makefile * makefile)
 {
 	ConfigurePrefs const * prefs;
 	String const * p;
@@ -253,11 +264,11 @@ static int _variables_dist(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	if((p = _makefile_get_config(configure, NULL, "dist")) == NULL)
+	if((p = _makefile_get_config(makefile, NULL, "dist")) == NULL)
 		return 0;
 	if((dist = string_new(p)) == NULL)
 		return 1;
-	prefs = configure_get_prefs(configure);
+	prefs = configure_get_prefs(makefile->configure);
 	q = dist;
 	for(i = 0;; i++)
 	{
@@ -265,21 +276,22 @@ static int _variables_dist(Configure * configure, FILE * fp)
 			continue;
 		c = dist[i];
 		dist[i] = '\0';
-		if(_makefile_get_config(configure, dist, "install") != NULL)
+		if(_makefile_get_config(makefile, dist, "install") != NULL)
 		{
 			/* FIXME may still need to be output */
-			if(_makefile_get_config(configure, NULL, "targets")
+			if(_makefile_get_config(makefile, NULL, "targets")
 					== NULL)
 			{
-				_makefile_output_variable(fp, "OBJDIR", "");
-				_makefile_output_variable(fp, "PREFIX",
+				_makefile_output_variable(makefile, "OBJDIR",
+						"");
+				_makefile_output_variable(makefile, "PREFIX",
 						prefs->prefix);
-				_makefile_output_variable(fp, "DESTDIR",
+				_makefile_output_variable(makefile, "DESTDIR",
 						prefs->destdir);
 			}
-			_makefile_output_program(configure, fp, "mkdir");
-			_makefile_output_program(configure, fp, "install");
-			_makefile_output_program(configure, fp, "rm");
+			_makefile_output_program(makefile, "mkdir");
+			_makefile_output_program(makefile, "install");
+			_makefile_output_program(makefile, "rm");
 			break;
 		}
 		if(c == '\0')
@@ -291,7 +303,7 @@ static int _variables_dist(Configure * configure, FILE * fp)
 	return 0;
 }
 
-static int _variables_targets(Configure * configure, FILE * fp)
+static int _variables_targets(Makefile * makefile)
 {
 	int ret = 0;
 	String const * p;
@@ -302,51 +314,51 @@ static int _variables_targets(Configure * configure, FILE * fp)
 	String const * type;
 	int phony;
 
-	if((p = _makefile_get_config(configure, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
 		return 0;
 	if((prints = string_new(p)) == NULL)
 		return 1;
 	q = prints;
-	_makefile_print(fp, "%s", "TARGETS\t=");
+	_makefile_print(makefile, "%s", "TARGETS\t=");
 	for(i = 0;; i++)
 	{
 		if(prints[i] != ',' && prints[i] != '\0')
 			continue;
 		c = prints[i];
 		prints[i] = '\0';
-		if((type = _makefile_get_config(configure, prints, "type"))
+		if((type = _makefile_get_config(makefile, prints, "type"))
 			       	== NULL)
-			_makefile_print(fp, " %s", prints);
+			_makefile_print(makefile, " %s", prints);
 		else
 			switch(enum_string(TT_LAST, sTargetType, type))
 			{
 				case TT_BINARY:
-					_makefile_print(fp,
+					_makefile_print(makefile,
 							" $(OBJDIR)%s$(EXEEXT)",
 							prints);
 					break;
 				case TT_LIBRARY:
 					ret |= _variables_targets_library(
-							configure, fp, prints);
+							makefile, prints);
 					break;
 				case TT_LIBTOOL:
-					_makefile_print(fp, " $(OBJDIR)%s%s",
+					_makefile_print(makefile, " $(OBJDIR)%s%s",
 							prints, ".la");
 					break;
 				case TT_OBJECT:
 				case TT_UNKNOWN:
-					_makefile_print(fp, " $(OBJDIR)%s",
+					_makefile_print(makefile, " $(OBJDIR)%s",
 							prints);
 					break;
 				case TT_SCRIPT:
-					phony = _makefile_is_phony(configure,
+					phony = _makefile_is_phony(makefile,
 							prints);
-					_makefile_print(fp, " %s%s", phony
+					_makefile_print(makefile, " %s%s", phony
 							? "" : "$(OBJDIR)",
 							prints);
 					break;
 				case TT_PLUGIN:
-					_makefile_print(fp,
+					_makefile_print(makefile,
 							" $(OBJDIR)%s$(SOEXT)",
 							prints);
 					break;
@@ -356,49 +368,50 @@ static int _variables_targets(Configure * configure, FILE * fp)
 		prints += i + 1;
 		i = 0;
 	}
-	_makefile_print(fp, "%c", '\n');
+	_makefile_print(makefile, "%c", '\n');
 	string_delete(q);
 	return ret;
 }
 
-static int _variables_targets_library(Configure * configure, FILE * fp,
+static int _variables_targets_library(Makefile * makefile,
 		char const * target)
 {
 	String * soname;
 	String const * p;
+	HostOS os;
 
-	if((p = _makefile_get_config(configure, target, "soname")) != NULL)
+	if((p = _makefile_get_config(makefile, target, "soname")) != NULL)
 		soname = string_new(p);
-	else if(configure_get_os(configure) == HO_MACOSX)
+	else if(configure_get_os(makefile->configure) == HO_MACOSX)
 		/* versioning is different on MacOS X */
 		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
-	else if(configure_get_os(configure) == HO_WIN32)
+	else if(configure_get_os(makefile->configure) == HO_WIN32)
 		/* and on Windows */
 		soname = string_new_append(target, "$(SOEXT)", NULL);
 	else
 		soname = string_new_append(target, "$(SOEXT)", ".0", NULL);
 	if(soname == NULL)
 		return 1;
-	if(configure_can_library_static(configure))
+	if(configure_can_library_static(makefile->configure))
 		/* generate a static library */
-		_makefile_print(fp, "%s%s%s", " $(OBJDIR)", target, ".a");
-	if(configure_get_os(configure) == HO_MACOSX)
-		_makefile_print(fp, "%s%s%s%s%s%s%s", " $(OBJDIR)", soname,
-				" $(OBJDIR)", target, ".0$(SOEXT) $(OBJDIR)",
-				target, "$(SOEXT)");
-	else if(configure_get_os(configure) == HO_WIN32)
-		_makefile_print(fp, "%s%s", " $(OBJDIR)", soname);
+		_makefile_print(makefile, "%s%s%s", " $(OBJDIR)", target, ".a");
+	if((os = configure_get_os(makefile->configure)) == HO_MACOSX)
+		_makefile_print(makefile, "%s%s%s%s%s%s%s", " $(OBJDIR)",
+				soname, " $(OBJDIR)", target,
+				".0$(SOEXT) $(OBJDIR)", target, "$(SOEXT)");
+	else if(os == HO_WIN32)
+		_makefile_print(makefile, "%s%s", " $(OBJDIR)", soname);
 	else
-		_makefile_print(fp, "%s%s%s%s%s%s%s", " $(OBJDIR)", soname,
-				".0 $(OBJDIR)", soname, " $(OBJDIR)", target,
-				"$(SOEXT)");
+		_makefile_print(makefile, "%s%s%s%s%s%s%s", " $(OBJDIR)",
+				soname, ".0 $(OBJDIR)", soname, " $(OBJDIR)",
+				target, "$(SOEXT)");
 	string_delete(soname);
 	return 0;
 }
 
-static void _executables_variables(Configure * configure, FILE * fp,
+static void _executables_variables(Makefile * makefile,
 	       	String const * target, char * done);
-static int _variables_executables(Configure * configure, FILE * fp)
+static int _variables_executables(Makefile * makefile)
 {
 	ConfigurePrefs const * prefs;
 	char done[TT_LAST]; /* FIXME even better if'd be variable by variable */
@@ -410,11 +423,11 @@ static int _variables_executables(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	prefs = configure_get_prefs(configure);
+	prefs = configure_get_prefs(makefile->configure);
 	memset(&done, 0, sizeof(done));
-	targets = _makefile_get_config(configure, NULL, "targets");
-	includes = _makefile_get_config(configure, NULL, "includes");
-	package = _makefile_get_config(configure, NULL, "package");
+	targets = _makefile_get_config(makefile, NULL, "targets");
+	includes = _makefile_get_config(makefile, NULL, "includes");
+	package = _makefile_get_config(makefile, NULL, "package");
 	if(targets != NULL)
 	{
 		if((p = string_new(targets)) == NULL)
@@ -426,7 +439,7 @@ static int _variables_executables(Configure * configure, FILE * fp)
 				continue;
 			c = p[i];
 			p[i] = '\0';
-			_executables_variables(configure, fp, p, done);
+			_executables_variables(makefile, p, done);
 			if(c == '\0')
 				break;
 			p += i + 1;
@@ -436,68 +449,68 @@ static int _variables_executables(Configure * configure, FILE * fp)
 	}
 	else if(includes != NULL)
 	{
-		_makefile_output_variable(fp, "OBJDIR", "");
-		_makefile_output_variable(fp, "PREFIX", prefs->prefix);
-		_makefile_output_variable(fp, "DESTDIR", prefs->destdir);
+		_makefile_output_variable(makefile, "OBJDIR", "");
+		_makefile_output_variable(makefile, "PREFIX", prefs->prefix);
+		_makefile_output_variable(makefile, "DESTDIR", prefs->destdir);
 	}
 	if(targets != NULL || includes != NULL || package != NULL)
 	{
-		_makefile_output_program(configure, fp, "rm");
-		_makefile_output_program(configure, fp, "ln");
+		_makefile_output_program(makefile, "rm");
+		_makefile_output_program(makefile, "ln");
 	}
 	if(package != NULL)
 	{
-		_makefile_output_program(configure, fp, "tar");
-		_makefile_output_extension(configure, fp, "tgz");
-		_makefile_output_program(configure, fp, "mkdir");
+		_makefile_output_program(makefile, "tar");
+		_makefile_output_extension(makefile, "tgz");
+		_makefile_output_program(makefile, "mkdir");
 	}
 	if(targets != NULL || includes != NULL)
 	{
 		if(package == NULL)
-			_makefile_output_program(configure, fp, "mkdir");
-		_makefile_output_program(configure, fp, "install");
+			_makefile_output_program(makefile, "mkdir");
+		_makefile_output_program(makefile, "install");
 	}
 	return 0;
 }
 
-static void _variables_binary(Configure * configure, FILE * fp, char * done);
-static void _variables_library(Configure * configure, FILE * fp, char * done);
-static void _variables_library_static(Configure * configure, FILE * fp);
-static void _variables_libtool(Configure * configure, FILE * fp, char * done);
-static void _variables_script(Configure * configure, FILE * fp, char * done);
-static void _executables_variables(Configure * configure, FILE * fp,
+static void _variables_binary(Makefile * makefile, char * done);
+static void _variables_library(Makefile * makefile, char * done);
+static void _variables_library_static(Makefile * makefile);
+static void _variables_libtool(Makefile * makefile, char * done);
+static void _variables_script(Makefile * makefile, char * done);
+static void _executables_variables(Makefile * makefile,
 	       	String const * target, char * done)
 {
 	String const * type;
 	TargetType tt;
 
-	if((type = _makefile_get_config(configure, target, "type")) == NULL)
+	if((type = _makefile_get_config(makefile, target, "type")) == NULL)
 		return;
 	if(done[(tt = enum_string(TT_LAST, sTargetType, type))])
 		return;
 	switch(tt)
 	{
 		case TT_BINARY:
-			_variables_binary(configure, fp, done);
+			_variables_binary(makefile, done);
 			done[TT_OBJECT] = 1;
 			break;
 		case TT_OBJECT:
-			_variables_binary(configure, fp, done);
+			_variables_binary(makefile, done);
 			done[TT_BINARY] = 1;
 			break;
 		case TT_LIBRARY:
-			_variables_library(configure, fp, done);
+			_variables_library(makefile, done);
 			done[TT_PLUGIN] = 1;
 			break;
 		case TT_PLUGIN:
-			_variables_library(configure, fp, done);
+			_variables_library(makefile, done);
 			done[TT_LIBRARY] = 1;
 			break;
 		case TT_LIBTOOL:
-			_variables_libtool(configure, fp, done);
+			_variables_libtool(makefile, done);
 			break;
 		case TT_SCRIPT:
-			_variables_script(configure, fp, done);
+			_variables_script(makefile, done);
 			break;
 		case TT_UNKNOWN:
 			break;
@@ -506,76 +519,76 @@ static void _executables_variables(Configure * configure, FILE * fp,
 	return;
 }
 
-static void _targets_asflags(Configure * configure, FILE * fp);
-static void _targets_cflags(Configure * configure, FILE * fp);
-static void _targets_cxxflags(Configure * configure, FILE * fp);
-static void _targets_exeext(Configure * configure, FILE * fp);
-static void _targets_ldflags(Configure * configure, FILE * fp);
-static void _targets_vflags(Configure * configure, FILE * fp);
-static void _binary_ldflags(Configure * configure, FILE * fp,
-		String const * ldflags);
-static void _variables_binary(Configure * configure, FILE * fp, char * done)
+static void _targets_asflags(Makefile * makefile);
+static void _targets_cflags(Makefile * makefile);
+static void _targets_cxxflags(Makefile * makefile);
+static void _targets_exeext(Makefile * makefile);
+static void _targets_ldflags(Makefile * makefile);
+static void _targets_vflags(Makefile * makefile);
+static void _binary_ldflags(Makefile * makefile, String const * ldflags);
+static void _variables_binary(Makefile * makefile, char * done)
 {
 	ConfigurePrefs const * prefs;
 	String * p;
 
-	prefs = configure_get_prefs(configure);
+	prefs = configure_get_prefs(makefile->configure);
 	if(!done[TT_LIBRARY] && !done[TT_SCRIPT])
 	{
-		_makefile_output_variable(fp, "OBJDIR", "");
-		_makefile_output_variable(fp, "PREFIX", prefs->prefix);
-		_makefile_output_variable(fp, "DESTDIR", prefs->destdir);
+		_makefile_output_variable(makefile, "OBJDIR", "");
+		_makefile_output_variable(makefile, "PREFIX", prefs->prefix);
+		_makefile_output_variable(makefile, "DESTDIR", prefs->destdir);
 	}
 	/* BINDIR */
 	if(prefs->bindir[0] == '/')
-		_makefile_output_variable(fp, "BINDIR",
+		_makefile_output_variable(makefile, "BINDIR",
 				prefs->bindir);
 	else if((p = string_new_append("$(PREFIX)/", prefs->bindir,
 					NULL)) != NULL)
 	{
-		_makefile_output_variable(fp, "BINDIR", p);
+		_makefile_output_variable(makefile, "BINDIR", p);
 		string_delete(p);
 	}
 	/* SBINDIR */
 	if(prefs->sbindir[0] == '/')
-		_makefile_output_variable(fp, "SBINDIR",
+		_makefile_output_variable(makefile, "SBINDIR",
 				prefs->sbindir);
 	else if((p = string_new_append("$(PREFIX)/", prefs->sbindir,
 					NULL)) != NULL)
 	{
-		_makefile_output_variable(fp, "SBINDIR", p);
+		_makefile_output_variable(makefile, "SBINDIR", p);
 		string_delete(p);
 	}
 	if(!done[TT_LIBRARY])
 	{
-		_targets_asflags(configure, fp);
-		_targets_cflags(configure, fp);
-		_targets_cxxflags(configure, fp);
-		_targets_ldflags(configure, fp);
-		_targets_vflags(configure, fp);
-		_targets_exeext(configure, fp);
+		_targets_asflags(makefile);
+		_targets_cflags(makefile);
+		_targets_cxxflags(makefile);
+		_targets_ldflags(makefile);
+		_targets_vflags(makefile);
+		_targets_exeext(makefile);
 	}
 }
 
-static void _targets_asflags(Configure * configure, FILE * fp)
+static void _targets_asflags(Makefile * makefile)
 {
 	String const * as;
 	String const * asf;
 	String const * asff;
 
-	as = _makefile_get_config(configure, NULL, "as");
-	asff = _makefile_get_config(configure, NULL, "asflags_force");
-	asf = _makefile_get_config(configure, NULL, "asflags");
+	as = _makefile_get_config(makefile, NULL, "as");
+	asff = _makefile_get_config(makefile, NULL, "asflags_force");
+	asf = _makefile_get_config(makefile, NULL, "asflags");
 	if(as != NULL || asff != NULL || asf != NULL)
 	{
-		_makefile_output_variable(fp, "AS", (as != NULL) ? as
-				: configure_get_program(configure, "as"));
-		_makefile_output_variable(fp, "ASFLAGSF", asff);
-		_makefile_output_variable(fp, "ASFLAGS", asf);
+		_makefile_output_variable(makefile, "AS", (as != NULL) ? as
+				: configure_get_program(makefile->configure,
+					"as"));
+		_makefile_output_variable(makefile, "ASFLAGSF", asff);
+		_makefile_output_variable(makefile, "ASFLAGS", asf);
 	}
 }
 
-static void _targets_cflags(Configure * configure, FILE * fp)
+static void _targets_cflags(Makefile * makefile)
 {
 	String const * cc;
 	String const * cff;
@@ -583,111 +596,110 @@ static void _targets_cflags(Configure * configure, FILE * fp)
 	String const * cppf;
 	String const * cpp;
 	String * p;
+	HostOS os;
 
-	cppf = _makefile_get_config(configure, NULL, "cppflags_force");
-	cpp = _makefile_get_config(configure, NULL, "cppflags");
-	cff = _makefile_get_config(configure, NULL, "cflags_force");
-	cf = _makefile_get_config(configure, NULL, "cflags");
-	cc = _makefile_get_config(configure, NULL, "cc");
+	cppf = _makefile_get_config(makefile, NULL, "cppflags_force");
+	cpp = _makefile_get_config(makefile, NULL, "cppflags");
+	cff = _makefile_get_config(makefile, NULL, "cflags_force");
+	cf = _makefile_get_config(makefile, NULL, "cflags");
+	cc = _makefile_get_config(makefile, NULL, "cc");
 	if(cppf == NULL && cpp == NULL && cff == NULL && cf == NULL
 			&& cc == NULL)
 		return;
 	if(cc == NULL)
-		_makefile_output_program(configure, fp, "cc");
+		_makefile_output_program(makefile, "cc");
 	else
-		_makefile_output_variable(fp, "CC", cc);
-	_makefile_output_variable(fp, "CPPFLAGSF", cppf);
-	_makefile_output_variable(fp, "CPPFLAGS", cpp);
+		_makefile_output_variable(makefile, "CC", cc);
+	_makefile_output_variable(makefile, "CPPFLAGSF", cppf);
+	_makefile_output_variable(makefile, "CPPFLAGS", cpp);
 	p = NULL;
-	if(configure_get_os(configure) == HO_GNU_LINUX && cff != NULL
-			&& string_find(cff, "-ansi"))
+	if((os = configure_get_os(makefile->configure)) == HO_GNU_LINUX
+			&& cff != NULL && string_find(cff, "-ansi"))
 		p = string_new_append(cff, " -D _GNU_SOURCE");
-	_makefile_output_variable(fp, "CFLAGSF", (p != NULL) ? p : cff);
+	_makefile_output_variable(makefile, "CFLAGSF", (p != NULL) ? p : cff);
 	string_delete(p);
 	p = NULL;
-	if(configure_get_os(configure) == HO_GNU_LINUX && cf != NULL
-			&& string_find(cf, "-ansi"))
+	if(os == HO_GNU_LINUX && cf != NULL && string_find(cf, "-ansi"))
 		p = string_new_append(cf, " -D _GNU_SOURCE");
-	_makefile_output_variable(fp, "CFLAGS", (p != NULL) ? p : cf);
+	_makefile_output_variable(makefile, "CFLAGS", (p != NULL) ? p : cf);
 	string_delete(p);
 }
 
-static void _targets_cxxflags(Configure * configure, FILE * fp)
+static void _targets_cxxflags(Makefile * makefile)
 {
 	String const * cxx;
 	String const * cxxff;
 	String const * cxxf;
 
-	cxx = _makefile_get_config(configure, NULL, "cxx");
-	cxxff = _makefile_get_config(configure, NULL, "cxxflags_force");
-	cxxf = _makefile_get_config(configure, NULL, "cxxflags");
+	cxx = _makefile_get_config(makefile, NULL, "cxx");
+	cxxff = _makefile_get_config(makefile, NULL, "cxxflags_force");
+	cxxf = _makefile_get_config(makefile, NULL, "cxxflags");
 	if(cxx != NULL || cxxff != NULL || cxxf != NULL)
 	{
 		if(cxx == NULL)
-			cxx = configure_get_program(configure, "cxx");
-		_makefile_output_variable(fp, "CXX", cxx);
+			cxx = configure_get_program(makefile->configure, "cxx");
+		_makefile_output_variable(makefile, "CXX", cxx);
 	}
 	if(cxxff != NULL)
 	{
-		_makefile_print(fp, "%s%s", "CXXFLAGSF= ", cxxff);
-		if(configure_get_os(configure) == HO_GNU_LINUX
+		_makefile_print(makefile, "%s%s", "CXXFLAGSF= ", cxxff);
+		if(configure_get_os(makefile->configure) == HO_GNU_LINUX
 				&& string_find(cxxff, "-ansi"))
-			_makefile_print(fp, "%s", " -D _GNU_SOURCE");
-		_makefile_print(fp, "%c", '\n');
+			_makefile_print(makefile, "%s", " -D _GNU_SOURCE");
+		_makefile_print(makefile, "%c", '\n');
 	}
 	if(cxxf != NULL)
 	{
-		_makefile_print(fp, "%s%s", "CXXFLAGS= ", cxxf);
-		if(configure_get_os(configure) == HO_GNU_LINUX
+		_makefile_print(makefile, "%s%s", "CXXFLAGS= ", cxxf);
+		if(configure_get_os(makefile->configure) == HO_GNU_LINUX
 				&& string_find(cxxf, "-ansi"))
-			_makefile_print(fp, "%s", " -D _GNU_SOURCE");
-		_makefile_print(fp, "%c", '\n');
+			_makefile_print(makefile, "%s", " -D _GNU_SOURCE");
+		_makefile_print(makefile, "%c", '\n');
 	}
 }
 
-static void _targets_exeext(Configure * configure, FILE * fp)
+static void _targets_exeext(Makefile * makefile)
 {
-	_makefile_output_extension(configure, fp, "exe");
+	_makefile_output_extension(makefile, "exe");
 }
 
-static void _targets_ldflags(Configure * configure, FILE * fp)
-{
-	String const * p;
-
-	if((p = _makefile_get_config(configure, NULL, "ldflags_force")) != NULL)
-	{
-		_makefile_print(fp, "%s", "LDFLAGSF=");
-		_binary_ldflags(configure, fp, p);
-		_makefile_print(fp, "%c", '\n');
-	}
-	if((p = _makefile_get_config(configure, NULL, "ldflags")) != NULL)
-	{
-		_makefile_print(fp, "%s", "LDFLAGS\t=");
-		_binary_ldflags(configure, fp, p);
-		_makefile_print(fp, "%c", '\n');
-	}
-}
-
-static void _targets_vflags(Configure * configure, FILE * fp)
+static void _targets_ldflags(Makefile * makefile)
 {
 	String const * p;
 
-	if((p = _makefile_get_config(configure, NULL, "verilog")) != NULL)
-		_makefile_output_variable(fp, "VERILOG", p);
-	if((p = _makefile_get_config(configure, NULL, "vflags_force")) != NULL)
+	if((p = _makefile_get_config(makefile, NULL, "ldflags_force")) != NULL)
 	{
-		_makefile_print(fp, "%s", "VFLAGSF=");
-		_makefile_print(fp, "%c", '\n');
+		_makefile_print(makefile, "%s", "LDFLAGSF=");
+		_binary_ldflags(makefile, p);
+		_makefile_print(makefile, "%c", '\n');
 	}
-	if((p = _makefile_get_config(configure, NULL, "vflags")) != NULL)
+	if((p = _makefile_get_config(makefile, NULL, "ldflags")) != NULL)
 	{
-		_makefile_print(fp, "%s", "VFLAGS\t=");
-		_makefile_print(fp, "%c", '\n');
+		_makefile_print(makefile, "%s", "LDFLAGS\t=");
+		_binary_ldflags(makefile, p);
+		_makefile_print(makefile, "%c", '\n');
 	}
 }
 
-static void _binary_ldflags(Configure * configure, FILE * fp,
-		String const * ldflags)
+static void _targets_vflags(Makefile * makefile)
+{
+	String const * p;
+
+	if((p = _makefile_get_config(makefile, NULL, "verilog")) != NULL)
+		_makefile_output_variable(makefile, "VERILOG", p);
+	if((p = _makefile_get_config(makefile, NULL, "vflags_force")) != NULL)
+	{
+		_makefile_print(makefile, "%s", "VFLAGSF=");
+		_makefile_print(makefile, "%c", '\n');
+	}
+	if((p = _makefile_get_config(makefile, NULL, "vflags")) != NULL)
+	{
+		_makefile_print(makefile, "%s", "VFLAGS\t=");
+		_makefile_print(makefile, "%c", '\n');
+	}
+}
+
+static void _binary_ldflags(Makefile * makefile, String const * ldflags)
 {
 	char const * libs_bsd[] = { "dl", "resolv", "ossaudio", "socket",
 		"ws2_32", NULL };
@@ -709,10 +721,10 @@ static void _binary_ldflags(Configure * configure, FILE * fp,
 
 	if((p = string_new(ldflags)) == NULL) /* XXX report error? */
 	{
-		_makefile_print(fp, " %s%s", ldflags, "\n");
+		_makefile_print(makefile, " %s%s", ldflags, "\n");
 		return;
 	}
-	switch(configure_get_os(configure))
+	switch(configure_get_os(makefile->configure))
 	{
 		case HO_DEFORAOS:
 			libs = libs_deforaos;
@@ -752,144 +764,144 @@ static void _binary_ldflags(Configure * configure, FILE * fp,
 			continue;
 		memmove(q, q + strlen(buf), strlen(q) - strlen(buf) + 1);
 	}
-	_makefile_print(fp, " %s", p);
+	_makefile_print(makefile, " %s", p);
 	string_delete(p);
 }
 
-static void _variables_library(Configure * configure, FILE * fp, char * done)
+static void _variables_library(Makefile * makefile, char * done)
 {
 	ConfigurePrefs const * prefs;
 	String const * libdir;
 	String const * p;
 
-	prefs = configure_get_prefs(configure);
+	prefs = configure_get_prefs(makefile->configure);
 	if(!done[TT_LIBRARY] && !done[TT_SCRIPT])
 	{
-		_makefile_output_variable(fp, "OBJDIR", "");
-		_makefile_output_variable(fp, "PREFIX", prefs->prefix);
-		_makefile_output_variable(fp, "DESTDIR", prefs->destdir);
+		_makefile_output_variable(makefile, "OBJDIR", "");
+		_makefile_output_variable(makefile, "PREFIX", prefs->prefix);
+		_makefile_output_variable(makefile, "DESTDIR", prefs->destdir);
 	}
-	if((libdir = _makefile_get_config(configure, NULL, "libdir")) == NULL)
+	if((libdir = _makefile_get_config(makefile, NULL, "libdir")) == NULL)
 		libdir = prefs->libdir;
 	if(libdir[0] == '/')
-		_makefile_output_variable(fp, "LIBDIR", libdir);
+		_makefile_output_variable(makefile, "LIBDIR", libdir);
 	else
-		_makefile_print(fp, "%s%s\n", "LIBDIR\t= $(PREFIX)/", libdir);
+		_makefile_print(makefile, "%s%s\n", "LIBDIR\t= $(PREFIX)/", libdir);
 	if(!done[TT_BINARY])
 	{
-		_targets_asflags(configure, fp);
-		_targets_cflags(configure, fp);
-		_targets_cxxflags(configure, fp);
-		_targets_ldflags(configure, fp);
-		_targets_vflags(configure, fp);
-		_targets_exeext(configure, fp);
+		_targets_asflags(makefile);
+		_targets_cflags(makefile);
+		_targets_cxxflags(makefile);
+		_targets_ldflags(makefile);
+		_targets_vflags(makefile);
+		_targets_exeext(makefile);
 	}
-	if(configure_can_library_static(configure))
-		_variables_library_static(configure, fp);
-	if((p = _makefile_get_config(configure, NULL, "ld")) == NULL)
-		_makefile_output_program(configure, fp, "ccshared");
+	if(configure_can_library_static(makefile->configure))
+		_variables_library_static(makefile);
+	if((p = _makefile_get_config(makefile, NULL, "ld")) == NULL)
+		_makefile_output_program(makefile, "ccshared");
 	else
-		_makefile_output_variable(fp, "CCSHARED", p);
-	_makefile_output_extension(configure, fp, "so");
+		_makefile_output_variable(makefile, "CCSHARED", p);
+	_makefile_output_extension(makefile, "so");
 }
 
-static void _variables_library_static(Configure * configure, FILE * fp)
+static void _variables_library_static(Makefile * makefile)
 {
 	String const * p;
 
-	if((p = _makefile_get_config(configure, NULL, "ar")) == NULL)
-		_makefile_output_program(configure, fp, "ar");
+	if((p = _makefile_get_config(makefile, NULL, "ar")) == NULL)
+		_makefile_output_program(makefile, "ar");
 	else
-		_makefile_output_variable(fp, "AR", p);
-	_makefile_output_variable(fp, "ARFLAGS", "-rc");
-	if((p = _makefile_get_config(configure, NULL, "ranlib")) == NULL)
-		_makefile_output_program(configure, fp, "ranlib");
+		_makefile_output_variable(makefile, "AR", p);
+	_makefile_output_variable(makefile, "ARFLAGS", "-rc");
+	if((p = _makefile_get_config(makefile, NULL, "ranlib")) == NULL)
+		_makefile_output_program(makefile, "ranlib");
 	else
-		_makefile_output_variable(fp, "RANLIB", p);
+		_makefile_output_variable(makefile, "RANLIB", p);
 }
 
-static void _variables_libtool(Configure * configure, FILE * fp, char * done)
+static void _variables_libtool(Makefile * makefile, char * done)
 {
 	String const * p;
 
-	_variables_library(configure, fp, done);
+	_variables_library(makefile, done);
 	if(!done[TT_LIBTOOL])
 	{
-		if((p = _makefile_get_config(configure, NULL, "libtool"))
+		if((p = _makefile_get_config(makefile, NULL, "libtool"))
 				== NULL)
-			_makefile_output_program(configure, fp, "libtool");
+			_makefile_output_program(makefile, "libtool");
 		else
-			_makefile_output_variable(fp, "LIBTOOL", p);
+			_makefile_output_variable(makefile, "LIBTOOL", p);
 	}
 }
 
-static void _variables_script(Configure * configure, FILE * fp, char * done)
+static void _variables_script(Makefile * makefile, char * done)
 {
 	ConfigurePrefs const * prefs;
 
 	if(!done[TT_BINARY] && !done[TT_LIBRARY] && !done[TT_SCRIPT])
 	{
-		prefs = configure_get_prefs(configure);
-		_makefile_output_variable(fp, "OBJDIR", "");
-		_makefile_output_variable(fp, "PREFIX", prefs->prefix);
-		_makefile_output_variable(fp, "DESTDIR", prefs->destdir);
+		prefs = configure_get_prefs(makefile->configure);
+		_makefile_output_variable(makefile, "OBJDIR", "");
+		_makefile_output_variable(makefile, "PREFIX", prefs->prefix);
+		_makefile_output_variable(makefile, "DESTDIR", prefs->destdir);
 	}
 }
 
-static int _variables_includes(Configure * configure, FILE * fp)
+static int _variables_includes(Makefile * makefile)
 {
 	ConfigurePrefs const * prefs;
 	String const * includes;
 
-	if((includes = _makefile_get_config(configure, NULL, "includes"))
+	if((includes = _makefile_get_config(makefile, NULL, "includes"))
 			== NULL)
 		return 0;
-	if(fp == NULL)
+	if(makefile->fp == NULL)
 		return 0;
-	prefs = configure_get_prefs(configure);
+	prefs = configure_get_prefs(makefile->configure);
 	if(prefs->includedir[0] == '/')
-		_makefile_output_variable(fp, "INCLUDEDIR", prefs->includedir);
+		_makefile_output_variable(makefile, "INCLUDEDIR", prefs->includedir);
 	else
-		_makefile_print(fp, "%s%s\n", "INCLUDEDIR= $(PREFIX)/",
+		_makefile_print(makefile, "%s%s\n", "INCLUDEDIR= $(PREFIX)/",
 				prefs->includedir);
 	return 0;
 }
 
-static int _variables_subdirs(Configure * configure, FILE * fp)
+static int _variables_subdirs(Makefile * makefile)
 {
 	String const * sections[] = { "dist" };
 	size_t i;
 	String * p;
 	String const * q;
 
-	if(_makefile_get_config(configure, NULL, "subdirs") == NULL
-			|| _makefile_get_config(configure, NULL, "package") != NULL
-			|| _makefile_get_config(configure, NULL, "targets") != NULL
-			|| _makefile_get_config(configure, NULL, "includes") != NULL)
+	if(_makefile_get_config(makefile, NULL, "subdirs") == NULL
+			|| _makefile_get_config(makefile, NULL, "package") != NULL
+			|| _makefile_get_config(makefile, NULL, "targets") != NULL
+			|| _makefile_get_config(makefile, NULL, "includes") != NULL)
 		return 0;
 	for(i = 0; i < sizeof(sections) / sizeof(*sections); i++)
 	{
-		if((q = _makefile_get_config(configure, NULL, sections[i]))
+		if((q = _makefile_get_config(makefile, NULL, sections[i]))
 				== NULL)
 			continue;
 		if((p = strdup(q)) == NULL)
 			return -1;
 		for(q = strtok(p, ","); q != NULL; q = strtok(NULL, ","))
-			if(_makefile_get_config(configure, q, "install")
+			if(_makefile_get_config(makefile, q, "install")
 					!= NULL)
 				break;
 		free(p);
 		if(q != NULL)
 			return 0;
 	}
-	return _makefile_output_program(configure, fp, "mkdir");
+	return _makefile_output_program(makefile, "mkdir");
 }
 
-static int _targets_all(Configure * configure, FILE * fp);
-static int _targets_subdirs(Configure * configure, FILE * fp);
-static int _targets_target(Configure * configure, FILE * fp,
+static int _targets_all(Makefile * makefile);
+static int _targets_subdirs(Makefile * makefile);
+static int _targets_target(Makefile * makefile,
 		String const * target);
-static int _write_targets(Configure * configure, FILE * fp)
+static int _write_targets(Makefile * makefile)
 {
 	int ret = 0;
 	String const * p;
@@ -898,10 +910,10 @@ static int _write_targets(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	if(_targets_all(configure, fp) != 0
-			|| _targets_subdirs(configure, fp) != 0)
+	if(_targets_all(makefile) != 0
+			|| _targets_subdirs(makefile) != 0)
 		return 1;
-	if((p = _makefile_get_config(configure, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -912,7 +924,7 @@ static int _write_targets(Configure * configure, FILE * fp)
 			continue;
 		c = targets[i];
 		targets[i] = '\0';
-		ret |= _targets_target(configure, fp, targets);
+		ret |= _targets_target(makefile, targets);
 		if(c == '\0')
 			break;
 		targets += i + 1;
@@ -922,54 +934,45 @@ static int _write_targets(Configure * configure, FILE * fp)
 	return ret;
 }
 
-static int _targets_all(Configure * configure, FILE * fp)
+static int _targets_all(Makefile * makefile)
 {
 	char const * depends[] = { NULL, NULL };
 	size_t i = 0;
 
-	if(_makefile_get_config(configure, NULL, "subdirs") != NULL)
+	if(_makefile_get_config(makefile, NULL, "subdirs") != NULL)
 		depends[i++] = "subdirs";
-	if(_makefile_get_config(configure, NULL, "targets") != NULL)
+	if(_makefile_get_config(makefile, NULL, "targets") != NULL)
 		depends[i++] = "$(TARGETS)";
-	_makefile_target(fp, "all", depends[0], depends[1], NULL);
+	_makefile_target(makefile, "all", depends[0], depends[1], NULL);
 	return 0;
 }
 
-static int _targets_subdirs(Configure * configure, FILE * fp)
+static int _targets_subdirs(Makefile * makefile)
 {
 	String const * subdirs;
 
-	if((subdirs = _makefile_get_config(configure, NULL, "subdirs")) != NULL)
+	if((subdirs = _makefile_get_config(makefile, NULL, "subdirs")) != NULL)
 	{
-		_makefile_target(fp, "subdirs", NULL);
-		_makefile_subdirs(fp, NULL);
+		_makefile_target(makefile, "subdirs", NULL);
+		_makefile_subdirs(makefile, NULL);
 	}
 	return 0;
 }
 
-static int _target_objs(Configure * configure, FILE * fp,
-		String const * target);
-static int _target_binary(Configure * configure, FILE * fp,
-		String const * target);
-static int _target_library(Configure * configure, FILE * fp,
-		String const * target);
-static int _target_library_static(Configure * configure, FILE * fp,
-		String const * target);
-static int _target_libtool(Configure * configure, FILE * fp,
-		String const * target);
-static int _target_object(Configure * configure, FILE * fp,
-		String const * target);
-static int _target_plugin(Configure * configure, FILE * fp,
-		String const * target);
-static int _target_script(Configure * configure, FILE * fp,
-		String const * target);
-static int _targets_target(Configure * configure, FILE * fp,
-		String const * target)
+static int _target_objs(Makefile * makefile, String const * target);
+static int _target_binary(Makefile * makefile, String const * target);
+static int _target_library(Makefile * makefile, String const * target);
+static int _target_library_static(Makefile * makefile, String const * target);
+static int _target_libtool(Makefile * makefile, String const * target);
+static int _target_object(Makefile * makefile, String const * target);
+static int _target_plugin(Makefile * makefile, String const * target);
+static int _target_script(Makefile * makefile, String const * target);
+static int _targets_target(Makefile * makefile, String const * target)
 {
 	String const * type;
 	TargetType tt;
 
-	if((type = _makefile_get_config(configure, target, "type")) == NULL)
+	if((type = _makefile_get_config(makefile, target, "type")) == NULL)
 	{
 		fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
 				": no type defined for target\n");
@@ -979,17 +982,17 @@ static int _targets_target(Configure * configure, FILE * fp,
 	switch(tt)
 	{
 		case TT_BINARY:
-			return _target_binary(configure, fp, target);
+			return _target_binary(makefile, target);
 		case TT_LIBRARY:
-			return _target_library(configure, fp, target);
+			return _target_library(makefile, target);
 		case TT_LIBTOOL:
-			return _target_libtool(configure, fp, target);
+			return _target_libtool(makefile, target);
 		case TT_OBJECT:
-			return _target_object(configure, fp, target);
+			return _target_object(makefile, target);
 		case TT_PLUGIN:
-			return _target_plugin(configure, fp, target);
+			return _target_plugin(makefile, target);
 		case TT_SCRIPT:
-			return _target_script(configure, fp, target);
+			return _target_script(makefile, target);
 		case TT_UNKNOWN:
 			fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
 					": unknown type for target\n");
@@ -998,9 +1001,8 @@ static int _targets_target(Configure * configure, FILE * fp,
 	return 0;
 }
 
-static int _objs_source(FILE * fp, String * source, TargetType tt);
-static int _target_objs(Configure * configure, FILE * fp,
-		String const * target)
+static int _objs_source(Makefile * makefile, String * source, TargetType tt);
+static int _target_objs(Makefile * makefile, String const * target)
 {
 	int ret = 0;
 	String const * p;
@@ -1010,33 +1012,33 @@ static int _target_objs(Configure * configure, FILE * fp,
 	size_t i;
 	char c;
 
-	if((p = _makefile_get_config(configure, target, "type")) != NULL)
+	if((p = _makefile_get_config(makefile, target, "type")) != NULL)
 		tt = enum_string(TT_LAST, sTargetType, p);
-	if((p = _makefile_get_config(configure, target, "sources")) == NULL)
+	if((p = _makefile_get_config(makefile, target, "sources")) == NULL)
 		/* a binary target may have no sources */
 		return 0;
 	if((sources = string_new(p)) == NULL)
 		return 1;
 	q = sources;
-	_makefile_print(fp, "%s%s%s", "\n", target, "_OBJS =");
+	_makefile_print(makefile, "%s%s%s", "\n", target, "_OBJS =");
 	for(i = 0; ret == 0; i++)
 	{
 		if(sources[i] != ',' && sources[i] != '\0')
 			continue;
 		c = sources[i];
 		sources[i] = '\0';
-		ret = _objs_source(fp, sources, tt);
+		ret = _objs_source(makefile, sources, tt);
 		if(c == '\0')
 			break;
 		sources += i + 1;
 		i = 0;
 	}
-	_makefile_print(fp, "%c", '\n');
+	_makefile_print(makefile, "%c", '\n');
 	string_delete(q);
 	return ret;
 }
 
-static int _objs_source(FILE * fp, String * source, TargetType tt)
+static int _objs_source(Makefile * makefile, String * source, TargetType tt)
 {
 	int ret = 0;
 	String const * extension;
@@ -1057,12 +1059,13 @@ static int _objs_source(FILE * fp, String * source, TargetType tt)
 		case OT_CXX_SOURCE:
 		case OT_OBJC_SOURCE:
 		case OT_OBJCXX_SOURCE:
-			_makefile_print(fp, "%s%s%s", " $(OBJDIR)", source,
+			_makefile_print(makefile, "%s%s%s", " $(OBJDIR)",
+					source,
 					(tt == TT_LIBTOOL) ? ".lo" : ".o");
 			break;
 		case OT_VERILOG_SOURCE:
-			_makefile_print(fp, "%s%s%s", " $(OBJDIR)", source,
-					".o");
+			_makefile_print(makefile, "%s%s%s", " $(OBJDIR)",
+					source, ".o");
 			break;
 		case OT_UNKNOWN:
 			ret = 1;
@@ -1074,39 +1077,35 @@ static int _objs_source(FILE * fp, String * source, TargetType tt)
 	return ret;
 }
 
-static int _target_flags(Configure * configure, FILE * fp,
-		String const * target);
-static int _target_binary(Configure * configure, FILE * fp,
-		String const * target)
+static int _target_flags(Makefile * makefile, String const * target);
+static int _target_binary(Makefile * makefile, String const * target)
 {
 	String const * p;
 
-	if(_target_objs(configure, fp, target) != 0)
+	if(_target_objs(makefile, target) != 0)
 		return 1;
-	if(_target_flags(configure, fp, target) != 0)
+	if(_target_flags(makefile, target) != 0)
 		return 1;
-	_makefile_print(fp, "%c", '\n');
+	_makefile_print(makefile, "%c", '\n');
 	/* output the binary target */
-	_makefile_print(fp, "%s%s%s%s%s%s", "$(OBJDIR)", target, "$(EXEEXT)",
-			": $(", target, "_OBJS)");
-	if((p = _makefile_get_config(configure, target, "depends")) != NULL
-			&& _makefile_expand(fp, p) != 0)
+	_makefile_print(makefile, "%s%s%s%s%s%s", "$(OBJDIR)", target,
+			"$(EXEEXT)", ": $(", target, "_OBJS)");
+	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
+			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
-	_makefile_print(fp, "%c", '\n');
+	_makefile_print(makefile, "%c", '\n');
 	/* build the binary */
-	_makefile_print(fp, "%s%s%s%s%s%s%s", "\t$(CC) -o $(OBJDIR)", target,
-			"$(EXEEXT) $(", target, "_OBJS) $(", target,
+	_makefile_print(makefile, "%s%s%s%s%s%s%s", "\t$(CC) -o $(OBJDIR)",
+			target, "$(EXEEXT) $(", target, "_OBJS) $(", target,
 			"_LDFLAGS)\n");
 	return 0;
 }
 
-static void _flags_asm(Configure * configure, FILE * fp, String const * target);
-static void _flags_c(Configure * configure, FILE * fp, String const * target);
-static void _flags_cxx(Configure * configure, FILE * fp, String const * target);
-static void _flags_verilog(Configure * configure, FILE * fp,
-		String const * target);
-static int _target_flags(Configure * configure, FILE * fp,
-		String const * target)
+static void _flags_asm(Makefile * makefile, String const * target);
+static void _flags_c(Makefile * makefile, String const * target);
+static void _flags_cxx(Makefile * makefile, String const * target);
+static void _flags_verilog(Makefile * makefile, String const * target);
+static int _target_flags(Makefile * makefile, String const * target)
 {
 	char done[OT_COUNT];
 	String const * p;
@@ -1118,12 +1117,12 @@ static int _target_flags(Configure * configure, FILE * fp,
 	size_t i;
 
 	memset(&done, 0, sizeof(done));
-	if((p = _makefile_get_config(configure, target, "sources")) == NULL
+	if((p = _makefile_get_config(makefile, target, "sources")) == NULL
 			|| string_length(p) == 0)
 	{
-		if((p = _makefile_get_config(configure, target, "type")) != NULL
+		if((p = _makefile_get_config(makefile, target, "type")) != NULL
 				&& string_compare(p, "binary") == 0)
-			_flags_c(configure, fp, target);
+			_flags_c(makefile, target);
 		return 0;
 	}
 	if((sources = string_new(p)) == NULL)
@@ -1146,25 +1145,25 @@ static int _target_flags(Configure * configure, FILE * fp,
 			switch(type)
 			{
 				case OT_ASM_SOURCE:
-					_flags_asm(configure, fp, target);
+					_flags_asm(makefile, target);
 					break;
 				case OT_OBJC_SOURCE:
 					done[OT_C_SOURCE] = 1;
 					/* fallback */
 				case OT_C_SOURCE:
 					done[OT_OBJC_SOURCE] = 1;
-					_flags_c(configure, fp, target);
+					_flags_c(makefile, target);
 					break;
 				case OT_OBJCXX_SOURCE:
 					done[OT_CXX_SOURCE] = 1;
 					/* fallback */
 				case OT_CXX_SOURCE:
 					done[OT_OBJCXX_SOURCE] = 1;
-					_flags_cxx(configure, fp, target);
+					_flags_cxx(makefile, target);
 					break;
 				case OT_VERILOG_SOURCE:
 					done[OT_VERILOG_SOURCE] = 1;
-					_flags_verilog(configure, fp, target);
+					_flags_verilog(makefile, target);
 					break;
 				case OT_UNKNOWN:
 					break;
@@ -1179,215 +1178,217 @@ static int _target_flags(Configure * configure, FILE * fp,
 	return 0;
 }
 
-static void _flags_asm(Configure * configure, FILE * fp, String const * target)
+static void _flags_asm(Makefile * makefile, String const * target)
 {
 	String const * p;
 
-	_makefile_print(fp, "%s%s", target, "_ASFLAGS = $(CPPFLAGSF)"
+	_makefile_print(makefile, "%s%s", target, "_ASFLAGS = $(CPPFLAGSF)"
 			" $(CPPFLAGS) $(ASFLAGSF) $(ASFLAGS)");
-	if((p = _makefile_get_config(configure, target, "asflags")) != NULL)
-		_makefile_print(fp, " %s", p);
-	_makefile_print(fp, "%c", '\n');
+	if((p = _makefile_get_config(makefile, target, "asflags")) != NULL)
+		_makefile_print(makefile, " %s", p);
+	_makefile_print(makefile, "%c", '\n');
 }
 
-static void _flags_c(Configure * configure, FILE * fp, String const * target)
+static void _flags_c(Makefile * makefile, String const * target)
 {
 	String const * p;
 
-	_makefile_print(fp, "%s%s", target, "_CFLAGS = $(CPPFLAGSF)"
+	_makefile_print(makefile, "%s%s", target, "_CFLAGS = $(CPPFLAGSF)"
 			" $(CPPFLAGS)");
-	if((p = _makefile_get_config(configure, target, "cppflags")) != NULL)
-		_makefile_print(fp, " %s", p);
-	_makefile_print(fp, "%s", " $(CFLAGSF) $(CFLAGS)");
-	if((p = _makefile_get_config(configure, target, "cflags")) != NULL)
+	if((p = _makefile_get_config(makefile, target, "cppflags")) != NULL)
+		_makefile_print(makefile, " %s", p);
+	_makefile_print(makefile, "%s", " $(CFLAGSF) $(CFLAGS)");
+	if((p = _makefile_get_config(makefile, target, "cflags")) != NULL)
 	{
-		_makefile_print(fp, " %s", p);
-		if(configure_get_os(configure) == HO_GNU_LINUX
+		_makefile_print(makefile, " %s", p);
+		if(configure_get_os(makefile->configure) == HO_GNU_LINUX
 				&& string_find(p, "-ansi"))
-			_makefile_print(fp, "%s", " -D _GNU_SOURCE");
+			_makefile_print(makefile, "%s", " -D _GNU_SOURCE");
 	}
-	_makefile_print(fp, "\n%s%s", target,
+	_makefile_print(makefile, "\n%s%s", target,
 			"_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
-	if((p = _makefile_get_config(configure, target, "ldflags")) != NULL)
-		_binary_ldflags(configure, fp, p);
-	_makefile_print(fp, "%c", '\n');
+	if((p = _makefile_get_config(makefile, target, "ldflags")) != NULL)
+		_binary_ldflags(makefile, p);
+	_makefile_print(makefile, "%c", '\n');
 }
 
-static void _flags_cxx(Configure * configure, FILE * fp, String const * target)
+static void _flags_cxx(Makefile * makefile, String const * target)
 {
 	String const * p;
 
-	_makefile_print(fp, "%s%s", target, "_CXXFLAGS = $(CPPFLAGSF)"
+	_makefile_print(makefile, "%s%s", target, "_CXXFLAGS = $(CPPFLAGSF)"
 			" $(CPPFLAGS) $(CXXFLAGSF) $(CXXFLAGS)");
-	if((p = _makefile_get_config(configure, target, "cxxflags")) != NULL)
-		_makefile_print(fp, " %s", p);
-	_makefile_print(fp, "\n%s%s", target,
+	if((p = _makefile_get_config(makefile, target, "cxxflags")) != NULL)
+		_makefile_print(makefile, " %s", p);
+	_makefile_print(makefile, "\n%s%s", target,
 			"_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
-	if((p = _makefile_get_config(configure, target, "ldflags")) != NULL)
-		_binary_ldflags(configure, fp, p);
-	_makefile_print(fp, "%c", '\n');
+	if((p = _makefile_get_config(makefile, target, "ldflags")) != NULL)
+		_binary_ldflags(makefile, p);
+	_makefile_print(makefile, "%c", '\n');
 }
 
-static void _flags_verilog(Configure * configure, FILE * fp,
-		String const * target)
+static void _flags_verilog(Makefile * makefile, String const * target)
 {
 	String const * p;
 
-	_makefile_print(fp, "%s%s", target, "_VFLAGS = $(VFLAGSF) $(VFLAGS)");
-	if((p = _makefile_get_config(configure, target, "vflags")) != NULL)
-		_makefile_print(fp, " %s", p);
-	_makefile_print(fp, "%c", '\n');
+	_makefile_print(makefile, "%s%s", target,
+			"_VFLAGS = $(VFLAGSF) $(VFLAGS)");
+	if((p = _makefile_get_config(makefile, target, "vflags")) != NULL)
+		_makefile_print(makefile, " %s", p);
+	_makefile_print(makefile, "%c", '\n');
 }
 
-static int _target_library(Configure * configure, FILE * fp,
-		String const * target)
+static int _target_library(Makefile * makefile, String const * target)
 {
 	String const * p;
 	String * q;
 	String * soname;
+	HostOS os;
 
-	if(_target_objs(configure, fp, target) != 0)
+	if(_target_objs(makefile, target) != 0)
 		return 1;
-	if(_target_flags(configure, fp, target) != 0)
+	if(_target_flags(makefile, target) != 0)
 		return 1;
-	if(configure_can_library_static(configure)
+	if(configure_can_library_static(makefile->configure)
 			/* generate a static library */
-			&& _target_library_static(configure, fp, target) != 0)
+			&& _target_library_static(makefile, target) != 0)
 		return 1;
-	if((p = _makefile_get_config(configure, target, "soname")) != NULL)
+	os = configure_get_os(makefile->configure);
+	if((p = _makefile_get_config(makefile, target, "soname")) != NULL)
 		soname = string_new(p);
-	else if(configure_get_os(configure) == HO_MACOSX)
+	else if(os == HO_MACOSX)
 		/* versioning is different on MacOS X */
 		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
-	else if(configure_get_os(configure) == HO_WIN32)
+	else if(os == HO_WIN32)
 		/* and on Windows */
 		soname = string_new_append(target, "$(SOEXT)", NULL);
 	else
 		soname = string_new_append(target, "$(SOEXT)", ".0", NULL);
 	if(soname == NULL)
 		return 1;
-	if(configure_get_os(configure) == HO_MACOSX)
-		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname, ": $(",
+	if(os == HO_MACOSX)
+		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", soname, ": $(",
 				target, "_OBJS)");
-	else if(configure_get_os(configure) == HO_WIN32)
-		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname, ": $(",
+	else if(os == HO_WIN32)
+		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", soname, ": $(",
 				target, "_OBJS)");
 	else
-		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
+		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
 				".0: $(", target, "_OBJS)");
-	if((p = _makefile_get_config(configure, target, "depends")) != NULL
-			&& _makefile_expand(fp, p) != 0)
+	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
+			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
-	_makefile_print(fp, "%c", '\n');
+	_makefile_print(makefile, "%c", '\n');
 	/* build the shared library */
-	_makefile_print(fp, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname,
-			(configure_get_os(configure) != HO_MACOSX
-			 && configure_get_os(configure) != HO_WIN32)
+	_makefile_print(makefile, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname,
+			(os != HO_MACOSX && os != HO_WIN32)
 			? ".0" : "");
-	if((p = _makefile_get_config(configure, target, "install")) != NULL)
+	if((p = _makefile_get_config(makefile, target, "install")) != NULL)
 	{
 		/* soname is not available on MacOS X */
-		if(configure_get_os(configure) == HO_MACOSX)
-			_makefile_print(fp, "%s%s%s%s%s", " -install_name ",
-					p, "/", target, ".0$(SOEXT)");
-		else if(configure_get_os(configure) != HO_WIN32)
-			_makefile_print(fp, "%s%s", " -Wl,-soname,", soname);
+		if(os == HO_MACOSX)
+			_makefile_print(makefile, "%s%s%s%s%s",
+					" -install_name ", p, "/", target,
+					".0$(SOEXT)");
+		else if(os != HO_WIN32)
+			_makefile_print(makefile, "%s%s", " -Wl,-soname,",
+					soname);
 	}
-	_makefile_print(fp, "%s%s%s%s%s", " $(", target, "_OBJS) $(", target,
-			"_LDFLAGS)");
+	_makefile_print(makefile, "%s%s%s%s%s", " $(", target, "_OBJS) $(",
+			target, "_LDFLAGS)");
 	if((q = string_new_append(target, "$(SOEXT)", NULL)) == NULL)
 	{
 		string_delete(soname);
 		return 1;
 	}
-	if((p = _makefile_get_config(configure, q, "ldflags")) != NULL)
-		_binary_ldflags(configure, fp, p);
+	if((p = _makefile_get_config(makefile, q, "ldflags")) != NULL)
+		_binary_ldflags(makefile, p);
 	string_delete(q);
-	_makefile_print(fp, "%c", '\n');
-	if(configure_get_os(configure) == HO_MACOSX)
+	_makefile_print(makefile, "%c", '\n');
+	if(os == HO_MACOSX)
 	{
-		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
+		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target,
 				".0$(SOEXT): $(OBJDIR)", soname, "\n");
-		_makefile_print(fp, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+		_makefile_print(makefile, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				" $(OBJDIR)", target, ".0$(SOEXT)", "\n");
-		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
+		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target,
 				"$(SOEXT): $(OBJDIR)", soname, "\n");
-		_makefile_print(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+		_makefile_print(makefile, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				" $(OBJDIR)", target, "$(SOEXT)\n");
 	}
-	else if(configure_get_os(configure) != HO_WIN32)
+	else if(os != HO_WIN32)
 	{
-		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
+		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
 				": $(OBJDIR)", soname, ".0\n");
-		_makefile_print(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+		_makefile_print(makefile, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				".0 $(OBJDIR)", soname, "\n");
-		_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
+		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target,
 				"$(SOEXT): $(OBJDIR)", soname, ".0\n");
-		_makefile_print(fp, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
+		_makefile_print(makefile, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
 				".0 $(OBJDIR)", target, "$(SOEXT)\n");
 	}
 	string_delete(soname);
 	return 0;
 }
 
-static int _target_library_static(Configure * configure, FILE * fp,
+static int _target_library_static(Makefile * makefile,
 		String const * target)
 {
 	String const * p;
 	String * q;
 	size_t len;
 
-	_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
+	_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target,
 			".a: $(", target, "_OBJS)");
-	if((p = _makefile_get_config(configure, target, "depends")) != NULL
-			&& _makefile_expand(fp, p) != 0)
+	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
+			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
-	_makefile_print(fp, "%c", '\n');
+	_makefile_print(makefile, "%c", '\n');
 	/* build the static library */
-	_makefile_print(fp, "%s%s%s%s%s",
+	_makefile_print(makefile, "%s%s%s%s%s",
 			"\t$(AR) $(ARFLAGS) $(OBJDIR)", target, ".a $(",
 			target, "_OBJS)");
 	len = strlen(target) + 3;
 	if((q = malloc(len)) == NULL)
 		return 1;
 	snprintf(q, len, "%s.a", target);
-	if((p = _makefile_get_config(configure, q, "ldflags"))
+	if((p = _makefile_get_config(makefile, q, "ldflags"))
 			!= NULL)
-		_binary_ldflags(configure, fp, p);
+		_binary_ldflags(makefile, p);
 	free(q);
-	_makefile_print(fp, "%s%s%s",
+	_makefile_print(makefile, "%s%s%s",
 			"\n\t$(RANLIB) $(OBJDIR)", target, ".a\n");
 	return 0;
 }
 
-static int _target_libtool(Configure * configure, FILE * fp,
+static int _target_libtool(Makefile * makefile,
 		String const * target)
 {
 	String const * p;
 
-	if(_target_objs(configure, fp, target) != 0)
+	if(_target_objs(makefile, target) != 0)
 		return 1;
-	if(_target_flags(configure, fp, target) != 0)
+	if(_target_flags(makefile, target) != 0)
 		return 1;
-	_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target, ".la: $(",
+	_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target, ".la: $(",
 			target, "_OBJS)\n");
-	_makefile_print(fp, "%s%s%s%s%s",
+	_makefile_print(makefile, "%s%s%s%s%s",
 			"\t$(LIBTOOL) --mode=link $(CC) -o $(OBJDIR)", target,
 			".la $(", target, "_OBJS)");
-	if((p = _makefile_get_config(configure, target, "ldflags")) != NULL)
-		_binary_ldflags(configure, fp, p);
-	_makefile_print(fp, "%s%s%s", " -rpath $(LIBDIR) $(", target,
+	if((p = _makefile_get_config(makefile, target, "ldflags")) != NULL)
+		_binary_ldflags(makefile, p);
+	_makefile_print(makefile, "%s%s%s", " -rpath $(LIBDIR) $(", target,
 			"_LDFLAGS)\n");
 	return 0;
 }
 
-static int _target_object(Configure * configure, FILE * fp,
+static int _target_object(Makefile * makefile,
 		String const * target)
 {
 	String const * p;
 	String const * extension;
 
-	if((p = _makefile_get_config(configure, target, "sources")) == NULL)
+	if((p = _makefile_get_config(makefile, target, "sources")) == NULL)
 	{
 		fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
 				": No sources for target\n");
@@ -1404,49 +1405,49 @@ static int _target_object(Configure * configure, FILE * fp,
 	switch(_source_type(extension))
 	{
 		case OT_ASM_SOURCE:
-			_makefile_print(fp, "\n%s%s%s%s\n%s%s",
+			_makefile_print(makefile, "\n%s%s%s%s\n%s%s",
 					target, "_OBJS = ", "$(OBJDIR)", target,
 					target, "_ASFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS) $(ASFLAGSF)"
 					" $(ASFLAGS)");
-			if((p = _makefile_get_config(configure, target,
+			if((p = _makefile_get_config(makefile, target,
 							"asflags")) != NULL)
-				_makefile_print(fp, " %s", p);
-			_makefile_print(fp, "%c", '\n');
+				_makefile_print(makefile, " %s", p);
+			_makefile_print(makefile, "%c", '\n');
 			break;
 		case OT_C_SOURCE:
 		case OT_OBJC_SOURCE:
-			_makefile_print(fp, "\n%s%s%s%s\n%s%s",
+			_makefile_print(makefile, "\n%s%s%s%s\n%s%s",
 					target, "_OBJS = ", "$(OBJDIR)", target,
 					target, "_CFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF)"
 					" $(CFLAGS)");
-			if((p = _makefile_get_config(configure, target,
+			if((p = _makefile_get_config(makefile, target,
 							"cflags")) != NULL)
-				_makefile_print(fp, " %s", p);
-			_makefile_print(fp, "%c", '\n');
+				_makefile_print(makefile, " %s", p);
+			_makefile_print(makefile, "%c", '\n');
 			break;
 		case OT_CXX_SOURCE:
 		case OT_OBJCXX_SOURCE:
-			_makefile_print(fp, "\n%s%s%s%s\n%s%s",
+			_makefile_print(makefile, "\n%s%s%s%s\n%s%s",
 					target, "_OBJS = ", "$(OBJDIR)", target,
 					target, "_CXXFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS) $(CXXFLAGSF)"
 					" $(CXXFLAGS)");
-			if((p = _makefile_get_config(configure, target,
+			if((p = _makefile_get_config(makefile, target,
 							"cxxflags")) != NULL)
-				_makefile_print(fp, " %s", p);
-			_makefile_print(fp, "%c", '\n');
+				_makefile_print(makefile, " %s", p);
+			_makefile_print(makefile, "%c", '\n');
 			break;
 		case OT_VERILOG_SOURCE:
-			_makefile_print(fp, "\n%s%s%s%s\n%s%s",
+			_makefile_print(makefile, "\n%s%s%s%s\n%s%s",
 					target, "_OBJS = ",
 					"$(OBJDIR)", target, target, "_VFLAGS ="
 					" $(VFLAGSF) $(VFLAGS)");
-			if((p = _makefile_get_config(configure, target,
+			if((p = _makefile_get_config(makefile, target,
 							"vflags")) != NULL)
-				_makefile_print(fp, " %s", p);
-			_makefile_print(fp, "%c", '\n');
+				_makefile_print(makefile, " %s", p);
+			_makefile_print(makefile, "%c", '\n');
 			break;
 		case OT_UNKNOWN:
 			fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
@@ -1456,38 +1457,38 @@ static int _target_object(Configure * configure, FILE * fp,
 	return 0;
 }
 
-static int _target_plugin(Configure * configure, FILE * fp,
+static int _target_plugin(Makefile * makefile,
 		String const * target)
 {
 	String const * p;
 	String * q;
 
-	if(_target_objs(configure, fp, target) != 0)
+	if(_target_objs(makefile, target) != 0)
 		return 1;
-	if(_target_flags(configure, fp, target) != 0)
+	if(_target_flags(makefile, target) != 0)
 		return 1;
-	_makefile_print(fp, "%s%s%s%s%s", "\n$(OBJDIR)", target,
+	_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target,
 			"$(SOEXT): $(", target, "_OBJS)");
-	if((p = _makefile_get_config(configure, target, "depends")) != NULL
-			&& _makefile_expand(fp, p) != 0)
+	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
+			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
-	_makefile_print(fp, "%c", '\n');
+	_makefile_print(makefile, "%c", '\n');
 	/* build the plug-in */
-	_makefile_print(fp, "%s%s%s%s%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)",
+	_makefile_print(makefile, "%s%s%s%s%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)",
 			target, "$(SOEXT) $(", target, "_OBJS) $(", target,
 			"_LDFLAGS)");
 	if((q = string_new_append(target, "$(SOEXT)", NULL)) == NULL)
 		return error_print(PROGNAME);
-	if((p = _makefile_get_config(configure, q, "ldflags")) != NULL)
-		_binary_ldflags(configure, fp, p);
+	if((p = _makefile_get_config(makefile, q, "ldflags")) != NULL)
+		_binary_ldflags(makefile, p);
 	string_delete(q);
-	_makefile_print(fp, "%c", '\n');
+	_makefile_print(makefile, "%c", '\n');
 	return 0;
 }
 
-static int _objects_target(Configure * configure, FILE * fp,
+static int _objects_target(Makefile * makefile,
 		String const * target);
-static int _write_objects(Configure * configure, FILE * fp)
+static int _write_objects(Makefile * makefile)
 {
 	String const * p;
 	String * targets;
@@ -1496,7 +1497,7 @@ static int _write_objects(Configure * configure, FILE * fp)
 	size_t i;
 	int ret = 0;
 
-	if((p = _makefile_get_config(configure, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -1507,7 +1508,7 @@ static int _write_objects(Configure * configure, FILE * fp)
 			continue;
 		c = targets[i];
 		targets[i] = '\0';
-		ret += _objects_target(configure, fp, targets);
+		ret += _objects_target(makefile, targets);
 		if(c == '\0')
 			break;
 		targets += i + 1;
@@ -1517,47 +1518,46 @@ static int _write_objects(Configure * configure, FILE * fp)
 	return ret;
 }
 
-static void _script_check(Configure * configure, String const * target,
+static void _script_check(Makefile * makefile, String const * target,
 		String const * script);
-static int _script_depends(Configure * configure, FILE * fp,
-		String const * target);
-static String * _script_path(Configure * configure, String const * script);
-static void _script_security(Configure * configure, String const * target,
+static int _script_depends(Makefile * makefile, String const * target);
+static String * _script_path(Makefile * makefile, String const * script);
+static void _script_security(Makefile * makefile, String const * target,
 		String const * script);
-static int _target_script(Configure * configure, FILE * fp,
+static int _target_script(Makefile * makefile,
 		String const * target)
 {
 	String const * prefix;
 	String const * script;
 	int phony;
 
-	if((script = _makefile_get_config(configure, target, "script")) == NULL)
+	if((script = _makefile_get_config(makefile, target, "script")) == NULL)
 	{
 		fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
 				": No script for target\n");
 		return 1;
 	}
-	if(fp == NULL)
-		_script_check(configure, target, script);
-	if(_makefile_is_flag_set(configure, PREFS_S))
-		_script_security(configure, target, script);
-	phony = _makefile_is_phony(configure, target);
-	_makefile_print(fp, "\n%s%s:", phony ? "" : "$(OBJDIR)",
+	if(makefile->fp == NULL)
+		_script_check(makefile, target, script);
+	if(_makefile_is_flag_set(makefile, PREFS_S))
+		_script_security(makefile, target, script);
+	phony = _makefile_is_phony(makefile, target);
+	_makefile_print(makefile, "\n%s%s:", phony ? "" : "$(OBJDIR)",
 			target);
-	_script_depends(configure, fp, target);
-	if((prefix = _makefile_get_config(configure, target, "prefix")) == NULL)
+	_script_depends(makefile, target);
+	if((prefix = _makefile_get_config(makefile, target, "prefix")) == NULL)
 		prefix = "$(PREFIX)";
-	_makefile_print(fp, "\n\t%s -P \"%s\" -- \"%s%s\"\n", script, prefix,
-			phony ? "" : "$(OBJDIR)", target);
+	_makefile_print(makefile, "\n\t%s -P \"%s\" -- \"%s%s\"\n", script,
+			prefix, phony ? "" : "$(OBJDIR)", target);
 	return 0;
 }
 
-static void _script_check(Configure * configure, String const * target,
+static void _script_check(Makefile * makefile, String const * target,
 		String const * script)
 {
 	String * path;
 
-	if((path = _script_path(configure, script)) == NULL)
+	if((path = _script_path(makefile, script)) == NULL)
 	{
 		error_print(PROGNAME);
 		return;
@@ -1574,25 +1574,24 @@ static void _script_check(Configure * configure, String const * target,
 	string_delete(path);
 }
 
-static int _script_depends(Configure * configure, FILE * fp,
-		String const * target)
+static int _script_depends(Makefile * makefile, String const * target)
 {
 	String const * p;
 
-	if((p = _makefile_get_config(configure, target, "depends")) != NULL
-			&& _makefile_expand(fp, p) != 0)
+	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
+			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
 	return 0;
 }
 
-static String * _script_path(Configure * configure, String const * script)
+static String * _script_path(Makefile * makefile, String const * script)
 {
 	String * ret;
 	String const * directory;
 	ssize_t i;
 	String * p = NULL;
 
-	if((directory = _makefile_get_config(configure, NULL, "directory"))
+	if((directory = _makefile_get_config(makefile, NULL, "directory"))
 			== NULL)
 	{
 		error_print(PROGNAME);
@@ -1618,12 +1617,12 @@ static String * _script_path(Configure * configure, String const * script)
 	return ret;
 }
 
-static void _script_security(Configure * configure, String const * target,
+static void _script_security(Makefile * makefile, String const * target,
 		String const * script)
 {
 	String * path;
 
-	if((path = _script_path(configure, script)) == NULL)
+	if((path = _script_path(makefile, script)) == NULL)
 	{
 		error_print(PROGNAME);
 		return;
@@ -1633,9 +1632,9 @@ static void _script_security(Configure * configure, String const * target,
 	string_delete(path);
 }
 
-static int _target_source(Configure * configure, FILE * fp,
+static int _target_source(Makefile * makefile,
 		String const * target, String * source);
-static int _objects_target(Configure * configure, FILE * fp,
+static int _objects_target(Makefile * makefile,
 		String const * target)
 {
 	int ret = 0;
@@ -1645,7 +1644,7 @@ static int _objects_target(Configure * configure, FILE * fp,
 	size_t i;
 	char c;
 
-	if((p = _makefile_get_config(configure, target, "sources")) == NULL)
+	if((p = _makefile_get_config(makefile, target, "sources")) == NULL)
 		return 0;
 	if((sources = string_new(p)) == NULL)
 		return 1;
@@ -1656,7 +1655,7 @@ static int _objects_target(Configure * configure, FILE * fp,
 			continue;
 		c = sources[i];
 		sources[i] = '\0';
-		ret |= _target_source(configure, fp, target, sources);
+		ret |= _target_source(makefile, target, sources);
 		if(c == '\0')
 			break;
 		sources += i + 1;
@@ -1666,10 +1665,10 @@ static int _objects_target(Configure * configure, FILE * fp,
 	return ret;
 }
 
-static int _source_depends(Configure * configure, FILE * fp,
+static int _source_depends(Makefile * makefile,
 		String const * source);
-static int _source_subdir(FILE * fp, String * source);
-static int _target_source(Configure * configure, FILE * fp,
+static int _source_subdir(Makefile * makefile, String * source);
+static int _target_source(Makefile * makefile,
 		String const * target, String * source)
 	/* FIXME check calls to _source_depends() */
 {
@@ -1681,7 +1680,7 @@ static int _target_source(Configure * configure, FILE * fp,
 	String const * p;
 	String const * q;
 
-	if((p = _makefile_get_config(configure, target, "type")) != NULL)
+	if((p = _makefile_get_config(makefile, target, "type")) != NULL)
 			tt = enum_string(TT_LAST, sTargetType, p);
 	if((extension = _source_extension(source)) == NULL)
 		return 1;
@@ -1691,141 +1690,142 @@ static int _target_source(Configure * configure, FILE * fp,
 	{
 		case OT_ASM_SOURCE:
 			if(tt == TT_OBJECT)
-				_makefile_print(fp, "%s%s", "\n$(OBJDIR)",
+				_makefile_print(makefile, "%s%s", "\n$(OBJDIR)",
 						target);
 			else
-				_makefile_print(fp, "%s%s%s",
+				_makefile_print(makefile, "%s%s%s",
 						"\n$(OBJDIR)", source, ".o");
 			if(tt == TT_LIBTOOL)
-				_makefile_print(fp, " %s.lo", source);
-			_makefile_print(fp, "%s%s%s%s", ": ", source, ".",
+				_makefile_print(makefile, " %s.lo", source);
+			_makefile_print(makefile, "%s%s%s%s", ": ", source, ".",
 					extension);
 			source[len] = '.'; /* FIXME ugly */
-			_source_depends(configure, fp, source);
+			_source_depends(makefile, source);
 			source[len] = '\0';
-			_makefile_print(fp, "%s", "\n\t");
+			_makefile_print(makefile, "%s", "\n\t");
 			if(strchr(source, '/') != NULL)
-				ret = _source_subdir(fp, source);
+				ret = _source_subdir(makefile, source);
 			if(tt == TT_LIBTOOL)
-				_makefile_print(fp, "%s",
+				_makefile_print(makefile, "%s",
 						"$(LIBTOOL) --mode=compile ");
-			_makefile_print(fp, "%s%s%s", "$(AS) $(", target,
+			_makefile_print(makefile, "%s%s%s", "$(AS) $(", target,
 					"_ASFLAGS)");
 			if(tt == TT_OBJECT)
-				_makefile_print(fp, "%s%s%s%s%s%s",
+				_makefile_print(makefile, "%s%s%s%s%s%s",
 						" -o $(OBJDIR)", target, " ",
 						source, ".", extension);
 			else
-				_makefile_print(fp, "%s%s%s%s%s%s",
+				_makefile_print(makefile, "%s%s%s%s%s%s",
 						" -o $(OBJDIR)", source, ".o ",
 						source, ".", extension);
-			_makefile_print(fp, "%c", '\n');
+			_makefile_print(makefile, "%c", '\n');
 			break;
 		case OT_C_SOURCE:
 		case OT_OBJC_SOURCE:
 			if(tt == TT_OBJECT)
-				_makefile_print(fp, "%s%s", "\n$(OBJDIR)",
+				_makefile_print(makefile, "%s%s", "\n$(OBJDIR)",
 						target);
 			else
-				_makefile_print(fp, "%s%s%s", "\n$(OBJDIR)",
+				_makefile_print(makefile, "%s%s%s", "\n$(OBJDIR)",
 						source, ".o");
 			if(tt == TT_LIBTOOL)
-				_makefile_print(fp, " %s%s", source, ".lo");
-			_makefile_print(fp, "%s%s%s%s", ": ", source, ".",
+				_makefile_print(makefile, " %s%s", source, ".lo");
+			_makefile_print(makefile, "%s%s%s%s", ": ", source, ".",
 					extension);
 			source[len] = '.'; /* FIXME ugly */
-			_source_depends(configure, fp, source);
-			_makefile_print(fp, "%s", "\n\t");
+			_source_depends(makefile, source);
+			_makefile_print(makefile, "%s", "\n\t");
 			if(strchr(source, '/') != NULL)
-				ret = _source_subdir(fp, source);
+				ret = _source_subdir(makefile, source);
 			/* FIXME do both wherever also relevant */
-			p = _makefile_get_config(configure, source, "cppflags");
-			q = _makefile_get_config(configure, source, "cflags");
+			p = _makefile_get_config(makefile, source, "cppflags");
+			q = _makefile_get_config(makefile, source, "cflags");
 			source[len] = '\0';
 			if(tt == TT_LIBTOOL)
-				_makefile_print(fp, "%s",
+				_makefile_print(makefile, "%s",
 						"$(LIBTOOL) --mode=compile ");
-			_makefile_print(fp, "%s", "$(CC)");
+			_makefile_print(makefile, "%s", "$(CC)");
 			if(p != NULL)
-				_makefile_print(fp, " %s", p);
-			_makefile_print(fp, "%s%s%s", " $(", target,
+				_makefile_print(makefile, " %s", p);
+			_makefile_print(makefile, "%s%s%s", " $(", target,
 					"_CFLAGS)");
 			if(q != NULL)
 			{
-				_makefile_print(fp, " %s", q);
-				if(configure_get_os(configure) == HO_GNU_LINUX
+				_makefile_print(makefile, " %s", q);
+				if(configure_get_os(makefile->configure)
+						== HO_GNU_LINUX
 					       	&& string_find(q, "-ansi"))
-					_makefile_print(fp, "%s",
+					_makefile_print(makefile, "%s",
 							" -D _GNU_SOURCE");
 			}
 			if(tt == TT_OBJECT)
-				_makefile_print(fp, "%s%s",
+				_makefile_print(makefile, "%s%s",
 						" -o $(OBJDIR)", target);
 			else
-				_makefile_print(fp, "%s%s%s",
+				_makefile_print(makefile, "%s%s%s",
 						" -o $(OBJDIR)", source, ".o");
-			_makefile_print(fp, "%s%s%s%s%c", " -c ", source, ".",
+			_makefile_print(makefile, "%s%s%s%s%c", " -c ", source, ".",
 					extension, '\n');
 			break;
 		case OT_CXX_SOURCE:
 		case OT_OBJCXX_SOURCE:
 			if(tt == TT_OBJECT)
-				_makefile_print(fp, "%s%s", "\n$(OBJDIR)",
+				_makefile_print(makefile, "%s%s", "\n$(OBJDIR)",
 						target);
 			else
-				_makefile_print(fp, "%s%s%s", "\n$(OBJDIR)",
+				_makefile_print(makefile, "%s%s%s", "\n$(OBJDIR)",
 						source, ".o");
-			_makefile_print(fp, "%s%s%s%s", ": ", source, ".",
+			_makefile_print(makefile, "%s%s%s%s", ": ", source, ".",
 					extension);
 			source[len] = '.'; /* FIXME ugly */
-			_source_depends(configure, fp, source);
-			p = _makefile_get_config(configure, source, "cxxflags");
+			_source_depends(makefile, source);
+			p = _makefile_get_config(makefile, source, "cxxflags");
 			source[len] = '\0';
-			_makefile_print(fp, "%s", "\n\t");
+			_makefile_print(makefile, "%s", "\n\t");
 			if(strchr(source, '/') != NULL)
-				ret = _source_subdir(fp, source);
-			_makefile_print(fp, "%s%s%s", "$(CXX) $(", target,
+				ret = _source_subdir(makefile, source);
+			_makefile_print(makefile, "%s%s%s", "$(CXX) $(", target,
 					"_CXXFLAGS)");
 			if(p != NULL)
-				_makefile_print(fp, " %s", p);
+				_makefile_print(makefile, " %s", p);
 			if(tt == TT_OBJECT)
-				_makefile_print(fp, "%s%s", " -o $(OBJDIR)",
+				_makefile_print(makefile, "%s%s", " -o $(OBJDIR)",
 						target);
 			else
-				_makefile_print(fp, "%s%s%s", " -o $(OBJDIR)",
+				_makefile_print(makefile, "%s%s%s", " -o $(OBJDIR)",
 						source, ".o");
-			_makefile_print(fp, "%s%s%s%s\n", " -c ", source, ".",
+			_makefile_print(makefile, "%s%s%s%s\n", " -c ", source, ".",
 					extension);
 			break;
 		case OT_VERILOG_SOURCE:
 			if(tt == TT_OBJECT)
-				_makefile_print(fp, "%s%s", "\n$(OBJDIR)",
+				_makefile_print(makefile, "%s%s", "\n$(OBJDIR)",
 						target);
 			else
-				_makefile_print(fp, "%s%s%s", "\n$(OBJDIR)",
+				_makefile_print(makefile, "%s%s%s", "\n$(OBJDIR)",
 						source, ".o");
-			_makefile_print(fp, "%s%s%s%s", ": ", source, ".",
+			_makefile_print(makefile, "%s%s%s%s", ": ", source, ".",
 					extension);
 			source[len] = '.'; /* FIXME ugly */
-			_source_depends(configure, fp, source);
-			_makefile_print(fp, "%s", "\n\t");
+			_source_depends(makefile, source);
+			_makefile_print(makefile, "%s", "\n\t");
 			if(strchr(source, '/') != NULL)
-				ret = _source_subdir(fp, source);
-			q = _makefile_get_config(configure, source, "vflags");
+				ret = _source_subdir(makefile, source);
+			q = _makefile_get_config(makefile, source, "vflags");
 			source[len] = '\0';
-			_makefile_print(fp, "%s", "$(VERILOG)");
-			_makefile_print(fp, "%s%s%s", " $(", target,
+			_makefile_print(makefile, "%s", "$(VERILOG)");
+			_makefile_print(makefile, "%s%s%s", " $(", target,
 					"_VFLAGS)");
 			if(q != NULL)
-				_makefile_print(fp, " %s", q);
+				_makefile_print(makefile, " %s", q);
 			if(tt == TT_OBJECT)
-				_makefile_print(fp, "%s%s",
+				_makefile_print(makefile, "%s%s",
 						" -o $(OBJDIR)", target);
 			else
-				_makefile_print(fp, "%s%s%s",
+				_makefile_print(makefile, "%s%s%s",
 						" -o $(OBJDIR)", source, ".o");
-			_makefile_print(fp, "%s%s%s%s%c", " ", source, ".",
-					extension, '\n');
+			_makefile_print(makefile, "%s%s%s%s%c", " ", source,
+					".", extension, '\n');
 			break;
 		case OT_UNKNOWN:
 			fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
@@ -1837,18 +1837,18 @@ static int _target_source(Configure * configure, FILE * fp,
 	return ret;
 }
 
-static int _source_depends(Configure * configure, FILE * fp,
+static int _source_depends(Makefile * makefile,
 		String const * target)
 {
 	String const * p;
 
-	if((p = _makefile_get_config(configure, target, "depends")) != NULL
-			&& _makefile_expand(fp, p) != 0)
+	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
+			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
 	return 0;
 }
 
-static int _source_subdir(FILE * fp, String * source)
+static int _source_subdir(Makefile * makefile, String * source)
 {
 	char * p;
 	char const * q;
@@ -1856,22 +1856,23 @@ static int _source_subdir(FILE * fp, String * source)
 	if((p = strdup(source)) == NULL)
 		return 1;
 	q = dirname(p);
-	_makefile_print(fp, "@[ -d \"%s%s\" ] || $(MKDIR) -- \"%s%s\"\n\t",
+	_makefile_print(makefile,
+			"@[ -d \"%s%s\" ] || $(MKDIR) -- \"%s%s\"\n\t",
 			"$(OBJDIR)", q, "$(OBJDIR)", q);
 	free(p);
 	return 0;
 }
 
-static int _clean_targets(Configure * configure, FILE * fp);
-static int _write_clean(Configure * configure, FILE * fp)
+static int _clean_targets(Makefile * makefile);
+static int _write_clean(Makefile * makefile)
 {
-	_makefile_target(fp, "clean", NULL);
-	if(_makefile_get_config(configure, NULL, "subdirs") != NULL)
-		_makefile_subdirs(fp, "clean");
-	return _clean_targets(configure, fp);
+	_makefile_target(makefile, "clean", NULL);
+	if(_makefile_get_config(makefile, NULL, "subdirs") != NULL)
+		_makefile_subdirs(makefile, "clean");
+	return _clean_targets(makefile);
 }
 
-static int _clean_targets(Configure * configure, FILE * fp)
+static int _clean_targets(Makefile * makefile)
 {
 	String const * prefix;
 	String const * p;
@@ -1880,27 +1881,27 @@ static int _clean_targets(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	if((p = _makefile_get_config(configure, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
 	q = targets;
 	/* remove all of the object files */
-	_makefile_print(fp, "%s", "\t$(RM) --");
+	_makefile_print(makefile, "%s", "\t$(RM) --");
 	for(i = 0;; i++)
 	{
 		if(targets[i] != ',' && targets[i] != '\0')
 			continue;
 		c = targets[i];
 		targets[i] = '\0';
-		_makefile_print(fp, "%s%s%s", " $(", targets, "_OBJS)");
+		_makefile_print(makefile, "%s%s%s", " $(", targets, "_OBJS)");
 		if(c == '\0')
 			break;
 		targets[i] = c;
 		targets += i + 1;
 		i = 0;
 	}
-	_makefile_print(fp, "%c", '\n');
+	_makefile_print(makefile, "%c", '\n');
 	targets = q;
 	/* let each scripted target remove the relevant object files */
 	for(i = 0;; i++)
@@ -1909,17 +1910,17 @@ static int _clean_targets(Configure * configure, FILE * fp)
 			continue;
 		c = targets[i];
 		targets[i] = '\0';
-		if((p = _makefile_get_config(configure, targets, "type")) != NULL
+		if((p = _makefile_get_config(makefile, targets, "type")) != NULL
 				&& strcmp(p, "script") == 0
-				&& (p = _makefile_get_config(configure, targets,
+				&& (p = _makefile_get_config(makefile, targets,
 						"script")) != NULL)
 		{
-			if((prefix = _makefile_get_config(configure, targets,
+			if((prefix = _makefile_get_config(makefile, targets,
 							"prefix")) == NULL)
 				prefix = "$(PREFIX)";
-			_makefile_print(fp, "\t%s%s%s%s%s%s\n", p, " -c -P \"",
-					prefix, "\" -- \"$(OBJDIR)", targets,
-					"\"");
+			_makefile_print(makefile, "\t%s%s%s%s%s%s\n", p,
+					" -c -P \"", prefix,
+					"\" -- \"$(OBJDIR)", targets, "\"");
 		}
 		if(c == '\0')
 			break;
@@ -1931,27 +1932,27 @@ static int _clean_targets(Configure * configure, FILE * fp)
 	return 0;
 }
 
-static int _write_distclean(Configure * configure, FILE * fp)
+static int _write_distclean(Makefile * makefile)
 {
 	String const * subdirs;
 
 	/* only depend on the "clean" target if we do not have subfolders */
-	if((subdirs = _makefile_get_config(configure, NULL, "subdirs")) == NULL)
-		_makefile_target(fp, "distclean", "clean", NULL);
+	if((subdirs = _makefile_get_config(makefile, NULL, "subdirs")) == NULL)
+		_makefile_target(makefile, "distclean", "clean", NULL);
 	else
 	{
-		_makefile_target(fp, "distclean", NULL);
-		_makefile_subdirs(fp, "distclean");
-		_clean_targets(configure, fp);
+		_makefile_target(makefile, "distclean", NULL);
+		_makefile_subdirs(makefile, "distclean");
+		_clean_targets(makefile);
 	}
 	/* FIXME do not erase targets that need be distributed */
-	if(_makefile_get_config(configure, NULL, "targets") != NULL)
-		_makefile_remove(fp, 0, "$(TARGETS)", NULL);
+	if(_makefile_get_config(makefile, NULL, "targets") != NULL)
+		_makefile_remove(makefile, 0, "$(TARGETS)", NULL);
 	return 0;
 }
 
-static int _dist_subdir(Configure * configure, FILE * fp, Config * subdir);
-static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
+static int _dist_subdir(Makefile * makefile, Config * subdir);
+static int _write_dist(Makefile * makefile, configArray * ca,
 	       	int from, int to)
 {
 	String const * package;
@@ -1959,32 +1960,33 @@ static int _write_dist(Configure * configure, FILE * fp, configArray * ca,
 	Config * p;
 	int i;
 
-	package = _makefile_get_config(configure, NULL, "package");
-	version = _makefile_get_config(configure, NULL, "version");
+	package = _makefile_get_config(makefile, NULL, "package");
+	version = _makefile_get_config(makefile, NULL, "version");
 	if(package == NULL || version == NULL)
 		return 0;
-	_makefile_target(fp, "dist", NULL);
-	_makefile_remove(fp, 1, "$(OBJDIR)$(PACKAGE)-$(VERSION)", NULL);
-	_makefile_link(fp, 1, "\"$$PWD\"", "$(OBJDIR)$(PACKAGE)-$(VERSION)");
-	_makefile_print(fp, "%s", "\t@cd $(OBJDIR). && $(TAR) -czvf"
+	_makefile_target(makefile, "dist", NULL);
+	_makefile_remove(makefile, 1, "$(OBJDIR)$(PACKAGE)-$(VERSION)", NULL);
+	_makefile_link(makefile, 1, "\"$$PWD\"",
+			"$(OBJDIR)$(PACKAGE)-$(VERSION)");
+	_makefile_print(makefile, "%s", "\t@cd $(OBJDIR). && $(TAR) -czvf"
 			" $(PACKAGE)-$(VERSION)$(TGZEXT) -- \\\n");
 	for(i = from + 1; i < to; i++)
 	{
 		array_get_copy(ca, i, &p);
-		_dist_subdir(configure, fp, p);
+		_dist_subdir(makefile, p);
 	}
 	if(from < to)
 	{
 		array_get_copy(ca, from, &p);
-		_dist_subdir(configure, fp, p);
+		_dist_subdir(makefile, p);
 	}
 	else
 		return 1;
-	_makefile_remove(fp, 0, "$(OBJDIR)$(PACKAGE)-$(VERSION)", NULL);
+	_makefile_remove(makefile, 0, "$(OBJDIR)$(PACKAGE)-$(VERSION)", NULL);
 	return 0;
 }
 
-static int _write_distcheck(Configure * configure, FILE * fp)
+static int _write_distcheck(Makefile * makefile)
 {
 	String const * package;
 	String const * version;
@@ -1999,17 +2001,17 @@ static int _write_distcheck(Configure * configure, FILE * fp)
 		"\tcd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) dist\n";
 	const char posttarget[] = "\t$(RM) -r -- $(PACKAGE)-$(VERSION)\n";
 
-	package = _makefile_get_config(configure, NULL, "package");
-	version = _makefile_get_config(configure, NULL, "version");
+	package = _makefile_get_config(makefile, NULL, "package");
+	version = _makefile_get_config(makefile, NULL, "version");
 	if(package == NULL || version == NULL)
 		return 0;
-	_makefile_print(fp, "%s%s%s", pretarget, target, posttarget);
+	_makefile_print(makefile, "%s%s%s", pretarget, target, posttarget);
 	return 0;
 }
 
-static int _dist_subdir_dist(FILE * fp, String const * path,
+static int _dist_subdir_dist(Makefile * makefile, String const * path,
 		String const * dist);
-static int _dist_subdir(Configure * configure, FILE * fp, Config * subdir)
+static int _dist_subdir(Makefile * makefile, Config * subdir)
 {
 	String const * path;
 	size_t len;
@@ -2022,7 +2024,7 @@ static int _dist_subdir(Configure * configure, FILE * fp, Config * subdir)
 	char c;
 	String const * quote;
 
-	path = _makefile_get_config(configure, NULL, "directory");
+	path = _makefile_get_config(makefile, NULL, "directory");
 	len = string_length(path);
 	path = config_get(subdir, NULL, "directory");
 	path = &path[len];
@@ -2042,7 +2044,7 @@ static int _dist_subdir(Configure * configure, FILE * fp, Config * subdir)
 			targets[i] = '\0';
 			if((dist = config_get(subdir, targets, "sources"))
 					!= NULL)
-				_dist_subdir_dist(fp, path, dist);
+				_dist_subdir_dist(makefile, path, dist);
 			if(c == '\0')
 				break;
 			targets += i + 1;
@@ -2051,18 +2053,18 @@ static int _dist_subdir(Configure * configure, FILE * fp, Config * subdir)
 		string_delete(q);
 	}
 	if((includes = config_get(subdir, NULL, "includes")) != NULL)
-		_dist_subdir_dist(fp, path, includes);
+		_dist_subdir_dist(makefile, path, includes);
 	if((dist = config_get(subdir, NULL, "dist")) != NULL)
-		_dist_subdir_dist(fp, path, dist);
+		_dist_subdir_dist(makefile, path, dist);
 	quote = (strchr(path, ' ') != NULL) ? "\"" : "";
-	_makefile_print(fp, "%s%s%s%s%s%s%s%s", "\t\t", quote,
+	_makefile_print(makefile, "%s%s%s%s%s%s%s%s", "\t\t", quote,
 			"$(PACKAGE)-$(VERSION)/", path,
 			(path[0] == '\0') ? "" : "/", PROJECT_CONF, quote,
 			(path[0] == '\0') ? "\n" : " \\\n");
 	return 0;
 }
 
-static int _dist_subdir_dist(FILE * fp, String const * path,
+static int _dist_subdir_dist(Makefile * makefile, String const * path,
 		String const * dist)
 {
 	String * d;
@@ -2082,7 +2084,7 @@ static int _dist_subdir_dist(FILE * fp, String const * path,
 		d[i] = '\0';
 		quote = (strchr(path, ' ') != NULL || strchr(d, ' ') != NULL)
 			? "\"" : "";
-		_makefile_print(fp, "%s%s%s%s%s%s%s%s", "\t\t", quote,
+		_makefile_print(makefile, "%s%s%s%s%s%s%s%s", "\t\t", quote,
 				"$(PACKAGE)-$(VERSION)/",
 				(path[0] == '\0') ? "" : path,
 				(path[0] == '\0') ? "" : "/",
@@ -2097,28 +2099,27 @@ static int _dist_subdir_dist(FILE * fp, String const * path,
 	return 0;
 }
 
-static int _install_targets(Configure * configure, FILE * fp);
-static int _install_includes(Configure * configure, FILE * fp);
-static int _install_dist(Configure * configure, FILE * fp);
-static int _write_install(Configure * configure, FILE * fp)
+static int _install_targets(Makefile * makefile);
+static int _install_includes(Makefile * makefile);
+static int _install_dist(Makefile * makefile);
+static int _write_install(Makefile * makefile)
 {
 	int ret = 0;
 	char const * targets;
 
-	targets = _makefile_get_config(configure, NULL, "targets");
-	_makefile_target(fp, "install", (targets != NULL) ? "$(TARGETS)" : NULL,
-			NULL);
-	if(_makefile_get_config(configure, NULL, "subdirs") != NULL)
-		_makefile_subdirs(fp, "install");
-	ret |= _install_targets(configure, fp);
-	ret |= _install_includes(configure, fp);
-	ret |= _install_dist(configure, fp);
+	targets = _makefile_get_config(makefile, NULL, "targets");
+	_makefile_target(makefile, "install",
+			(targets != NULL) ? "$(TARGETS)" : NULL, NULL);
+	if(_makefile_get_config(makefile, NULL, "subdirs") != NULL)
+		_makefile_subdirs(makefile, "install");
+	ret |= _install_targets(makefile);
+	ret |= _install_includes(makefile);
+	ret |= _install_dist(makefile);
 	return ret;
 }
 
-static int _install_target(Configure * configure, FILE * fp,
-		String const * target);
-static int _install_targets(Configure * configure, FILE * fp)
+static int _install_target(Makefile * makefile, String const * target);
+static int _install_targets(Makefile * makefile)
 {
 	int ret = 0;
 	String const * p;
@@ -2127,7 +2128,7 @@ static int _install_targets(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	if((p = _makefile_get_config(configure, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -2138,7 +2139,7 @@ static int _install_targets(Configure * configure, FILE * fp)
 			continue;
 		c = targets[i];
 		targets[i] = '\0';
-		ret |= _install_target(configure, fp, targets);
+		ret |= _install_target(makefile, targets);
 		if(c == '\0')
 			break;
 		targets += i + 1;
@@ -2148,46 +2149,39 @@ static int _install_targets(Configure * configure, FILE * fp)
 	return ret;
 }
 
-static void _install_target_binary(Configure * configure, FILE * fp,
-		String const * target);
-static int _install_target_library(Configure * configure, FILE * fp,
-		String const * target);
-static void _install_target_libtool(Configure * configure, FILE * fp,
-		String const * target);
-static void _install_target_object(Configure * configure, FILE * fp,
-		String const * target);
-static void _install_target_plugin(Configure * configure, FILE * fp,
-		String const * target);
-static void _install_target_script(Configure * configure, FILE * fp,
-		String const * target);
-static int _install_target(Configure * configure, FILE * fp,
-		String const * target)
+static void _install_target_binary(Makefile * makefile, String const * target);
+static int _install_target_library(Makefile * makefile, String const * target);
+static void _install_target_libtool(Makefile * makefile, String const * target);
+static void _install_target_object(Makefile * makefile, String const * target);
+static void _install_target_plugin(Makefile * makefile, String const * target);
+static void _install_target_script(Makefile * makefile, String const * target);
+static int _install_target(Makefile * makefile, String const * target)
 {
 	int ret = 0;
 	String const * type;
 	TargetType tt;
 
-	if((type = _makefile_get_config(configure, target, "type")) == NULL)
+	if((type = _makefile_get_config(makefile, target, "type")) == NULL)
 		return 1;
 	switch((tt = enum_string(TT_LAST, sTargetType, type)))
 	{
 		case TT_BINARY:
-			_install_target_binary(configure, fp, target);
+			_install_target_binary(makefile, target);
 			break;
 		case TT_LIBRARY:
-			ret = _install_target_library(configure, fp, target);
+			ret = _install_target_library(makefile, target);
 			break;
 		case TT_LIBTOOL:
-			_install_target_libtool(configure, fp, target);
+			_install_target_libtool(makefile, target);
 			break;
 		case TT_OBJECT:
-			_install_target_object(configure, fp, target);
+			_install_target_object(makefile, target);
 			break;
 		case TT_PLUGIN:
-			_install_target_plugin(configure, fp, target);
+			_install_target_plugin(makefile, target);
 			break;
 		case TT_SCRIPT:
-			_install_target_script(configure, fp, target);
+			_install_target_script(makefile, target);
 			break;
 		case TT_UNKNOWN:
 			break;
@@ -2195,40 +2189,40 @@ static int _install_target(Configure * configure, FILE * fp,
 	return ret;
 }
 
-static void _install_target_binary(Configure * configure, FILE * fp,
-		String const * target)
+static void _install_target_binary(Makefile * makefile, String const * target)
 {
 	String const * path;
 
-	if((path = _makefile_get_config(configure, target, "install")) == NULL)
+	if((path = _makefile_get_config(makefile, target, "install")) == NULL)
 		return;
-	_makefile_mkdir(fp, path);
-	_makefile_print(fp, "%s%s%s%s/%s%s\n",
+	_makefile_mkdir(makefile, path);
+	_makefile_print(makefile, "%s%s%s%s/%s%s\n",
 			"\t$(INSTALL) -m 0755 $(OBJDIR)", target,
 			"$(EXEEXT) $(DESTDIR)", path, target, "$(EXEEXT)");
 }
 
-static int _install_target_library(Configure * configure, FILE * fp,
-		String const * target)
+static int _install_target_library(Makefile * makefile, String const * target)
 {
 	String const * path;
 	String const * p;
 	String * soname;
+	HostOS os;
 
-	if((path = _makefile_get_config(configure, target, "install")) == NULL)
+	if((path = _makefile_get_config(makefile, target, "install")) == NULL)
 		return 0;
-	_makefile_mkdir(fp, path);
-	if(configure_can_library_static(configure))
+	_makefile_mkdir(makefile, path);
+	if(configure_can_library_static(makefile->configure))
 		/* install the static library */
-		_makefile_print(fp, "%s%s%s%s/%s%s",
+		_makefile_print(makefile, "%s%s%s%s/%s%s",
 				"\t$(INSTALL) -m 0644 $(OBJDIR)", target,
 				".a $(DESTDIR)", path, target, ".a\n");
-	if((p = _makefile_get_config(configure, target, "soname")) != NULL)
+	os = configure_get_os(makefile->configure);
+	if((p = _makefile_get_config(makefile, target, "soname")) != NULL)
 		soname = string_new(p);
-	else if(configure_get_os(configure) == HO_MACOSX)
+	else if(os == HO_MACOSX)
 		/* versioning is different on MacOS X */
 		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
-	else if(configure_get_os(configure) == HO_WIN32)
+	else if(os == HO_WIN32)
 		/* and on Windows */
 		soname = string_new_append(target, "$(SOEXT)", NULL);
 	else
@@ -2236,102 +2230,105 @@ static int _install_target_library(Configure * configure, FILE * fp,
 	if(soname == NULL)
 		return 1;
 	/* install the shared library */
-	if(configure_get_os(configure) == HO_MACOSX)
+	if(os == HO_MACOSX)
 	{
-		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
-				soname, " $(DESTDIR)", path, soname, "\n");
-		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
-				" $(DESTDIR)", path, target, ".0$(SOEXT)\n");
-		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
-				" $(DESTDIR)", path, target, "$(SOEXT)\n");
+		_makefile_print(makefile, "%s%s%s%s/%s%s",
+				"\t$(INSTALL) -m 0755 $(OBJDIR)", soname,
+				" $(DESTDIR)", path, soname, "\n");
+		_makefile_print(makefile, "%s%s%s%s/%s%s", "\t$(LN) -s -- ",
+				soname, " $(DESTDIR)", path, target,
+				".0$(SOEXT)\n");
+		_makefile_print(makefile, "%s%s%s%s/%s%s", "\t$(LN) -s -- ",
+				soname, " $(DESTDIR)", path, target,
+				"$(SOEXT)\n");
 	}
-	else if(configure_get_os(configure) == HO_WIN32)
-		_makefile_print(fp, "%s%s%s%s%s%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
-				soname, " $(DESTDIR)", path, "/", soname, "\n");
+	else if(os == HO_WIN32)
+		_makefile_print(makefile, "%s%s%s%s%s%s%s",
+				"\t$(INSTALL) -m 0755 $(OBJDIR)", soname,
+				" $(DESTDIR)", path, "/", soname, "\n");
 	else
 	{
-		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(INSTALL) -m 0755 $(OBJDIR)",
-				soname, ".0 $(DESTDIR)", path, soname, ".0\n");
-		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
-				".0 $(DESTDIR)", path, soname, "\n");
-		_makefile_print(fp, "%s%s%s%s/%s%s", "\t$(LN) -s -- ", soname,
-				".0 $(DESTDIR)", path, target, "$(SOEXT)\n");
+		_makefile_print(makefile, "%s%s%s%s/%s%s",
+				"\t$(INSTALL) -m 0755 $(OBJDIR)", soname,
+				".0 $(DESTDIR)", path, soname, ".0\n");
+		_makefile_print(makefile, "%s%s%s%s/%s%s", "\t$(LN) -s -- ",
+				soname, ".0 $(DESTDIR)", path, soname, "\n");
+		_makefile_print(makefile, "%s%s%s%s/%s%s", "\t$(LN) -s -- ",
+				soname, ".0 $(DESTDIR)", path, target,
+				"$(SOEXT)\n");
 	}
 	string_delete(soname);
 	return 0;
 }
 
-static void _install_target_libtool(Configure * configure, FILE * fp,
-		String const * target)
+static void _install_target_libtool(Makefile * makefile, String const * target)
 {
 	String const * path;
 
-	if((path = _makefile_get_config(configure, target, "install")) == NULL)
+	if((path = _makefile_get_config(makefile, target, "install")) == NULL)
 		return;
-	_makefile_mkdir(fp, path);
-	_makefile_print(fp, "%s%s%s%s/%s%s",
+	_makefile_mkdir(makefile, path);
+	_makefile_print(makefile, "%s%s%s%s/%s%s",
 			"\t$(LIBTOOL) --mode=install $(INSTALL)"
 			" -m 0755 $(OBJDIR)", target, ".la $(DESTDIR)", path,
 			target, ".la\n");
-	_makefile_print(fp, "%s/%s\n", "\t$(LIBTOOL) --mode=finish $(DESTDIR)",
-			path);
+	_makefile_print(makefile, "%s/%s\n",
+			"\t$(LIBTOOL) --mode=finish $(DESTDIR)", path);
 }
 
-static void _install_target_object(Configure * configure, FILE * fp,
-		String const * target)
+static void _install_target_object(Makefile * makefile, String const * target)
 {
 	String const * path;
 
-	if((path = _makefile_get_config(configure, target, "install")) == NULL)
+	if((path = _makefile_get_config(makefile, target, "install")) == NULL)
 		return;
-	_makefile_mkdir(fp, path);
-	_makefile_print(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 $(OBJDIR)",
+	_makefile_mkdir(makefile, path);
+	_makefile_print(makefile, "%s%s%s%s/%s\n",
+			"\t$(INSTALL) -m 0644 $(OBJDIR)",
 			target, " $(DESTDIR)", path, target);
 }
 
-static void _install_target_plugin(Configure * configure, FILE * fp,
-		String const * target)
+static void _install_target_plugin(Makefile * makefile, String const * target)
 {
 	String const * path;
 	String const * mode;
 	mode_t m = 0755;
 	String * p;
 
-	if((path = _makefile_get_config(configure, target, "install")) == NULL)
+	if((path = _makefile_get_config(makefile, target, "install")) == NULL)
 		return;
-	if((mode = _makefile_get_config(configure, target, "mode")) == NULL
+	if((mode = _makefile_get_config(makefile, target, "mode")) == NULL
 			/* XXX these tests are not sufficient */
 			|| mode[0] == '\0'
 			|| (m = strtol(mode, &p, 8)) == 0
 			|| *p != '\0')
 		mode = "0755";
-	_makefile_mkdir(fp, path);
-	_makefile_print(fp, "%s%04o%s%s%s%s%s%s%s", "\t$(INSTALL) -m ", m,
+	_makefile_mkdir(makefile, path);
+	_makefile_print(makefile, "%s%04o%s%s%s%s%s%s%s", "\t$(INSTALL) -m ", m,
 			" $(OBJDIR)", target, "$(SOEXT) $(DESTDIR)", path, "/",
 			target, "$(SOEXT)\n");
 }
 
-static void _install_target_script(Configure * configure, FILE * fp,
-		String const * target)
+static void _install_target_script(Makefile * makefile, String const * target)
 {
 	String const * path;
 	String const * script;
 	int phony;
 
-	if((path = _makefile_get_config(configure, target, "install")) == NULL)
+	if((path = _makefile_get_config(makefile, target, "install")) == NULL)
 		return;
-	if((script = _makefile_get_config(configure, target, "script")) == NULL)
+	if((script = _makefile_get_config(makefile, target, "script")) == NULL)
 		return;
-	phony = _makefile_is_phony(configure, target);
-	_makefile_print(fp, "\t%s%s%s%s%s%s%s", script, " -P \"$(DESTDIR)",
+	phony = _makefile_is_phony(makefile, target);
+	_makefile_print(makefile, "\t%s%s%s%s%s%s%s", script,
+			" -P \"$(DESTDIR)",
 			(path[0] != '\0') ? path : "$(PREFIX)",
 			"\" -i -- \"", phony ? "" : "$(OBJDIR)", target,
 			"\"\n");
 }
 
-static int _install_include(Configure * configure, FILE * fp,
-		String const * include);
-static int _install_includes(Configure * configure, FILE * fp)
+static int _install_include(Makefile * makefile, String const * include);
+static int _install_includes(Makefile * makefile)
 {
 	int ret = 0;
 	String const * p;
@@ -2340,7 +2337,7 @@ static int _install_includes(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	if((p = _makefile_get_config(configure, NULL, "includes")) == NULL)
+	if((p = _makefile_get_config(makefile, NULL, "includes")) == NULL)
 		return 0;
 	if((includes = string_new(p)) == NULL)
 		return 1;
@@ -2351,7 +2348,7 @@ static int _install_includes(Configure * configure, FILE * fp)
 			continue;
 		c = includes[i];
 		includes[i] = '\0';
-		ret |= _install_include(configure, fp, includes);
+		ret |= _install_include(makefile, includes);
 		if(c == '\0')
 			break;
 		includes += i + 1;
@@ -2361,14 +2358,13 @@ static int _install_includes(Configure * configure, FILE * fp)
 	return ret;
 }
 
-static int _install_include(Configure * configure, FILE * fp,
-		String const * include)
+static int _install_include(Makefile * makefile, String const * include)
 {
 	char const * install;
 	ssize_t i;
 	String * p = NULL;
 
-	if((install = _makefile_get_config(configure, include, "install"))
+	if((install = _makefile_get_config(makefile, include, "install"))
 			== NULL)
 	{
 		install = "$(INCLUDEDIR)";
@@ -2377,24 +2373,24 @@ static int _install_include(Configure * configure, FILE * fp,
 				return 2;
 	}
 	/* FIXME keep track of the directories created */
-	_makefile_print(fp, "%s%s", "\t$(MKDIR) $(DESTDIR)", install);
+	_makefile_print(makefile, "%s%s", "\t$(MKDIR) $(DESTDIR)", install);
 	if(p != NULL)
 	{
-		_makefile_print(fp, "/%s", p);
+		_makefile_print(makefile, "/%s", p);
 		string_delete(p);
 	}
-	_makefile_print(fp, "\n");
-	_makefile_print(fp, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 ", include,
-			" $(DESTDIR)", install, include);
+	_makefile_print(makefile, "\n");
+	_makefile_print(makefile, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 ",
+			include, " $(DESTDIR)", install, include);
 	return 0;
 }
 
-static int _dist_check(Configure * configure, char const * target,
+static int _dist_check(Makefile * makefile, char const * target,
 		char const * mode);
-static int _dist_install(Configure * configure, FILE * fp,
+static int _dist_install(Makefile * makefile,
 		char const * directory, char const * mode,
 		char const * filename);
-static int _install_dist(Configure * configure, FILE * fp)
+static int _install_dist(Makefile * makefile)
 {
 	int ret = 0;
 	String const * p;
@@ -2405,7 +2401,7 @@ static int _install_dist(Configure * configure, FILE * fp)
 	String const * d;
 	String const * mode;
 
-	if((p = _makefile_get_config(configure, NULL, "dist")) == NULL)
+	if((p = _makefile_get_config(makefile, NULL, "dist")) == NULL)
 		return 0;
 	if((dist = string_new(p)) == NULL)
 		return 1;
@@ -2416,13 +2412,13 @@ static int _install_dist(Configure * configure, FILE * fp)
 			continue;
 		c = dist[i];
 		dist[i] = '\0';
-		if((mode = _makefile_get_config(configure, dist, "mode"))
+		if((mode = _makefile_get_config(makefile, dist, "mode"))
 				== NULL)
 			mode = "0644";
-		ret |= _dist_check(configure, dist, mode);
-		if((d = _makefile_get_config(configure, dist, "install"))
+		ret |= _dist_check(makefile, dist, mode);
+		if((d = _makefile_get_config(makefile, dist, "install"))
 				!= NULL)
-			_dist_install(configure, fp, d, mode, dist);
+			_dist_install(makefile, d, mode, dist);
 		if(c == '\0')
 			break;
 		dist += i + 1;
@@ -2432,7 +2428,7 @@ static int _install_dist(Configure * configure, FILE * fp)
 	return ret;
 }
 
-static int _dist_check(Configure * configure, char const * target,
+static int _dist_check(Makefile * makefile, char const * target,
 		char const * mode)
 {
 	char * p;
@@ -2442,30 +2438,31 @@ static int _dist_check(Configure * configure, char const * target,
 	if(mode[0] == '\0' || *p != '\0')
 		return error_set_print(PROGNAME, 1, "%s: %s%s%s", target,
 				"Invalid permissions \"", mode, "\"");
-	if(_makefile_is_flag_set(configure, PREFS_S) && (m & S_ISUID))
+	if(_makefile_is_flag_set(makefile, PREFS_S) && (m & S_ISUID))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a SUID file");
-	if(_makefile_is_flag_set(configure, PREFS_S) && (m & S_ISUID))
+	if(_makefile_is_flag_set(makefile, PREFS_S) && (m & S_ISUID))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a SGID file");
-	if(_makefile_is_flag_set(configure, PREFS_S)
+	if(_makefile_is_flag_set(makefile, PREFS_S)
 			&& (m & (S_IXUSR | S_IXGRP | S_IXOTH)))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as an executable file");
-	if(_makefile_is_flag_set(configure, PREFS_S) && (m & S_IWGRP))
+	if(_makefile_is_flag_set(makefile, PREFS_S) && (m & S_IWGRP))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a group-writable file");
-	if(_makefile_is_flag_set(configure, PREFS_S) && (m & S_IWOTH))
+	if(_makefile_is_flag_set(makefile, PREFS_S) && (m & S_IWOTH))
 		error_set_print(PROGNAME, 0, "%s: %s", target,
 				"Installed as a writable file");
 	return 0;
 }
 
-static int _dist_install(Configure * configure, FILE * fp,
+static int _dist_install(Makefile * makefile,
 		char const * directory, char const * mode,
 		char const * filename)
 {
-	char sep = (configure_get_os(configure) != HO_WIN32) ? '/' : '\\';
+	char sep = (configure_get_os(makefile->configure) != HO_WIN32)
+		? '/' : '\\';
 	String * p;
 	char const * q;
 
@@ -2475,32 +2472,33 @@ static int _dist_install(Configure * configure, FILE * fp,
 			return -1;
 		q = dirname(p);
 		/* FIXME keep track of the directories created */
-		_makefile_print(fp, "%s%s%c%s\n", "\t$(MKDIR) $(DESTDIR)",
+		_makefile_print(makefile, "%s%s%c%s\n", "\t$(MKDIR) $(DESTDIR)",
 				directory, sep, q);
 		string_delete(p);
 	}
 	else
-		_makefile_mkdir(fp, directory);
-	_makefile_print(fp, "%s%s%s%s%s%s%c%s\n", "\t$(INSTALL) -m ", mode, " ",
-			filename, " $(DESTDIR)", directory, sep, filename);
+		_makefile_mkdir(makefile, directory);
+	_makefile_print(makefile, "%s%s%s%s%s%s%c%s\n", "\t$(INSTALL) -m ",
+			mode, " ", filename, " $(DESTDIR)", directory, sep,
+			filename);
 	return 0;
 }
 
-static int _write_phony_targets(Configure * configure, FILE * fp);
-static int _write_phony(Configure * configure, FILE * fp, char const ** targets)
+static int _write_phony_targets(Makefile * makefile);
+static int _write_phony(Makefile * makefile, char const ** targets)
 {
 	size_t i;
 
-	_makefile_print(fp, "%s:", "\n.PHONY");
+	_makefile_print(makefile, "%s:", "\n.PHONY");
 	for(i = 0; targets[i] != NULL; i++)
-		_makefile_print(fp, " %s", targets[i]);
-	if(_write_phony_targets(configure, fp) != 0)
+		_makefile_print(makefile, " %s", targets[i]);
+	if(_write_phony_targets(makefile) != 0)
 		return 1;
-	_makefile_print(fp, "%s", "\n");
+	_makefile_print(makefile, "%s", "\n");
 	return 0;
 }
 
-static int _write_phony_targets(Configure * configure, FILE * fp)
+static int _write_phony_targets(Makefile * makefile)
 {
 	String const * p;
 	String * prints;
@@ -2508,7 +2506,7 @@ static int _write_phony_targets(Configure * configure, FILE * fp)
 	char c;
 	String const * type;
 
-	if((p = _makefile_get_config(configure, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
 		return 0;
 	if((prints = string_new(p)) == NULL)
 		return 1;
@@ -2518,14 +2516,13 @@ static int _write_phony_targets(Configure * configure, FILE * fp)
 			continue;
 		c = prints[i];
 		prints[i] = '\0';
-		if((type = _makefile_get_config(configure, prints, "type"))
+		if((type = _makefile_get_config(makefile, prints, "type"))
 				!= NULL)
 			switch(enum_string(TT_LAST, sTargetType, type))
 			{
 				case TT_SCRIPT:
-					if(_makefile_is_phony(configure,
-								prints))
-						_makefile_print(fp, " %s",
+					if(_makefile_is_phony(makefile, prints))
+						_makefile_print(makefile, " %s",
 								prints);
 					break;
 			}
@@ -2537,13 +2534,13 @@ static int _write_phony_targets(Configure * configure, FILE * fp)
 	return 0;
 }
 
-static int _uninstall_target(Configure * configure, FILE * fp,
+static int _uninstall_target(Makefile * makefile,
 		String const * target);
-static int _uninstall_include(Configure * configure, FILE * fp,
+static int _uninstall_include(Makefile * makefile,
 		String const * include);
-static int _uninstall_dist(Configure * configure, FILE * fp,
+static int _uninstall_dist(Makefile * makefile,
 		String const * dist);
-static int _write_uninstall(Configure * configure, FILE * fp)
+static int _write_uninstall(Makefile * makefile)
 {
 	int ret = 0;
 	String const * p;
@@ -2554,10 +2551,10 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 	size_t i;
 	char c;
 
-	_makefile_target(fp, "uninstall", NULL);
-	if(_makefile_get_config(configure, NULL, "subdirs") != NULL)
-		_makefile_subdirs(fp, "uninstall");
-	if((p = _makefile_get_config(configure, NULL, "targets")) != NULL)
+	_makefile_target(makefile, "uninstall", NULL);
+	if(_makefile_get_config(makefile, NULL, "subdirs") != NULL)
+		_makefile_subdirs(makefile, "uninstall");
+	if((p = _makefile_get_config(makefile, NULL, "targets")) != NULL)
 	{
 		if((targets = string_new(p)) == NULL)
 			return 1;
@@ -2568,7 +2565,7 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 				continue;
 			c = targets[i];
 			targets[i] = '\0';
-			ret = _uninstall_target(configure, fp, targets);
+			ret = _uninstall_target(makefile, targets);
 			if(c == '\0')
 				break;
 			targets += i + 1;
@@ -2576,7 +2573,7 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 		}
 		string_delete(q);
 	}
-	if((p = _makefile_get_config(configure, NULL, "includes")) != NULL)
+	if((p = _makefile_get_config(makefile, NULL, "includes")) != NULL)
 	{
 		if((includes = string_new(p)) == NULL)
 			return 1;
@@ -2587,7 +2584,7 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 				continue;
 			c = includes[i];
 			includes[i] = '\0';
-			ret = _uninstall_include(configure, fp, includes);
+			ret = _uninstall_include(makefile, includes);
 			if(c == '\0')
 				break;
 			includes += i + 1;
@@ -2595,7 +2592,7 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 		}
 		string_delete(q);
 	}
-	if((p = _makefile_get_config(configure, NULL, "dist")) != NULL)
+	if((p = _makefile_get_config(makefile, NULL, "dist")) != NULL)
 	{
 		if((dist = string_new(p)) == NULL)
 			return 1;
@@ -2606,7 +2603,7 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 				continue;
 			c = dist[i];
 			dist[i] = '\0';
-			ret = _uninstall_dist(configure, fp, dist);
+			ret = _uninstall_dist(makefile, dist);
 			if(c == '\0')
 				break;
 			dist += i + 1;
@@ -2617,11 +2614,11 @@ static int _write_uninstall(Configure * configure, FILE * fp)
 	return ret;
 }
 
-static int _uninstall_target_library(Configure * configure, FILE * fp,
+static int _uninstall_target_library(Makefile * makefile,
 		String const * target, String const * path);
-static void _uninstall_target_script(Configure * configure, FILE * fp,
+static void _uninstall_target_script(Makefile * makefile,
 		String const * target, String const * path);
-static int _uninstall_target(Configure * configure, FILE * fp,
+static int _uninstall_target(Makefile * makefile,
 		String const * target)
 {
 	String const * type;
@@ -2629,37 +2626,37 @@ static int _uninstall_target(Configure * configure, FILE * fp,
 	TargetType tt;
 	const String rm_destdir[] = "$(RM) -- $(DESTDIR)";
 
-	if((type = _makefile_get_config(configure, target, "type")) == NULL)
+	if((type = _makefile_get_config(makefile, target, "type")) == NULL)
 		return 1;
-	if((path = _makefile_get_config(configure, target, "install")) == NULL)
+	if((path = _makefile_get_config(makefile, target, "install")) == NULL)
 		return 0;
 	tt = enum_string(TT_LAST, sTargetType, type);
 	switch(tt)
 	{
 		case TT_BINARY:
-			_makefile_print(fp, "\t%s%s/%s%s\n", rm_destdir, path,
-					target, "$(EXEEXT)");
+			_makefile_print(makefile, "\t%s%s/%s%s\n", rm_destdir,
+					path, target, "$(EXEEXT)");
 			break;
 		case TT_LIBRARY:
-			if(_uninstall_target_library(configure, fp, target,
+			if(_uninstall_target_library(makefile, target,
 						path) != 0)
 				return 1;
 			break;
 		case TT_LIBTOOL:
-			_makefile_print(fp, "\t%s%s%s/%s%s", "$(LIBTOOL)"
+			_makefile_print(makefile, "\t%s%s%s/%s%s", "$(LIBTOOL)"
 					" --mode=uninstall ", rm_destdir, path,
 					target, ".la\n");
 			break;
 		case TT_OBJECT:
-			_makefile_print(fp, "\t%s%s/%s\n", rm_destdir, path,
-					target);
+			_makefile_print(makefile, "\t%s%s/%s\n", rm_destdir,
+					path, target);
 			break;
 		case TT_PLUGIN:
-			_makefile_print(fp, "\t%s%s/%s%s\n", rm_destdir, path,
-					target, "$(SOEXT)");
+			_makefile_print(makefile, "\t%s%s/%s%s\n", rm_destdir,
+					path, target, "$(SOEXT)");
 			break;
 		case TT_SCRIPT:
-			_uninstall_target_script(configure, fp, target, path);
+			_uninstall_target_script(makefile, target, path);
 			break;
 		case TT_UNKNOWN:
 			break;
@@ -2667,24 +2664,26 @@ static int _uninstall_target(Configure * configure, FILE * fp,
 	return 0;
 }
 
-static int _uninstall_target_library(Configure * configure, FILE * fp,
+static int _uninstall_target_library(Makefile * makefile,
 		String const * target, String const * path)
 {
 	String * soname;
 	String const * p;
 	const String format[] = "\t%s%s/%s%s%s%s";
 	const String rm_destdir[] = "$(RM) -- $(DESTDIR)";
+	HostOS os;
 
-	if(configure_can_library_static(configure))
+	if(configure_can_library_static(makefile->configure))
 		/* uninstall the static library */
-		_makefile_print(fp, format, rm_destdir, path, target, ".a\n",
-				"", "");
-	if((p = _makefile_get_config(configure, target, "soname")) != NULL)
+		_makefile_print(makefile, format, rm_destdir, path, target,
+				".a\n", "", "");
+	os = configure_get_os(makefile->configure);
+	if((p = _makefile_get_config(makefile, target, "soname")) != NULL)
 		soname = string_new(p);
-	else if(configure_get_os(configure) == HO_MACOSX)
+	else if(os == HO_MACOSX)
 		/* versioning is different on MacOS X */
 		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
-	else if(configure_get_os(configure) == HO_WIN32)
+	else if(os == HO_WIN32)
 		/* and on Windows */
 		soname = string_new_append(target, "$(SOEXT)", NULL);
 	else
@@ -2692,59 +2691,59 @@ static int _uninstall_target_library(Configure * configure, FILE * fp,
 	if(soname == NULL)
 		return 1;
 	/* uninstall the shared library */
-	if(configure_get_os(configure) == HO_MACOSX)
+	if(os == HO_MACOSX)
 	{
-		_makefile_print(fp, format, rm_destdir, path, soname, "\n", "",
-				"");
-		_makefile_print(fp, format, rm_destdir, path, target, ".0",
-				"$(SOEXT)", "\n");
+		_makefile_print(makefile, format, rm_destdir, path, soname,
+				"\n", "", "");
+		_makefile_print(makefile, format, rm_destdir, path, target,
+				".0", "$(SOEXT)", "\n");
 	}
-	else if(configure_get_os(configure) != HO_WIN32)
+	else if(os != HO_WIN32)
 	{
-		_makefile_print(fp, format, rm_destdir, path, soname, ".0\n",
-				"", "");
-		_makefile_print(fp, format, rm_destdir, path, soname, "\n", "",
-				"");
+		_makefile_print(makefile, format, rm_destdir, path, soname,
+				".0\n", "", "");
+		_makefile_print(makefile, format, rm_destdir, path, soname,
+				"\n", "", "");
 	}
-	_makefile_print(fp, format, rm_destdir, path, target, "$(SOEXT)", "\n",
-			"");
+	_makefile_print(makefile, format, rm_destdir, path, target, "$(SOEXT)",
+			"\n", "");
 	string_delete(soname);
 	return 0;
 }
 
-static void _uninstall_target_script(Configure * configure, FILE * fp,
+static void _uninstall_target_script(Makefile * makefile,
 		String const * target, String const * path)
 {
 	String const * script;
 
-	if((script = _makefile_get_config(configure, target, "script")) == NULL)
+	if((script = _makefile_get_config(makefile, target, "script")) == NULL)
 		return;
-	_makefile_print(fp, "\t%s%s%s%s%s%s", script, " -P \"$(DESTDIR)",
+	_makefile_print(makefile, "\t%s%s%s%s%s%s", script, " -P \"$(DESTDIR)",
 			(path[0] != '\0') ? path : "$(PREFIX)", "\" -u -- \"",
 			target, "\"\n");
 }
 
-static int _uninstall_include(Configure * configure, FILE * fp,
+static int _uninstall_include(Makefile * makefile,
 		String const * include)
 {
 	String const * install;
 
-	if((install = _makefile_get_config(configure, include, "install"))
+	if((install = _makefile_get_config(makefile, include, "install"))
 			== NULL)
 		install = "$(INCLUDEDIR)";
-	_makefile_print(fp, "%s%s/%s\n", "\t$(RM) -- $(DESTDIR)", install,
+	_makefile_print(makefile, "%s%s/%s\n", "\t$(RM) -- $(DESTDIR)", install,
 			include);
 	return 0;
 }
 
-static int _uninstall_dist(Configure * configure, FILE * fp,
+static int _uninstall_dist(Makefile * makefile,
 		String const * dist)
 {
 	String const * install;
 
-	if((install = _makefile_get_config(configure, dist, "install")) == NULL)
+	if((install = _makefile_get_config(makefile, dist, "install")) == NULL)
 		return 0;
-	_makefile_print(fp, "%s%s/%s\n", "\t$(RM) -- $(DESTDIR)", install,
+	_makefile_print(makefile, "%s%s/%s\n", "\t$(RM) -- $(DESTDIR)", install,
 			dist);
 	return 0;
 }
@@ -2752,27 +2751,27 @@ static int _uninstall_dist(Configure * configure, FILE * fp,
 
 /* accessors */
 /* makefile_get_config */
-static String const * _makefile_get_config(Configure * configure,
+static String const * _makefile_get_config(Makefile * makefile,
 		String const * section, String const * variable)
 {
-	return configure_get_config(configure, section, variable);
+	return configure_get_config(makefile->configure, section, variable);
 }
 
 
 /* makefile_is_flag_set */
-static unsigned int _makefile_is_flag_set(Configure * configure,
+static unsigned int _makefile_is_flag_set(Makefile * makefile,
 		unsigned int flag)
 {
-	return configure_is_flag_set(configure, flag);
+	return configure_is_flag_set(makefile->configure, flag);
 }
 
 
 /* makefile_is_phony */
-static int _makefile_is_phony(Configure * configure, char const * target)
+static int _makefile_is_phony(Makefile * makefile, char const * target)
 {
 	String const * p;
 
-	if((p = _makefile_get_config(configure, target, "phony")) != NULL
+	if((p = _makefile_get_config(makefile, target, "phony")) != NULL
 			&& strtol(p, NULL, 10) == 1)
 		return 1;
 	return 0;
@@ -2781,7 +2780,7 @@ static int _makefile_is_phony(Configure * configure, char const * target)
 
 /* useful */
 /* makefile_expand */
-static int _makefile_expand(FILE * fp, char const * field)
+static int _makefile_expand(Makefile * makefile, char const * field)
 {
 	String * q;
 	int res;
@@ -2792,24 +2791,24 @@ static int _makefile_expand(FILE * fp, char const * field)
 		string_delete(q);
 		return -1;
 	}
-	res = _makefile_print(fp, " %s", q);
+	res = _makefile_print(makefile, " %s", q);
 	string_delete(q);
 	return (res >= 0) ? 0 : -1;
 }
 
 
 /* makefile_link */
-static int _makefile_link(FILE * fp, int symlink, char const * link,
+static int _makefile_link(Makefile * makefile, int symlink, char const * link,
 		char const * path)
 {
-	_makefile_print(fp, "\t$(LN)%s -- %s %s\n", symlink ? " -s" : "", link,
-			path);
+	_makefile_print(makefile, "\t$(LN)%s -- %s %s\n", symlink ? " -s" : "",
+			link, path);
 	return 0;
 }
 
 
 /* makefile_output_extension */
-static int _makefile_output_extension(Configure * configure, FILE * fp,
+static int _makefile_output_extension(Makefile * makefile,
 		String const * extension)
 {
 	int ret;
@@ -2819,16 +2818,15 @@ static int _makefile_output_extension(Configure * configure, FILE * fp,
 	if((upper = string_new_append(extension, "EXT", NULL)) == NULL)
 		return -1;
 	string_toupper(upper);
-	value = configure_get_extension(configure, extension);
-	ret = _makefile_output_variable(fp, upper, value);
+	value = configure_get_extension(makefile->configure, extension);
+	ret = _makefile_output_variable(makefile, upper, value);
 	string_delete(upper);
 	return ret;
 }
 
 
 /* makefile_output_program */
-static int _makefile_output_program(Configure * configure, FILE * fp,
-		String const * name)
+static int _makefile_output_program(Makefile * makefile, String const * name)
 {
 	int ret;
 	String const * value;
@@ -2837,22 +2835,22 @@ static int _makefile_output_program(Configure * configure, FILE * fp,
 	if((upper = string_new(name)) == NULL)
 		return -1;
 	string_toupper(upper);
-	value = configure_get_program(configure, name);
-	ret = _makefile_output_variable(fp, upper, value);
+	value = configure_get_program(makefile->configure, name);
+	ret = _makefile_output_variable(makefile, upper, value);
 	string_delete(upper);
 	return ret;
 }
 
 
 /* makefile_output_variable */
-static int _makefile_output_variable(FILE * fp, String const * name,
+static int _makefile_output_variable(Makefile * makefile, String const * name,
 		String const * value)
 {
 	int res;
 	char const * align;
 	char const * equals;
 
-	if(fp == NULL)
+	if(makefile->fp == NULL)
 		return 0;
 	if(name == NULL)
 		return -1;
@@ -2860,68 +2858,69 @@ static int _makefile_output_variable(FILE * fp, String const * name,
 		value = "";
 	align = (strlen(name) >= 8) ? "" : "\t";
 	equals = (strlen(value) > 0) ? "= " : "=";
-	res = _makefile_print(fp, "%s%s%s%s\n", name, align, equals, value);
+	res = _makefile_print(makefile, "%s%s%s%s\n", name, align, equals,
+			value);
 	return (res >= 0) ? 0 : -1;
 }
 
 
 /* makefile_mkdir */
-static int _makefile_mkdir(FILE * fp, char const * directory)
+static int _makefile_mkdir(Makefile * makefile, char const * directory)
 {
 	/* FIXME keep track of the directories created */
-	return _makefile_print(fp, "%s%s\n", "\t$(MKDIR) $(DESTDIR)",
+	return _makefile_print(makefile, "%s%s\n", "\t$(MKDIR) $(DESTDIR)",
 			directory);
 }
 
 
 /* makefile_print */
-static int _makefile_print(FILE * fp, char const * format, ...)
+static int _makefile_print(Makefile * makefile, char const * format, ...)
 {
 	int ret;
 	va_list ap;
 
 	va_start(ap, format);
-	if(fp == NULL)
+	if(makefile->fp == NULL)
 		ret = vsnprintf(NULL, 0, format, ap);
 	else
-		ret = vfprintf(fp, format, ap);
+		ret = vfprintf(makefile->fp, format, ap);
 	va_end(ap);
 	return ret;
 }
 
 
 /* makefile_remove */
-static int _makefile_remove(FILE * fp, int recursive, ...)
+static int _makefile_remove(Makefile * makefile, int recursive, ...)
 {
 	va_list ap;
 	char const * sep = " -- ";
 	char const * p;
 
-	_makefile_print(fp, "\t$(RM)%s", recursive ? " -r" : "");
+	_makefile_print(makefile, "\t$(RM)%s", recursive ? " -r" : "");
 	va_start(ap, recursive);
 	while((p = va_arg(ap, char const * )) != NULL)
 	{
-		_makefile_print(fp, "%s%s", sep, p);
+		_makefile_print(makefile, "%s%s", sep, p);
 		sep = " ";
 	}
 	va_end(ap);
-	_makefile_print(fp, "%c", '\n');
+	_makefile_print(makefile, "%c", '\n');
 	return 0;
 }
 
 
 /* makefile_subdirs */
-static int _makefile_subdirs(FILE * fp, char const * target)
+static int _makefile_subdirs(Makefile * makefile, char const * target)
 {
 	if(target != NULL)
-		_makefile_print(fp,
+		_makefile_print(makefile,
 				"\t@for i in $(SUBDIRS); do (cd \"$$i\" && \\\n"
 				"\t\tif [ -n \"$(OBJDIR)\" ]; then \\\n"
 				"\t\t$(MAKE) OBJDIR=\"$(OBJDIR)$$i/\" %s; \\\n"
 				"\t\telse $(MAKE) %s; fi) || exit; done\n",
 				target, target);
 	else
-		_makefile_print(fp, "%s",
+		_makefile_print(makefile, "%s",
 				"\t@for i in $(SUBDIRS); do (cd \"$$i\" && \\\n"
 				"\t\tif [ -n \"$(OBJDIR)\" ]; then \\\n"
 				"\t\t([ -d \"$(OBJDIR)$$i\" ]"
@@ -2933,7 +2932,7 @@ static int _makefile_subdirs(FILE * fp, char const * target)
 
 
 /* makefile_target */
-static int _makefile_target(FILE * fp, char const * target, ...)
+static int _makefile_target(Makefile * makefile, char const * target, ...)
 {
 	va_list ap;
 	char const * sep = " ";
@@ -2941,12 +2940,12 @@ static int _makefile_target(FILE * fp, char const * target, ...)
 
 	if(target == NULL)
 		return -1;
-	_makefile_print(fp, "\n%s:", target);
+	_makefile_print(makefile, "\n%s:", target);
 	va_start(ap, target);
 	while((p = va_arg(ap, char const *)) != NULL)
-		_makefile_print(fp, "%s%s", sep, p);
+		_makefile_print(makefile, "%s%s", sep, p);
 	va_end(ap);
-	_makefile_print(fp, "%c", '\n');
+	_makefile_print(makefile, "%c", '\n');
 	return 0;
 }
 
@@ -2960,11 +2959,11 @@ static int _makefile_targetv(FILE * fp, char const * target,
 
 	if(target == NULL)
 		return -1;
-	_makefile_print(fp, "\n%s:", target);
+	_makefile_print(makefile, "\n%s:", target);
 	if(depends != NULL)
 		for(p = depends; *p != NULL; p++)
-			_makefile_print(fp, " %s", *p);
-	_makefile_print(fp, "%c", '\n');
+			_makefile_print(makefile, " %s", *p);
+	_makefile_print(makefile, "%c", '\n');
 	return 0;
 }
 #endif
