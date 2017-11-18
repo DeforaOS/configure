@@ -72,7 +72,8 @@ static int _makefile_link(Makefile * makefile, int symlink, char const * link,
 static int _makefile_output_extension(Makefile * makefile,
 		String const * extension);
 static int _makefile_output_path(Makefile * makefile, String const * path);
-static int _makefile_output_program(Makefile * makefile, String const * name);
+static int _makefile_output_program(Makefile * makefile, String const * name,
+		unsigned int override);
 static int _makefile_output_variable(Makefile * makefile, String const * name,
 		String const * value);
 static int _makefile_mkdir(Makefile * makefile, char const * directory);
@@ -285,9 +286,9 @@ static int _variables_dist(Makefile * makefile)
 				_makefile_output_path(makefile, "prefix");
 				_makefile_output_path(makefile, "destdir");
 			}
-			_makefile_output_program(makefile, "mkdir");
-			_makefile_output_program(makefile, "install");
-			_makefile_output_program(makefile, "rm");
+			_makefile_output_program(makefile, "mkdir", 0);
+			_makefile_output_program(makefile, "install", 0);
+			_makefile_output_program(makefile, "rm", 0);
 			break;
 		}
 		if(c == '\0')
@@ -449,20 +450,20 @@ static int _variables_executables(Makefile * makefile)
 	}
 	if(targets != NULL || includes != NULL || package != NULL)
 	{
-		_makefile_output_program(makefile, "rm");
-		_makefile_output_program(makefile, "ln");
+		_makefile_output_program(makefile, "rm", 0);
+		_makefile_output_program(makefile, "ln", 0);
 	}
 	if(package != NULL)
 	{
-		_makefile_output_program(makefile, "tar");
+		_makefile_output_program(makefile, "tar", 0);
 		_makefile_output_extension(makefile, "tgz");
-		_makefile_output_program(makefile, "mkdir");
+		_makefile_output_program(makefile, "mkdir", 0);
 	}
 	if(targets != NULL || includes != NULL)
 	{
 		if(package == NULL)
-			_makefile_output_program(makefile, "mkdir");
-		_makefile_output_program(makefile, "install");
+			_makefile_output_program(makefile, "mkdir", 0);
+		_makefile_output_program(makefile, "install", 0);
 	}
 	return 0;
 }
@@ -578,10 +579,7 @@ static void _targets_cflags(Makefile * makefile)
 	if(cppf == NULL && cpp == NULL && cff == NULL && cf == NULL
 			&& cc == NULL)
 		return;
-	if(cc == NULL)
-		_makefile_output_program(makefile, "cc");
-	else
-		_makefile_output_variable(makefile, "CC", cc);
+	_makefile_output_program(makefile, "cc", 1);
 	_makefile_output_variable(makefile, "CPPFLAGSF", cppf);
 	_makefile_output_variable(makefile, "CPPFLAGS", cpp);
 	p = NULL;
@@ -607,11 +605,7 @@ static void _targets_cxxflags(Makefile * makefile)
 	cxxff = _makefile_get_config(makefile, NULL, "cxxflags_force");
 	cxxf = _makefile_get_config(makefile, NULL, "cxxflags");
 	if(cxx != NULL || cxxff != NULL || cxxf != NULL)
-	{
-		if(cxx == NULL)
-			cxx = configure_get_program(makefile->configure, "cxx");
-		_makefile_output_variable(makefile, "CXX", cxx);
-	}
+		_makefile_output_program(makefile, "cxx", 1);
 	if(cxxff != NULL)
 	{
 		_makefile_print(makefile, "%s%s", "CXXFLAGSF= ", cxxff);
@@ -655,20 +649,19 @@ static void _targets_ldflags(Makefile * makefile)
 
 static void _targets_vflags(Makefile * makefile)
 {
-	String const * p;
+	String const * v;
+	String const * vff;
+	String const * vf;
 
-	if((p = _makefile_get_config(makefile, NULL, "verilog")) != NULL)
-		_makefile_output_variable(makefile, "VERILOG", p);
-	if((p = _makefile_get_config(makefile, NULL, "vflags_force")) != NULL)
-	{
-		_makefile_print(makefile, "%s", "VFLAGSF=");
-		_makefile_print(makefile, "%c", '\n');
-	}
-	if((p = _makefile_get_config(makefile, NULL, "vflags")) != NULL)
-	{
-		_makefile_print(makefile, "%s", "VFLAGS\t=");
-		_makefile_print(makefile, "%c", '\n');
-	}
+	v = _makefile_get_config(makefile, NULL, "verilog");
+	vff = _makefile_get_config(makefile, NULL, "vflags_force");
+	vf = _makefile_get_config(makefile, NULL, "vflags");
+	if(v != NULL || vff != NULL || vf != NULL)
+		_makefile_output_program(makefile, "verilog", 1);
+	if(vff != NULL)
+		_makefile_output_variable(makefile, "VFLAGSF", vff);
+	if(vf != NULL)
+		_makefile_output_variable(makefile, "VFLAGS", vf);
 }
 
 static void _binary_ldflags(Makefile * makefile, String const * ldflags)
@@ -763,7 +756,7 @@ static void _variables_library(Makefile * makefile, char * done)
 	if(configure_can_library_static(makefile->configure))
 		_variables_library_static(makefile);
 	if((p = _makefile_get_config(makefile, NULL, "ld")) == NULL)
-		_makefile_output_program(makefile, "ccshared");
+		_makefile_output_program(makefile, "ccshared", 0);
 	else
 		_makefile_output_variable(makefile, "CCSHARED", p);
 	_makefile_output_extension(makefile, "so");
@@ -774,29 +767,21 @@ static void _variables_library_static(Makefile * makefile)
 	String const * p;
 
 	if((p = _makefile_get_config(makefile, NULL, "ar")) == NULL)
-		_makefile_output_program(makefile, "ar");
+		_makefile_output_program(makefile, "ar", 0);
 	else
 		_makefile_output_variable(makefile, "AR", p);
 	_makefile_output_variable(makefile, "ARFLAGS", "-rc");
 	if((p = _makefile_get_config(makefile, NULL, "ranlib")) == NULL)
-		_makefile_output_program(makefile, "ranlib");
+		_makefile_output_program(makefile, "ranlib", 0);
 	else
 		_makefile_output_variable(makefile, "RANLIB", p);
 }
 
 static void _variables_libtool(Makefile * makefile, char * done)
 {
-	String const * p;
-
 	_variables_library(makefile, done);
 	if(!done[TT_LIBTOOL])
-	{
-		if((p = _makefile_get_config(makefile, NULL, "libtool"))
-				== NULL)
-			_makefile_output_program(makefile, "libtool");
-		else
-			_makefile_output_variable(makefile, "LIBTOOL", p);
-	}
+		_makefile_output_program(makefile, "libtool", 1);
 }
 
 static void _variables_script(Makefile * makefile, char * done)
@@ -849,7 +834,7 @@ static int _variables_subdirs(Makefile * makefile)
 		if(q != NULL)
 			return 0;
 	}
-	return _makefile_output_program(makefile, "mkdir");
+	return _makefile_output_program(makefile, "mkdir", 0);
 }
 
 static int _targets_all(Makefile * makefile);
@@ -2810,7 +2795,8 @@ static int _makefile_output_path(Makefile * makefile, String const * path)
 
 
 /* makefile_output_program */
-static int _makefile_output_program(Makefile * makefile, String const * name)
+static int _makefile_output_program(Makefile * makefile, String const * name,
+		unsigned int override)
 {
 	int ret;
 	String const * value;
@@ -2819,7 +2805,12 @@ static int _makefile_output_program(Makefile * makefile, String const * name)
 	if((upper = string_new(name)) == NULL)
 		return -1;
 	string_toupper(upper);
-	value = configure_get_program(makefile->configure, name);
+	if(override)
+		value = _makefile_get_config(makefile, NULL, name);
+	else
+		value = NULL;
+	if(value == NULL)
+		value = configure_get_program(makefile->configure, name);
 	ret = _makefile_output_variable(makefile, upper, value);
 	string_delete(upper);
 	return ret;
