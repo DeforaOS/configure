@@ -138,20 +138,14 @@ static int _settings_do(Configure * configure, String const * directory,
 static int _do_h(Configure * configure, FILE * fp,
 		String const * package, String const * version)
 {
-	ConfigurePrefs const * prefs;
 	char const * p;
 
-	prefs = configure_get_prefs(configure);
 	fprintf(fp, "%s%s%s%s%s%s", "#define PACKAGE \"", package, "\"\n",
 			"#define VERSION \"", version, "\"\n");
-	if((p = prefs->prefix) != NULL
-			|| (p = configure_get_config(configure, "",
-					"prefix")) != NULL)
+	if((p = configure_get_path(configure, "prefix")) != NULL)
 		fprintf(fp, "%s%s%s", "\n#ifndef PREFIX\n\
 # define PREFIX \"", p, "\"\n#endif\n");
-	if((p = prefs->libdir) != NULL
-			|| (p = configure_get_config(configure, "",
-					"libdir")) != NULL)
+	if((p = configure_get_path(configure, "libdir")) != NULL)
 	{
 		fprintf(fp, "%s", "\n#ifndef LIBDIR\n# define LIBDIR ");
 		fprintf(fp, "%s%s", p[0] == '/' ? "\"" : "PREFIX \"/", p);
@@ -163,19 +157,13 @@ static int _do_h(Configure * configure, FILE * fp,
 static int _do_sh(Configure * configure, FILE * fp,
 		String const * package, String const * version)
 {
-	ConfigurePrefs const * prefs;
 	char const * p;
 
-	prefs = configure_get_prefs(configure);
 	fprintf(fp, "%s%s%s%s%s%s", "PACKAGE=\"", package, "\"\n",
 			"VERSION=\"", version, "\"\n");
-	if((p = prefs->prefix) != NULL
-			|| (p = configure_get_config(configure, "",
-					"prefix")) != NULL)
+	if((p = configure_get_path(configure, "prefix")) != NULL)
 		fprintf(fp, "%s%s%s", "\nPREFIX=\"", p, "\"\n");
-	if((p = prefs->libdir) != NULL
-			|| (p = configure_get_config(configure, "",
-					"libdir")) != NULL)
+	if((p = configure_get_path(configure, "libdir")) != NULL)
 		fprintf(fp, "%s%s%s%s", "LIBDIR=\"", p[0] == '/' ? ""
 				: "${PREFIX}/", p, "\"\n");
 	return 0;

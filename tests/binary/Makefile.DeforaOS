@@ -1,9 +1,9 @@
 TARGETS	= $(OBJDIR)test$(EXEEXT) $(OBJDIR)test2$(EXEEXT) $(OBJDIR)test3$(EXEEXT)
 OBJDIR	=
-PREFIX	= /usr/local
+PREFIX	= /Apps/$(VENDOR)
 DESTDIR	=
-BINDIR	= $(PREFIX)/bin
-SBINDIR	= $(PREFIX)/sbin
+BINDIR	= $(PREFIX)/Binaries
+SBINDIR	= $(PREFIX)/Binaries
 EXEEXT	=
 RM	= rm -f
 LN	= ln -f

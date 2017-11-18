@@ -137,23 +137,18 @@ extern const struct ExtensionType * sExtensionType;
 typedef struct _ConfigurePrefs
 {
 	unsigned int flags;
-	char * basedir;
-	char * bindir;
-	char * destdir;
-	char * includedir;
-	char * libdir;
-	char * prefix;
 	char * os;
-	char * sbindir;
 } ConfigurePrefs;
 # define PREFS_n	0x1
 # define PREFS_S	0x2
 # define PREFS_v	0x4
+
 typedef struct _Configure Configure;
 
 
 /* functions */
-int configure(ConfigurePrefs * prefs, String const * directory);
+Configure * configure_new(ConfigurePrefs * prefs);
+void configure_delete(Configure * configure);
 
 /* accessors */
 int configure_can_library_static(Configure * configure);
@@ -162,6 +157,7 @@ String const * configure_get_config(Configure * configure,
 		String const * section, String const * variable);
 String const * configure_get_extension(Configure * configure,
 		String const * extension);
+String const * configure_get_path(Configure * configure, String const * path);
 HostOS configure_get_os(Configure * configure);
 ConfigurePrefs const * configure_get_prefs(Configure * configure);
 String const * configure_get_program(Configure * configure,
@@ -169,9 +165,14 @@ String const * configure_get_program(Configure * configure,
 
 unsigned int configure_is_flag_set(Configure * configure, unsigned int flags);
 
+int configure_set_path(Configure * configure, String const * path,
+		String const * value);
+
 /* useful */
 int configure_error(int ret, char const * format, ...);
 int configure_warning(int ret, char const * format, ...);
+
+int configure_project(Configure * configure, String const * directory);
 
 /* generic */
 unsigned int enum_map_find(unsigned int last, EnumMap const * map,

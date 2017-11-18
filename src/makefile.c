@@ -70,6 +70,7 @@ static int _makefile_link(Makefile * makefile, int symlink, char const * link,
 		char const * path);
 static int _makefile_output_extension(Makefile * makefile,
 		String const * extension);
+static int _makefile_output_path(Makefile * makefile, String const * path);
 static int _makefile_output_program(Makefile * makefile, String const * name);
 static int _makefile_output_variable(Makefile * makefile, String const * name,
 		String const * value);
@@ -256,7 +257,6 @@ static int _variables_print(Makefile * makefile,
 
 static int _variables_dist(Makefile * makefile)
 {
-	ConfigurePrefs const * prefs;
 	String const * p;
 	String * dist;
 	String * q;
@@ -267,7 +267,6 @@ static int _variables_dist(Makefile * makefile)
 		return 0;
 	if((dist = string_new(p)) == NULL)
 		return 1;
-	prefs = configure_get_prefs(makefile->configure);
 	q = dist;
 	for(i = 0;; i++)
 	{
@@ -281,12 +280,9 @@ static int _variables_dist(Makefile * makefile)
 			if(_makefile_get_config(makefile, NULL, "targets")
 					== NULL)
 			{
-				_makefile_output_variable(makefile, "OBJDIR",
-						"");
-				_makefile_output_variable(makefile, "PREFIX",
-						prefs->prefix);
-				_makefile_output_variable(makefile, "DESTDIR",
-						prefs->destdir);
+				_makefile_output_path(makefile, "objdir");
+				_makefile_output_path(makefile, "prefix");
+				_makefile_output_path(makefile, "destdir");
 			}
 			_makefile_output_program(makefile, "mkdir");
 			_makefile_output_program(makefile, "install");
@@ -412,7 +408,6 @@ static void _executables_variables(Makefile * makefile,
 	       	String const * target, char * done);
 static int _variables_executables(Makefile * makefile)
 {
-	ConfigurePrefs const * prefs;
 	char done[TT_LAST]; /* FIXME even better if'd be variable by variable */
 	String const * targets;
 	String const * includes;
@@ -422,7 +417,6 @@ static int _variables_executables(Makefile * makefile)
 	size_t i;
 	char c;
 
-	prefs = configure_get_prefs(makefile->configure);
 	memset(&done, 0, sizeof(done));
 	targets = _makefile_get_config(makefile, NULL, "targets");
 	includes = _makefile_get_config(makefile, NULL, "includes");
@@ -448,9 +442,9 @@ static int _variables_executables(Makefile * makefile)
 	}
 	else if(includes != NULL)
 	{
-		_makefile_output_variable(makefile, "OBJDIR", "");
-		_makefile_output_variable(makefile, "PREFIX", prefs->prefix);
-		_makefile_output_variable(makefile, "DESTDIR", prefs->destdir);
+		_makefile_output_path(makefile, "objdir");
+		_makefile_output_path(makefile, "prefix");
+		_makefile_output_path(makefile, "destdir");
 	}
 	if(targets != NULL || includes != NULL || package != NULL)
 	{
@@ -527,36 +521,14 @@ static void _targets_vflags(Makefile * makefile);
 static void _binary_ldflags(Makefile * makefile, String const * ldflags);
 static void _variables_binary(Makefile * makefile, char * done)
 {
-	ConfigurePrefs const * prefs;
-	String * p;
-
-	prefs = configure_get_prefs(makefile->configure);
 	if(!done[TT_LIBRARY] && !done[TT_SCRIPT])
 	{
-		_makefile_output_variable(makefile, "OBJDIR", "");
-		_makefile_output_variable(makefile, "PREFIX", prefs->prefix);
-		_makefile_output_variable(makefile, "DESTDIR", prefs->destdir);
+		_makefile_output_path(makefile, "objdir");
+		_makefile_output_path(makefile, "prefix");
+		_makefile_output_path(makefile, "destdir");
 	}
-	/* BINDIR */
-	if(prefs->bindir[0] == '/')
-		_makefile_output_variable(makefile, "BINDIR",
-				prefs->bindir);
-	else if((p = string_new_append("$(PREFIX)/", prefs->bindir,
-					NULL)) != NULL)
-	{
-		_makefile_output_variable(makefile, "BINDIR", p);
-		string_delete(p);
-	}
-	/* SBINDIR */
-	if(prefs->sbindir[0] == '/')
-		_makefile_output_variable(makefile, "SBINDIR",
-				prefs->sbindir);
-	else if((p = string_new_append("$(PREFIX)/", prefs->sbindir,
-					NULL)) != NULL)
-	{
-		_makefile_output_variable(makefile, "SBINDIR", p);
-		string_delete(p);
-	}
+	_makefile_output_path(makefile, "bindir");
+	_makefile_output_path(makefile, "sbindir");
 	if(!done[TT_LIBRARY])
 	{
 		_targets_asflags(makefile);
@@ -769,23 +741,15 @@ static void _binary_ldflags(Makefile * makefile, String const * ldflags)
 
 static void _variables_library(Makefile * makefile, char * done)
 {
-	ConfigurePrefs const * prefs;
-	String const * libdir;
 	String const * p;
 
-	prefs = configure_get_prefs(makefile->configure);
 	if(!done[TT_LIBRARY] && !done[TT_SCRIPT])
 	{
-		_makefile_output_variable(makefile, "OBJDIR", "");
-		_makefile_output_variable(makefile, "PREFIX", prefs->prefix);
-		_makefile_output_variable(makefile, "DESTDIR", prefs->destdir);
+		_makefile_output_path(makefile, "objdir");
+		_makefile_output_path(makefile, "prefix");
+		_makefile_output_path(makefile, "destdir");
 	}
-	if((libdir = _makefile_get_config(makefile, NULL, "libdir")) == NULL)
-		libdir = prefs->libdir;
-	if(libdir[0] == '/')
-		_makefile_output_variable(makefile, "LIBDIR", libdir);
-	else
-		_makefile_print(makefile, "%s%s\n", "LIBDIR\t= $(PREFIX)/", libdir);
+	_makefile_output_path(makefile, "libdir");
 	if(!done[TT_BINARY])
 	{
 		_targets_asflags(makefile);
@@ -836,20 +800,16 @@ static void _variables_libtool(Makefile * makefile, char * done)
 
 static void _variables_script(Makefile * makefile, char * done)
 {
-	ConfigurePrefs const * prefs;
-
 	if(!done[TT_BINARY] && !done[TT_LIBRARY] && !done[TT_SCRIPT])
 	{
-		prefs = configure_get_prefs(makefile->configure);
-		_makefile_output_variable(makefile, "OBJDIR", "");
-		_makefile_output_variable(makefile, "PREFIX", prefs->prefix);
-		_makefile_output_variable(makefile, "DESTDIR", prefs->destdir);
+		_makefile_output_path(makefile, "objdir");
+		_makefile_output_path(makefile, "prefix");
+		_makefile_output_path(makefile, "destdir");
 	}
 }
 
 static int _variables_includes(Makefile * makefile)
 {
-	ConfigurePrefs const * prefs;
 	String const * includes;
 
 	if((includes = _makefile_get_config(makefile, NULL, "includes"))
@@ -857,12 +817,7 @@ static int _variables_includes(Makefile * makefile)
 		return 0;
 	if(makefile->fp == NULL)
 		return 0;
-	prefs = configure_get_prefs(makefile->configure);
-	if(prefs->includedir[0] == '/')
-		_makefile_output_variable(makefile, "INCLUDEDIR", prefs->includedir);
-	else
-		_makefile_print(makefile, "%s%s\n", "INCLUDEDIR= $(PREFIX)/",
-				prefs->includedir);
+	_makefile_output_path(makefile, "includedir");
 	return 0;
 }
 
@@ -2818,6 +2773,36 @@ static int _makefile_output_extension(Makefile * makefile,
 	string_toupper(upper);
 	value = configure_get_extension(makefile->configure, extension);
 	ret = _makefile_output_variable(makefile, upper, value);
+	string_delete(upper);
+	return ret;
+}
+
+
+/* makefile_output_path */
+static int _makefile_output_path(Makefile * makefile, String const * path)
+{
+	int ret;
+	String const * value;
+	String * upper;
+	String * p;
+
+	if((upper = string_new(path)) == NULL)
+		return -1;
+	string_toupper(upper);
+	value = configure_get_path(makefile->configure, path);
+	if(value != NULL && value[0] != '\0')
+	{
+		if(value[0] != '/')
+		{
+			p = string_new_append("$(PREFIX)/", value, NULL);
+			ret = _makefile_output_variable(makefile, upper, p);
+			string_delete(p);
+		}
+		else
+			ret = _makefile_output_variable(makefile, upper, value);
+	}
+	else
+		ret = _makefile_output_variable(makefile, upper, value);
 	string_delete(upper);
 	return ret;
 }

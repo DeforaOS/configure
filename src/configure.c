@@ -58,7 +58,7 @@
 /* private */
 /* types */
 struct _Configure {
-	ConfigurePrefs * prefs;
+	ConfigurePrefs prefs;
 	Config * project;
 	HostArch arch;
 	HostOS os;
@@ -144,34 +144,6 @@ ObjectType _source_type(String const * source);
 
 
 /* functions */
-/* configure_error */
-int configure_error(int ret, char const * format, ...)
-{
-	va_list ap;
-
-	fputs(PROGNAME ": ", stderr);
-	va_start(ap, format);
-	vfprintf(stderr, format, ap);
-	fputc('\n', stderr);
-	va_end(ap);
-	return ret;
-}
-
-
-/* configure_warning */
-int configure_warning(int ret, char const * format, ...)
-{
-	va_list ap;
-
-	fputs(PROGNAME ": warning: ", stderr);
-	va_start(ap, format);
-	vfprintf(stderr, format, ap);
-	fputc('\n', stderr);
-	va_end(ap);
-	return ret;
-}
-
-
 /* enum_map_find */
 unsigned int enum_map_find(unsigned int last, EnumMap const * map,
 		String const * str)
@@ -212,59 +184,32 @@ unsigned int enum_string_short(unsigned int last, const String * strings[],
 }
 
 
-/* configure */
-static void _configure_detect(Configure * configure);
-static HostKernel _detect_kernel(HostOS os, char const * release);
-static int _configure_load_config(Configure * configure);
-static int _configure_load_project(ConfigurePrefs * prefs,
-		char const * directory, configArray * ca);
-static int _load_subdirs(ConfigurePrefs * prefs, char const * directory,
-		configArray * ca, String const * subdirs);
-static int _load_subdirs_subdir(ConfigurePrefs * prefs, char const * directory,
-		configArray * ca, char const * subdir);
-static int _configure_do(Configure * configure, configArray * ca);
+/* configure_new */
+static void _new_detect(Configure * configure);
+static HostKernel _new_detect_kernel(HostOS os, char const * release);
+static int _new_load_config(Configure * configure);
 
-int configure(ConfigurePrefs * prefs, String const * directory)
+Configure * configure_new(ConfigurePrefs * prefs)
 {
-	int ret;
-	Configure configure;
-	configArray * ca;
-	const unsigned int flags = prefs->flags;
-	int i;
-	Config * p;
+	Configure * configure;
 
-	if((ca = configarray_new()) == NULL)
-		return error_print(PROGNAME);
-	configure.prefs = prefs;
-	_configure_detect(&configure);
-	if((ret = _configure_load_config(&configure)) != 0
-			|| (ret = _configure_load_project(prefs, directory,
-					ca)) == 0)
+	if((configure = object_new(sizeof(*configure))) == NULL)
+		return NULL;
+	if(prefs != NULL)
+		/* FIXME copy strings */
+		configure->prefs = *prefs;
+	else
+		memset(&configure->prefs, 0, sizeof(configure->prefs));
+	_new_detect(configure);
+	if(_new_load_config(configure) != 0)
 	{
-		if(prefs->flags & PREFS_n)
-			ret = _configure_do(&configure, ca);
-		else
-		{
-			prefs->flags = PREFS_n;
-			if((ret = _configure_do(&configure, ca)) == 0)
-			{
-				prefs->flags = flags;
-				ret = _configure_do(&configure, ca);
-			}
-		}
+		configure_delete(configure);
+		return NULL;
 	}
-	for(i = array_count(ca); i > 0; i--)
-	{
-		array_get_copy(ca, i - 1, &p);
-		config_delete(p);
-	}
-	array_delete(ca);
-	if(configure.config != NULL)
-		config_delete(configure.config);
-	return ret;
+	return configure;
 }
 
-static void _configure_detect(Configure * configure)
+static void _new_detect(Configure * configure)
 {
 	char const * os;
 	char const * version;
@@ -286,11 +231,11 @@ static void _configure_detect(Configure * configure)
 	}
 	configure->arch = enum_map_find(HA_LAST, mHostArch, un.machine);
 	configure->os = enum_string(HO_LAST, sHostOS,
-			(configure->prefs->os != NULL)
-			? configure->prefs->os : un.sysname);
-	configure->kernel = _detect_kernel(configure->os, un.release);
+			(configure->prefs.os != NULL)
+			? configure->prefs.os : un.sysname);
+	configure->kernel = _new_detect_kernel(configure->os, un.release);
 #endif
-	if(configure->prefs->flags & PREFS_v)
+	if(configure->prefs.flags & PREFS_v)
 	{
 		os = (mHostKernel[configure->kernel].os_display != NULL)
 			? mHostKernel[configure->kernel].os_display
@@ -304,7 +249,7 @@ static void _configure_detect(Configure * configure)
 	}
 }
 
-static HostKernel _detect_kernel(HostOS os, char const * release)
+static HostKernel _new_detect_kernel(HostOS os, char const * release)
 {
 	unsigned int i;
 
@@ -321,162 +266,46 @@ static HostKernel _detect_kernel(HostOS os, char const * release)
 	return i;
 }
 
-static int _configure_load_config(Configure * configure)
+static int _new_load_config(Configure * configure)
 {
-	int ret = 0;
-	String const section[] = "programs";
 	String * filename = DATADIR "/" PACKAGE "/" PACKAGE CONFEXT;
-	struct
-	{
-		String const * name;
-		String const * program;
-	} programs[] =
-	{
-		{ "ccshared",	"$(CC) -shared"		},
-		{ "cxx",	"c++"			},
-		{ "ln",		"ln -f"			},
-		{ "mkdir",	"mkdir -m 0755 -p"	},
-		{ "rm",		"rm -f"			},
-	};
-	size_t i;
 
 	if((configure->config = config_new()) == NULL)
 		return -1;
-	for(i = 0; i < sizeof(programs) / sizeof(*programs); i++)
-		if(config_set(configure->config, section, programs[i].name,
-					programs[i].program) != 0)
-			return -1;
 	/* load the global database */
-	if(configure->prefs->basedir != NULL
-			&& (filename = string_new_append(
-					configure->prefs->basedir,
-					"/data/" PACKAGE CONFEXT,
+#ifdef BASEDIR
+	if((filename = string_new_append(BASEDIR "/data/" PACKAGE CONFEXT,
 					NULL)) == NULL)
 		return -configure_error(1, "%s", error_get(NULL));
+#endif
 	if(filename != NULL && config_load(configure->config, filename) != 0)
 		configure_warning(0, "%s: %s", filename,
 			"Could not load program definitions");
-	if(configure->prefs->basedir != NULL)
-		string_delete(filename);
+#ifdef BASEDIR
+	string_delete(filename);
 	/* load the database for the current system */
-	if(configure->prefs->basedir != NULL)
-		filename = string_new_append(configure->prefs->basedir,
-				"/data/platform/", sHostOS[configure->os],
-				CONFEXT, NULL);
-	else
-		filename = string_new_append(DATADIR "/" PACKAGE "/platform/",
-				sHostOS[configure->os], CONFEXT, NULL);
+	filename = string_new_append(BASEDIR "/data/platform/",
+			sHostOS[configure->os], CONFEXT, NULL);
+#else
+	filename = string_new_append(DATADIR "/" PACKAGE "/platform/",
+			sHostOS[configure->os], CONFEXT, NULL);
+#endif
 	if(filename == NULL)
 		return -configure_error(1, "%s", error_get(NULL));
 	else if(config_load(configure->config, filename) != 0)
 		configure_warning(0, "%s: %s", filename,
 				"Could not load program definitions");
 	string_delete(filename);
-	return ret;
+	return 0;
 }
 
-static int _configure_load_project(ConfigurePrefs * prefs,
-		String const * directory, configArray * ca)
+
+/* configure_delete */
+void configure_delete(Configure * configure)
 {
-	int ret = 0;
-	Config * config;
-	String * path;
-	String const * subdirs = NULL;
-
-	if((path = string_new_append(directory, "/", PROJECT_CONF, NULL))
-			== NULL)
-		return configure_error(1, "%s", error_get(NULL));
-	if((config = config_new()) == NULL)
-	{
-		string_delete(path);
-		return configure_error(1, "%s", error_get(NULL));
-	}
-	config_set(config, "", "directory", directory);
-	if(prefs->flags & PREFS_v)
-		printf("%s%s%s", "Loading project file ", path, "\n");
-	if(config_load(config, path) != 0)
-		ret = error_print(PROGNAME);
-	else
-	{
-		array_append(ca, &config);
-		subdirs = config_get(config, "", "subdirs");
-	}
-	string_delete(path);
-	if(subdirs == NULL)
-		return ret;
-	return _load_subdirs(prefs, directory, ca, subdirs);
-}
-
-static int _load_subdirs(ConfigurePrefs * prefs, char const * directory,
-		configArray * ca, String const * subdirs)
-{
-	int ret = 0;
-	int i;
-	char c;
-	String * subdir;
-	String * p;
-
-	if((subdir = string_new(subdirs)) == NULL)
-		return 1;
-	p = subdir;
-	for(i = 0; ret == 0; i++)
-	{
-		if(subdir[i] != ',' && subdir[i] != '\0')
-			continue;
-		c = subdir[i];
-		subdir[i] = '\0';
-		ret = _load_subdirs_subdir(prefs, directory, ca, subdir);
-		if(c == '\0')
-			break;
-		subdir += i + 1;
-		i = 0;
-	}
-	string_delete(p);
-	return ret;
-}
-
-static int _load_subdirs_subdir(ConfigurePrefs * prefs, char const * directory,
-		configArray * ca, char const * subdir)
-	/* FIXME error checking */
-{
-	int ret;
-	String * p;
-
-	p = string_new(directory);
-	string_append(&p, "/");
-	string_append(&p, subdir);
-	ret = _configure_load_project(prefs, p, ca);
-	string_delete(p);
-	return ret;
-}
-
-static int _configure_do(Configure * configure, configArray * ca)
-{
-	size_t i;
-	size_t cnt = array_count(ca);
-	String const * di;
-	size_t j;
-	Config * cj;
-	String const * dj;
-
-	for(i = 0; i < cnt; i++)
-	{
-		array_get_copy(ca, i, &configure->project);
-		if((di = config_get(configure->project, "", "directory"))
-				== NULL)
-			continue;
-		for(j = i; j < cnt; j++)
-		{
-			array_get_copy(ca, j, &cj);
-			if((dj = config_get(cj, "", "directory")) == NULL)
-				continue;
-			if(string_find(dj, di) == NULL)
-				break;
-		}
-		if(makefile(configure, di, ca, i, j) != 0)
-			break;
-	}
-	return (i == cnt) ? 0 : 1;
+	if(configure->config != NULL)
+		config_delete(configure->config);
+	object_delete(configure);
 }
 
 
@@ -519,10 +348,19 @@ HostOS configure_get_os(Configure * configure)
 }
 
 
+/* configure_get_path */
+String const * configure_get_path(Configure * configure, String const * path)
+{
+	String const section[] = "paths";
+
+	return config_get(configure->config, section, path);
+}
+
+
 /* configure_get_prefs */
 ConfigurePrefs const * configure_get_prefs(Configure * configure)
 {
-	return configure->prefs;
+	return &configure->prefs;
 }
 
 
@@ -541,7 +379,194 @@ String const * configure_get_program(Configure * configure, String const * name)
 /* configure_is_flag_set */
 unsigned int configure_is_flag_set(Configure * configure, unsigned int flags)
 {
-	return (configure->prefs->flags & flags) ? 1 : 0;
+	return (configure->prefs.flags & flags) ? 1 : 0;
+}
+
+
+/* configure_set_path */
+int configure_set_path(Configure * configure, String const * path,
+		String const * value)
+{
+	String const section[] = "paths";
+
+	return config_set(configure->config, section, path, value);
+}
+
+
+/* useful */
+/* configure_error */
+int configure_error(int ret, char const * format, ...)
+{
+	va_list ap;
+
+	fputs(PROGNAME ": ", stderr);
+	va_start(ap, format);
+	vfprintf(stderr, format, ap);
+	fputc('\n', stderr);
+	va_end(ap);
+	return ret;
+}
+
+
+/* configure_project */
+static int _project_do(Configure * configure, configArray * ca);
+static int _project_load(ConfigurePrefs * prefs, char const * directory,
+		configArray * ca);
+static int _project_load_subdirs(ConfigurePrefs * prefs, char const * directory,
+		configArray * ca, String const * subdirs);
+static int _project_load_subdirs_subdir(ConfigurePrefs * prefs,
+		char const * directory, configArray * ca, char const * subdir);
+
+int configure_project(Configure * configure, String const * directory)
+{
+	int ret;
+	configArray * ca;
+	const unsigned int flags = configure->prefs.flags;
+	int i;
+	Config * p;
+
+	if((ca = configarray_new()) == NULL)
+		return error_print(PROGNAME);
+	if((ret = _project_load(&configure->prefs, directory, ca)) == 0)
+	{
+		if(configure->prefs.flags & PREFS_n)
+			ret = _project_do(configure, ca);
+		else
+		{
+			configure->prefs.flags = PREFS_n;
+			if((ret = _project_do(configure, ca)) == 0)
+			{
+				configure->prefs.flags = flags;
+				ret = _project_do(configure, ca);
+			}
+		}
+	}
+	for(i = array_count(ca); i > 0; i--)
+	{
+		array_get_copy(ca, i - 1, &p);
+		config_delete(p);
+	}
+	array_delete(ca);
+	return ret;
+}
+
+static int _project_do(Configure * configure, configArray * ca)
+{
+	size_t i;
+	size_t cnt = array_count(ca);
+	String const * di;
+	size_t j;
+	Config * cj;
+	String const * dj;
+
+	for(i = 0; i < cnt; i++)
+	{
+		array_get_copy(ca, i, &configure->project);
+		if((di = config_get(configure->project, "", "directory"))
+				== NULL)
+			continue;
+		for(j = i; j < cnt; j++)
+		{
+			array_get_copy(ca, j, &cj);
+			if((dj = config_get(cj, "", "directory")) == NULL)
+				continue;
+			if(string_find(dj, di) == NULL)
+				break;
+		}
+		if(makefile(configure, di, ca, i, j) != 0)
+			break;
+	}
+	return (i == cnt) ? 0 : 1;
+}
+
+static int _project_load(ConfigurePrefs * prefs, String const * directory,
+		configArray * ca)
+{
+	int ret = 0;
+	Config * config;
+	String * path;
+	String const * subdirs = NULL;
+
+	if((path = string_new_append(directory, "/", PROJECT_CONF, NULL))
+			== NULL)
+		return configure_error(1, "%s", error_get(NULL));
+	if((config = config_new()) == NULL)
+	{
+		string_delete(path);
+		return configure_error(1, "%s", error_get(NULL));
+	}
+	config_set(config, "", "directory", directory);
+	if(prefs->flags & PREFS_v)
+		printf("%s%s%s", "Loading project file ", path, "\n");
+	if(config_load(config, path) != 0)
+		ret = error_print(PROGNAME);
+	else
+	{
+		array_append(ca, &config);
+		subdirs = config_get(config, "", "subdirs");
+	}
+	string_delete(path);
+	if(subdirs == NULL)
+		return ret;
+	return _project_load_subdirs(prefs, directory, ca, subdirs);
+}
+
+static int _project_load_subdirs(ConfigurePrefs * prefs, char const * directory,
+		configArray * ca, String const * subdirs)
+{
+	int ret = 0;
+	int i;
+	char c;
+	String * subdir;
+	String * p;
+
+	if((subdir = string_new(subdirs)) == NULL)
+		return 1;
+	p = subdir;
+	for(i = 0; ret == 0; i++)
+	{
+		if(subdir[i] != ',' && subdir[i] != '\0')
+			continue;
+		c = subdir[i];
+		subdir[i] = '\0';
+		ret = _project_load_subdirs_subdir(prefs, directory, ca,
+				subdir);
+		if(c == '\0')
+			break;
+		subdir += i + 1;
+		i = 0;
+	}
+	string_delete(p);
+	return ret;
+}
+
+static int _project_load_subdirs_subdir(ConfigurePrefs * prefs,
+		char const * directory, configArray * ca, char const * subdir)
+	/* FIXME error checking */
+{
+	int ret;
+	String * p;
+
+	p = string_new(directory);
+	string_append(&p, "/");
+	string_append(&p, subdir);
+	ret = _project_load(prefs, p, ca);
+	string_delete(p);
+	return ret;
+}
+
+
+/* configure_warning */
+int configure_warning(int ret, char const * format, ...)
+{
+	va_list ap;
+
+	fputs(PROGNAME ": warning: ", stderr);
+	va_start(ap, format);
+	vfprintf(stderr, format, ap);
+	fputc('\n', stderr);
+	va_end(ap);
+	return ret;
 }
 
 
