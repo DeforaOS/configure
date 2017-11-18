@@ -123,8 +123,7 @@ static int _write_targets(Makefile * makefile);
 static int _write_objects(Makefile * makefile);
 static int _write_clean(Makefile * makefile);
 static int _write_distclean(Makefile * makefile);
-static int _write_dist(Makefile * makefile, configArray * ca,
-	       	int from, int to);
+static int _write_dist(Makefile * makefile, configArray * ca, int from, int to);
 static int _write_distcheck(Makefile * makefile);
 static int _write_install(Makefile * makefile);
 static int _write_phony(Makefile * makefile,
@@ -1952,8 +1951,7 @@ static int _write_distclean(Makefile * makefile)
 }
 
 static int _dist_subdir(Makefile * makefile, Config * subdir);
-static int _write_dist(Makefile * makefile, configArray * ca,
-	       	int from, int to)
+static int _write_dist(Makefile * makefile, configArray * ca, int from, int to)
 {
 	String const * package;
 	String const * version;
