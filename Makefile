@@ -10,7 +10,7 @@ RM	= rm -f
 RM	= rm -f
 LN	= ln -f
 TAR	= tar
-TGZEXT	=
+TGZEXT	= .tar.gz
 MKDIR	= mkdir -m 0755 -p
 
 
