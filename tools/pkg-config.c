@@ -629,7 +629,7 @@ static int _pkgconfig_parse(PkgConfig * pc, FILE * fp)
 	p = _pkglist_get(pc->pkgs, pc->pkgs->len - 1);
 
 	if((line = malloc(len)) == NULL)
-		return -1;
+		return -_pkgconfig_error(1, "%s", strerror(errno));
 	while(fgets(line, len, fp) != NULL)
 	{
 		i = strlen(line);
@@ -842,7 +842,6 @@ static char * _pkgconfig_parse_substitute(PkgList * vars, char const * value)
 		}
 		if(_string_append(&ret, var->value) != 0)
 		{
-			/* FIXME report error */
 			free(ret);
 			return NULL;
 		}
@@ -925,7 +924,7 @@ static int _string_append(char ** string, char const * append)
 	if(alen == 0)
 		return 0;
 	if((p = realloc(*string, slen + alen + 1)) == NULL)
-		return -1;
+		return -_pkgconfig_error(1, "%s", strerror(errno));
 	*string = p;
 	strcpy(*string + slen, append);
 	return 0;
@@ -947,7 +946,7 @@ static int _string_append_length(char ** string, char const * append,
 	if(alen == 0)
 		return 0;
 	if((p = realloc(*string, slen + alen + 1)) == NULL)
-		return -1;
+		return -_pkgconfig_error(1, "%s", strerror(errno));
 	*string = p;
 	strncpy(*string + slen, append, alen);
 	(*string)[slen + alen] = '\0';
@@ -960,7 +959,11 @@ static PkgList * _pkglist_new(PkgList ** pkglist)
 	if (*pkglist != NULL)
 		return *pkglist;
 
-	*pkglist = malloc(sizeof(PkgList));
+	if((*pkglist = malloc(sizeof(PkgList))) == NULL)
+	{
+		_pkgconfig_error(1, "%s", strerror(errno));
+		return NULL;
+	}
 	(*pkglist)->len = 0;
 	(*pkglist)->cap = 0;
 	(*pkglist)->data = NULL;
