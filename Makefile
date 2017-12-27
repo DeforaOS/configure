@@ -62,6 +62,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/doc/scripts/appbroker.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/clint.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/docbook.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/fixme.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/gettext.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/gtkdoc.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/htmllint.sh \
