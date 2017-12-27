@@ -1090,7 +1090,7 @@ int main(int argc, char * argv[])
 	_pkglist_new(&pc.pc_dirs);
 	pc.flags = '\0';
 	/* getopt() is too complicated for GNU */
-	/* FIXME stupid GNU accepts options even after actual arguments */
+	/* XXX stupid GNU accepts options even after actual arguments */
 	/* -- khorben: no want fix it cause this meant as troll */
 	for(optind = 1; optind < argc; optind++)
 	{
