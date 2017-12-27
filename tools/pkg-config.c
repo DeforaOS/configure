@@ -632,10 +632,11 @@ static int _pkgconfig_parse(PkgConfig * pc, FILE * fp)
 		return -1;
 	while(fgets(line, len, fp) != NULL)
 	{
-		/* FIXME complete the line if necessary */
 		i = strlen(line);
-		if(line[i - 1] == '\n')
-			line[i - 1] = '\0';
+		if(line[i - 1] != '\n')
+			/* FIXME report error */
+			return -1;
+		line[i - 1] = '\0';
 		/* detect empty lines or comments */
 		for(i = 0; line[i] != '\0'
 				&& isspace((unsigned char)line[i]); i++);
