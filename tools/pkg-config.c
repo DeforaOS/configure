@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2014 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2017 Pierre Pronchery <khorben@defora.org> */
 /* Copyright (c) 2012 Baptiste Daroussin <bapt@FreeBSD.org> */
 /* This file is part of DeforaOS Devel configure */
 /* All rights reserved.
