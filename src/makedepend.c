@@ -33,11 +33,13 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#define PROGNAME_MAKEDEPEND	"makedepend"
+
 
 /* usage */
 static int _usage(void)
 {
-	fputs("Usage: makedepend\n", stderr);
+	fputs("Usage: " PROGNAME_MAKEDEPEND "\n", stderr);
 	return 1;
 }
 
