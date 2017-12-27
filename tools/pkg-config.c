@@ -634,8 +634,8 @@ static int _pkgconfig_parse(PkgConfig * pc, FILE * fp)
 	{
 		i = strlen(line);
 		if(line[i - 1] != '\n')
-			/* FIXME report error */
-			return -1;
+			return -_pkgconfig_error(1, "%s: %s", p->pkgname,
+					"Line too long");
 		line[i - 1] = '\0';
 		/* detect empty lines or comments */
 		for(i = 0; line[i] != '\0'
