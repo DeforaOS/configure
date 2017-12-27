@@ -623,7 +623,7 @@ static int _pkgconfig_parse(PkgConfig * pc, FILE * fp)
 {
 	Pkg *p;
 	char * line;
-	size_t len = 256;
+	const size_t len = 256;
 	size_t i;
 
 	p = _pkglist_get(pc->pkgs, pc->pkgs->len - 1);
