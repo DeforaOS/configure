@@ -2047,8 +2047,7 @@ static int _write_install(Makefile * makefile)
 	char const * targets;
 
 	targets = _makefile_get_config(makefile, NULL, "targets");
-	_makefile_target(makefile, "install",
-			(targets != NULL) ? "$(TARGETS)" : NULL, NULL);
+	_makefile_target(makefile, "install", "all", NULL);
 	if(_makefile_get_config(makefile, NULL, "subdirs") != NULL)
 		_makefile_subdirs(makefile, "install");
 	ret |= _install_targets(makefile);
