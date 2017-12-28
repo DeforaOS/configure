@@ -25,7 +25,7 @@ clean:
 distclean: clean
 	$(RM) -- $(TARGETS)
 
-install: $(TARGETS)
+install: all
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
 	$(INSTALL) -m 0644 $(OBJDIR)object.o $(DESTDIR)$(LIBDIR)/object.o
 

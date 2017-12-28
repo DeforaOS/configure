@@ -24,7 +24,7 @@ clean:
 distclean: clean
 	$(RM) -- $(TARGETS)
 
-install: $(TARGETS)
+install: all
 	./script.sh -P "$(DESTDIR)/somewhere/else/again" -i -- "$(OBJDIR)test"
 	./script.sh -P "$(DESTDIR)$(PREFIX)" -i -- "phony"
 

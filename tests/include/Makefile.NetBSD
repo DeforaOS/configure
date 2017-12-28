@@ -14,7 +14,7 @@ clean:
 
 distclean: clean
 
-install:
+install: all
 	$(MKDIR) $(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL) -m 0644 stdio.h $(DESTDIR)$(INCLUDEDIR)/stdio.h
 	$(MKDIR) $(DESTDIR)$(INCLUDEDIR)/staging
