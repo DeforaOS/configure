@@ -35,7 +35,7 @@
 
 
 /* types */
-ARRAY(Config *, config)
+ARRAY2(Config *, config)
 
 typedef enum _HostArch
 {
