@@ -61,6 +61,7 @@ typedef struct _Makefile
 static String const * _makefile_get_config(Makefile * makefile,
 		String const * section, String const * variable);
 
+static int _makefile_is_enabled(Makefile * makefile, char const * target);
 static unsigned int _makefile_is_flag_set(Makefile * makefile,
 		unsigned int flag);
 static int _makefile_is_phony(Makefile * makefile, char const * target);
@@ -326,7 +327,7 @@ static int _variables_targets(Makefile * makefile)
 		if((type = _makefile_get_config(makefile, prints, "type"))
 			       	== NULL)
 			_makefile_print(makefile, " %s", prints);
-		else
+		else if(_makefile_is_enabled(makefile, prints) != 0)
 			switch(enum_string(TT_LAST, sTargetType, type))
 			{
 				case TT_BINARY:
@@ -2691,6 +2692,18 @@ static String const * _makefile_get_config(Makefile * makefile,
 		String const * section, String const * variable)
 {
 	return configure_get_config(makefile->configure, section, variable);
+}
+
+
+/* makefile_is_enabled */
+static int _makefile_is_enabled(Makefile * makefile, char const * target)
+{
+	String const * p;
+
+	if((p = _makefile_get_config(makefile, target, "enabled")) != NULL
+			&& strtol(p, NULL, 10) == 0)
+		return 0;
+	return 1;
 }
 
 
