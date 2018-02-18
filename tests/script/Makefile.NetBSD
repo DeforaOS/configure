@@ -13,12 +13,16 @@ all: $(TARGETS)
 $(OBJDIR)test:
 	./script.sh -P "/somewhere/else" -- "$(OBJDIR)test"
 
+$(OBJDIR)disabled: a.c b.c
+	./script.sh -P "$(PREFIX)" -- "$(OBJDIR)disabled"
+
 phony: a.c b.c
 	./script.sh -P "$(PREFIX)" -- "phony"
 
 clean:
-	$(RM) -- $(test_OBJS) $(phony_OBJS)
+	$(RM) -- $(test_OBJS) $(disabled_OBJS) $(phony_OBJS)
 	./script.sh -c -P "/somewhere/else" -- "$(OBJDIR)test"
+	./script.sh -c -P "$(PREFIX)" -- "$(OBJDIR)disabled"
 	./script.sh -c -P "$(PREFIX)" -- "$(OBJDIR)phony"
 
 distclean: clean
