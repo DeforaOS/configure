@@ -18,6 +18,8 @@ install: all
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 clint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/clint.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
+	$(INSTALL) -m 0644 coverage.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/coverage.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 docbook.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/docbook.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 fixme.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/fixme.sh
@@ -47,6 +49,7 @@ install: all
 uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/appbroker.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/clint.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/coverage.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/docbook.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/fixme.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/gettext.sh

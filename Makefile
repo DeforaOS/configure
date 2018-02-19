@@ -61,6 +61,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/doc/scripts/Makefile \
 		$(PACKAGE)-$(VERSION)/doc/scripts/appbroker.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/clint.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/coverage.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/docbook.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/fixme.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/gettext.sh \
