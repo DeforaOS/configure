@@ -13,6 +13,9 @@ all: $(TARGETS)
 $(OBJDIR)clint.log: ../doc/scripts/clint.sh
 	../doc/scripts/clint.sh -P "$(PREFIX)" -- "$(OBJDIR)clint.log"
 
+$(OBJDIR)coverage.log: ../doc/scripts/coverage.sh
+	../doc/scripts/coverage.sh -P "$(PREFIX)" -- "$(OBJDIR)coverage.log"
+
 $(OBJDIR)fixme.log: ../doc/scripts/fixme.sh
 	../doc/scripts/fixme.sh -P "$(PREFIX)" -- "$(OBJDIR)fixme.log"
 
@@ -35,8 +38,9 @@ $(OBJDIR)xmllint.log: ../doc/scripts/xmllint.sh
 	../doc/scripts/xmllint.sh -P "$(PREFIX)" -- "$(OBJDIR)xmllint.log"
 
 clean:
-	$(RM) -- $(clint.log_OBJS) $(fixme.log_OBJS) $(htmllint.log_OBJS) $(phplint.log_OBJS) $(pylint.log_OBJS) $(shlint.log_OBJS) $(tests.log_OBJS) $(xmllint.log_OBJS)
+	$(RM) -- $(clint.log_OBJS) $(coverage.log_OBJS) $(fixme.log_OBJS) $(htmllint.log_OBJS) $(phplint.log_OBJS) $(pylint.log_OBJS) $(shlint.log_OBJS) $(tests.log_OBJS) $(xmllint.log_OBJS)
 	../doc/scripts/clint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)clint.log"
+	../doc/scripts/coverage.sh -c -P "$(PREFIX)" -- "$(OBJDIR)coverage.log"
 	../doc/scripts/fixme.sh -c -P "$(PREFIX)" -- "$(OBJDIR)fixme.log"
 	../doc/scripts/htmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)htmllint.log"
 	../doc/scripts/phplint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)phplint.log"
