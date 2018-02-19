@@ -58,6 +58,16 @@ _test()
 		res=$?
 		$RM -- "$subdir/Makefile"
 	fi
+	if [ $res -eq 0 -a -f "$subdir/config.h" ]; then
+		$DIFF -- "$subdir/config.h.$system" "$subdir/config.h" 2>&1
+		res=$?
+		$RM -- "$subdir/config.h"
+	fi
+	if [ $res -eq 0 -a -f "$subdir/config.sh" ]; then
+		$DIFF -- "$subdir/config.sh.$system" "$subdir/config.sh" 2>&1
+		res=$?
+		$RM -- "$subdir/config.sh"
+	fi
 	if [ $res -ne 0 ]; then
 		echo "$system $subdir: Failed with error code $res"
 		echo "$system $subdir: FAIL" 1>&2
