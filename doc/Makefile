@@ -53,7 +53,7 @@ distclean:
 	./scripts/docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)project.conf.html"
 	$(RM) -- $(TARGETS)
 
-install: $(TARGETS)
+install: all
 	@for i in $(SUBDIRS); do (cd "$$i" && \
 		if [ -n "$(OBJDIR)" ]; then \
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/" install; \

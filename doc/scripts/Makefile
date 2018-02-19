@@ -12,7 +12,7 @@ clean:
 
 distclean: clean
 
-install:
+install: all
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 appbroker.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/appbroker.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts

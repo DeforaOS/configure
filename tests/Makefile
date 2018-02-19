@@ -48,7 +48,7 @@ clean:
 distclean: clean
 	$(RM) -- $(TARGETS)
 
-install: $(TARGETS)
+install: all
 
 uninstall:
 

@@ -12,7 +12,7 @@ clean:
 
 distclean: clean
 
-install:
+install: all
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/configure/platform
 	$(INSTALL) -m 0644 Darwin.conf $(DESTDIR)$(PREFIX)/share/configure/platform/Darwin.conf
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/configure/platform

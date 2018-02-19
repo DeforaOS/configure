@@ -61,7 +61,7 @@ clean:
 distclean: clean
 	$(RM) -- $(TARGETS)
 
-install: $(TARGETS)
+install: all
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m 0755 $(OBJDIR)configure$(EXEEXT) $(DESTDIR)$(BINDIR)/configure$(EXEEXT)
 
