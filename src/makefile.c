@@ -1821,6 +1821,7 @@ static int _clean_targets(Makefile * makefile)
 	String * q;
 	size_t i;
 	char c;
+	int phony;
 
 	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
 		return 0;
@@ -1859,9 +1860,11 @@ static int _clean_targets(Makefile * makefile)
 			if((prefix = _makefile_get_config(makefile, targets,
 							"prefix")) == NULL)
 				prefix = "$(PREFIX)";
-			_makefile_print(makefile, "\t%s%s%s%s%s%s\n", p,
-					" -c -P \"", prefix,
-					"\" -- \"$(OBJDIR)", targets, "\"");
+			phony = _makefile_is_phony(makefile, targets);
+			_makefile_print(makefile, "\t%s%s%s%s%s%s%s\n", p,
+					" -c -P \"", prefix, "\" -- \"",
+					phony ? "" : "$(OBJDIR)", targets,
+					"\"");
 		}
 		if(c == '\0')
 			break;
