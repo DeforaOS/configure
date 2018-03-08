@@ -720,13 +720,8 @@ static void _binary_ldflags(Makefile * makefile, String const * ldflags)
 	}
 	for(i = 0; libs[i] != NULL; i++)
 	{
-		snprintf(buf, sizeof(buf), "-l %s", libs[i]);
+		snprintf(buf, sizeof(buf), "-l%s", libs[i]);
 		if((q = string_find(p, buf)) == NULL)
-		{
-			snprintf(buf, sizeof(buf), "-l%s", libs[i]);
-			q = string_find(p, buf);
-		}
-		if(q == NULL)
 			continue;
 		memmove(q, q + strlen(buf), strlen(q) - strlen(buf) + 1);
 	}
