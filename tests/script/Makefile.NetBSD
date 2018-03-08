@@ -23,7 +23,7 @@ clean:
 	$(RM) -- $(test_OBJS) $(disabled_OBJS) $(phony_OBJS)
 	./script.sh -c -P "/somewhere/else" -- "$(OBJDIR)test"
 	./script.sh -c -P "$(PREFIX)" -- "$(OBJDIR)disabled"
-	./script.sh -c -P "$(PREFIX)" -- "$(OBJDIR)phony"
+	./script.sh -c -P "$(PREFIX)" -- "phony"
 
 distclean: clean
 	$(RM) -- $(TARGETS)
