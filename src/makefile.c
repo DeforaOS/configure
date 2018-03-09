@@ -2484,6 +2484,7 @@ static int _write_phony_targets(Makefile * makefile)
 				!= NULL)
 			switch(enum_string(TT_LAST, sTargetType, type))
 			{
+				case TT_COMMAND:
 				case TT_SCRIPT:
 					if(_makefile_is_phony(makefile, prints))
 						_makefile_print(makefile, " %s",
