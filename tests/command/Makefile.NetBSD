@@ -11,7 +11,7 @@ target:
 	$(MAKE) command
 
 clean:
-	$(RM) -- $(target_OBJS)
+	$(RM) --
 
 distclean: clean
 	$(RM) -- $(TARGETS)
