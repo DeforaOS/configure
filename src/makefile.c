@@ -1185,6 +1185,8 @@ static void _flags_verilog(Makefile * makefile, String const * target)
 	_makefile_print(makefile, "%c", '\n');
 }
 
+static void _command_security(Makefile * makefile, String const * target,
+		String const * command);
 static int _target_command(Makefile * makefile, String const * target)
 {
 	String const * p;
@@ -1195,8 +1197,19 @@ static int _target_command(Makefile * makefile, String const * target)
 		return error_print(PROGNAME);
 	if((p = _makefile_get_config(makefile, target, "command")) == NULL)
 		return error_print(PROGNAME);
+	if(_makefile_is_flag_set(makefile, PREFS_S))
+		_command_security(makefile, target, p);
 	_makefile_print(makefile, "\n\t%s\n", p);
 	return 0;
+}
+
+static void _command_security(Makefile * makefile, String const * target,
+		String const * command)
+{
+	(void) makefile;
+
+	error_set_print(PROGNAME, 0, "%s: %s%s%s", target, "Command \"",
+			command, "\" is executed while compiling");
 }
 
 static int _target_library(Makefile * makefile, String const * target)
