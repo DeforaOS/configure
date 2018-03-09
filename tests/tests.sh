@@ -92,6 +92,7 @@ _tests()
 	_test "Linux" "library"					|| ret=2
 	_test "Linux" "libtool"					|| ret=2
 	_test "NetBSD" "binary"					|| ret=2
+	_test "NetBSD" "command"				|| ret=2
 	_test "NetBSD" "include"				|| ret=2
 	_test "NetBSD" "library"				|| ret=2
 	_test "NetBSD" "libtool"				|| ret=2

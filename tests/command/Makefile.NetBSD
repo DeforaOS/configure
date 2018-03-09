@@ -1,0 +1,23 @@
+TARGETS	= target
+RM	= rm -f
+LN	= ln -f
+MKDIR	= mkdir -m 0755 -p
+INSTALL	= install
+
+
+all: $(TARGETS)
+
+target:
+	$(MAKE) command
+
+clean:
+	$(RM) -- $(target_OBJS)
+
+distclean: clean
+	$(RM) -- $(TARGETS)
+
+install: all
+
+uninstall:
+
+.PHONY: all clean distclean install uninstall
