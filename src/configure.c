@@ -123,8 +123,8 @@ const HostKernelMap mHostKernel[] =
 	{ HO_UNKNOWN,	"unknown",	NULL,		NULL	}
 };
 
-const String * sTargetType[TT_COUNT] = { "binary", "library", "libtool",
-	"object", "plugin", "script", NULL };
+const String * sTargetType[TT_COUNT] = { "binary", "command", "library",
+	"libtool", "object", "plugin", "script", NULL };
 const struct ExtensionType _sExtensionType[] =
 {
 	{ "c",		OT_C_SOURCE		},

@@ -335,6 +335,10 @@ static int _variables_targets(Makefile * makefile)
 							" $(OBJDIR)%s$(EXEEXT)",
 							prints);
 					break;
+				case TT_COMMAND:
+					_makefile_print(makefile, " %s",
+							prints);
+					break;
 				case TT_LIBRARY:
 					ret |= _variables_targets_library(
 							makefile, prints);
@@ -489,6 +493,8 @@ static void _executables_variables(Makefile * makefile,
 		case TT_BINARY:
 			_variables_binary(makefile, done);
 			done[TT_OBJECT] = 1;
+			break;
+		case TT_COMMAND:
 			break;
 		case TT_OBJECT:
 			_variables_binary(makefile, done);
@@ -897,6 +903,7 @@ static int _targets_subdirs(Makefile * makefile)
 
 static int _target_objs(Makefile * makefile, String const * target);
 static int _target_binary(Makefile * makefile, String const * target);
+static int _target_command(Makefile * makefile, String const * target);
 static int _target_library(Makefile * makefile, String const * target);
 static int _target_library_static(Makefile * makefile, String const * target);
 static int _target_libtool(Makefile * makefile, String const * target);
@@ -919,6 +926,8 @@ static int _targets_target(Makefile * makefile, String const * target)
 	{
 		case TT_BINARY:
 			return _target_binary(makefile, target);
+		case TT_COMMAND:
+			return _target_command(makefile, target);
 		case TT_LIBRARY:
 			return _target_library(makefile, target);
 		case TT_LIBTOOL:
@@ -1172,6 +1181,20 @@ static void _flags_verilog(Makefile * makefile, String const * target)
 	if((p = _makefile_get_config(makefile, target, "vflags")) != NULL)
 		_makefile_print(makefile, " %s", p);
 	_makefile_print(makefile, "%c", '\n');
+}
+
+static int _target_command(Makefile * makefile, String const * target)
+{
+	String const * p;
+
+	_makefile_print(makefile, "\n%s:", target);
+	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
+			&& _makefile_expand(makefile, p) != 0)
+		return error_print(PROGNAME);
+	if((p = _makefile_get_config(makefile, target, "command")) == NULL)
+		return error_print(PROGNAME);
+	_makefile_print(makefile, "\n\t%s\n", p);
+	return 0;
 }
 
 static int _target_library(Makefile * makefile, String const * target)
@@ -2103,6 +2126,8 @@ static int _install_target(Makefile * makefile, String const * target)
 		case TT_BINARY:
 			_install_target_binary(makefile, target);
 			break;
+		case TT_COMMAND:
+			break;
 		case TT_LIBRARY:
 			ret = _install_target_library(makefile, target);
 			break;
@@ -2571,6 +2596,8 @@ static int _uninstall_target(Makefile * makefile,
 		case TT_BINARY:
 			_makefile_print(makefile, "\t%s%s/%s%s\n", rm_destdir,
 					path, target, "$(EXEEXT)");
+			break;
+		case TT_COMMAND:
 			break;
 		case TT_LIBRARY:
 			if(_uninstall_target_library(makefile, target,
