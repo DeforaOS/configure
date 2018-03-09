@@ -27,7 +27,7 @@
 #variables
 PROGNAME="tests.sh"
 #executables
-CONFIGURE="$OBJDIR../tools/configure"
+CONFIGURE="$OBJDIR../tools/configure -S"
 DATE="date"
 DIFF="diff"
 RM="rm -f"
