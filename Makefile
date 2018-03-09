@@ -99,6 +99,8 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/binary/Makefile.DeforaOS \
 		$(PACKAGE)-$(VERSION)/tests/binary/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/binary/Makefile.Windows \
+		$(PACKAGE)-$(VERSION)/tests/command/project.conf \
+		$(PACKAGE)-$(VERSION)/tests/command/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/include/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/include/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/library/project.conf \
