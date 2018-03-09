@@ -1,4 +1,4 @@
-TARGETS	= target
+TARGETS	= phony target
 RM	= rm -f
 LN	= ln -f
 MKDIR	= mkdir -m 0755 -p
@@ -6,6 +6,9 @@ INSTALL	= install
 
 
 all: $(TARGETS)
+
+phony:
+	exit 42
 
 target:
 	$(MAKE) command
@@ -20,4 +23,4 @@ install: all
 
 uninstall:
 
-.PHONY: all clean distclean install uninstall
+.PHONY: all clean distclean install uninstall phony
