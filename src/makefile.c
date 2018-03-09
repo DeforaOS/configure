@@ -60,6 +60,8 @@ typedef struct _Makefile
 /* accessors */
 static String const * _makefile_get_config(Makefile * makefile,
 		String const * section, String const * variable);
+static TargetType _makefile_get_type(Makefile * makefile,
+		String const * target);
 
 static int _makefile_is_enabled(Makefile * makefile, char const * target);
 static unsigned int _makefile_is_flag_set(Makefile * makefile,
@@ -1854,7 +1856,9 @@ static int _clean_targets(Makefile * makefile)
 			continue;
 		c = targets[i];
 		targets[i] = '\0';
-		_makefile_print(makefile, "%s%s%s", " $(", targets, "_OBJS)");
+		if(_makefile_get_type(makefile, targets) != TT_COMMAND)
+			_makefile_print(makefile, "%s%s%s", " $(", targets,
+					"_OBJS)");
 		if(c == '\0')
 			break;
 		targets[i] = c;
@@ -2717,6 +2721,18 @@ static String const * _makefile_get_config(Makefile * makefile,
 		String const * section, String const * variable)
 {
 	return configure_get_config(makefile->configure, section, variable);
+}
+
+
+/* makefile_get_type */
+static TargetType _makefile_get_type(Makefile * makefile,
+		String const * target)
+{
+	String const * type;
+
+	if((type = _makefile_get_config(makefile, target, "type")) == NULL)
+		return TT_UNKNOWN;
+	return enum_string(TT_LAST, sTargetType, type);
 }
 
 
