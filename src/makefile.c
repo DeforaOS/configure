@@ -1002,6 +1002,7 @@ static int _objs_source(Makefile * makefile, String * source, TargetType tt)
 	switch(source_type(extension))
 	{
 		case OT_ASM_SOURCE:
+		case OT_ASMPP_SOURCE:
 		case OT_C_SOURCE:
 		case OT_CXX_SOURCE:
 		case OT_OBJC_SOURCE:
@@ -1092,6 +1093,7 @@ static int _target_flags(Makefile * makefile, String const * target)
 			switch(type)
 			{
 				case OT_ASM_SOURCE:
+				case OT_ASMPP_SOURCE:
 					_flags_asm(makefile, target);
 					break;
 				case OT_OBJC_SOURCE:
@@ -1379,6 +1381,7 @@ static int _target_object(Makefile * makefile,
 	switch(source_type(extension))
 	{
 		case OT_ASM_SOURCE:
+		case OT_ASMPP_SOURCE:
 			_makefile_print(makefile, "\n%s%s%s%s\n%s%s",
 					target, "_OBJS = ", "$(OBJDIR)", target,
 					target, "_ASFLAGS ="
@@ -1663,6 +1666,7 @@ static int _target_source(Makefile * makefile,
 	switch((ot = source_type(extension)))
 	{
 		case OT_ASM_SOURCE:
+		case OT_ASMPP_SOURCE:
 			if(tt == TT_OBJECT)
 				_makefile_print(makefile, "%s%s", "\n$(OBJDIR)",
 						target);
