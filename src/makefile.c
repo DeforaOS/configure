@@ -1166,7 +1166,10 @@ static void _flags_cxx(Makefile * makefile, String const * target)
 	String const * p;
 
 	_makefile_print(makefile, "%s%s", target, "_CXXFLAGS = $(CPPFLAGSF)"
-			" $(CPPFLAGS) $(CXXFLAGSF) $(CXXFLAGS)");
+			" $(CPPFLAGS)");
+	if((p = _makefile_get_config(makefile, target, "cppflags")) != NULL)
+		_makefile_print(makefile, " %s", p);
+	_makefile_print(makefile, "%s", " $(CXXFLAGSF) $(CXXFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "cxxflags")) != NULL)
 		_makefile_print(makefile, " %s", p);
 	_makefile_print(makefile, "\n%s%s", target,
