@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)test$(EXEEXT) $(OBJDIR)test2$(EXEEXT) $(OBJDIR)test3$(EXEEXT)
+TARGETS	= $(OBJDIR)test$(EXEEXT) $(OBJDIR)test2$(EXEEXT) $(OBJDIR)test3$(EXEEXT) $(OBJDIR)test4$(EXEEXT)
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -34,6 +34,13 @@ test3_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)   -lm
 $(OBJDIR)test3$(EXEEXT): $(test3_OBJS)
 	$(CC) -o $(OBJDIR)test3$(EXEEXT) $(test3_OBJS) $(test3_LDFLAGS)
 
+test4_OBJS = $(OBJDIR)test4.o $(OBJDIR)test4.o
+test4_ASFLAGS = $(ASFLAGSF) $(ASFLAGS)
+test4_CPPFLAGS = $(CPPFLAGSF) $(CPPFLAGS)
+
+$(OBJDIR)test4$(EXEEXT): $(test4_OBJS)
+	$(CC) -o $(OBJDIR)test4$(EXEEXT) $(test4_OBJS) $(test4_LDFLAGS)
+
 $(OBJDIR)test.o: test.c
 	$(CC) $(test_CFLAGS) -o $(OBJDIR)test.o -c test.c
 
@@ -46,11 +53,14 @@ $(OBJDIR)test2.o: test2.m
 $(OBJDIR)test3.o: test3.cpp
 	$(CXX) $(test3_CXXFLAGS) -o $(OBJDIR)test3.o -c test3.cpp
 
-$(OBJDIR)test.o: test.cpp
-	$(CXX) $(test3_CXXFLAGS) -o $(OBJDIR)test.o -c test.cpp
+$(OBJDIR)test4.o: test4.asm
+	$(AS) $(test4_ASFLAGS) -o $(OBJDIR)test4.o test4.asm
+
+$(OBJDIR)test4.o: test4.S
+	$(AS) $(test4_ASFLAGS) -o $(OBJDIR)test4.o test4.S
 
 clean:
-	$(RM) -- $(test_OBJS) $(test2_OBJS) $(test3_OBJS)
+	$(RM) -- $(test_OBJS) $(test2_OBJS) $(test3_OBJS) $(test4_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
