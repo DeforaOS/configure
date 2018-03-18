@@ -138,7 +138,7 @@ int main(int argc, char * argv[])
 
 	memset(&prefs, 0, sizeof(prefs));
 	memset(&paths, 0, sizeof(paths));
-	while((o = getopt(argc, argv, "d:i:l:nO:p:Ss:v")) != -1)
+	while((o = getopt(argc, argv, "b:d:i:l:nO:p:qSs:v")) != -1)
 		switch(o)
 		{
 			case 'b':
