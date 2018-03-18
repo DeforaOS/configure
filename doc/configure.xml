@@ -54,6 +54,7 @@
 		<cmdsynopsis>
 			<command>&name;</command>
 			<arg choice="opt"><option>-n</option></arg>
+			<arg choice="opt"><option>-q</option></arg>
 			<arg choice="opt"><option>-S</option></arg>
 			<arg choice="opt"><option>-v</option></arg>
 			<arg choice="opt"><option>-b</option> <replaceable>bindir</replaceable></arg>
@@ -124,6 +125,12 @@
 				<term><option>-p</option></term>
 				<listitem>
 					<para>Where to base the package installation (PREFIX)</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>-q</option></term>
+				<listitem>
+					<para>This option runs &name; in quiet mode.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
