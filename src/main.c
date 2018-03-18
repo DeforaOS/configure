@@ -91,9 +91,10 @@ static int _usage(void)
 	if((configure = configure_new(NULL)) == NULL)
 		return configure_error(2, "%s", error_get(NULL));
 	fprintf(stderr, "%s%s%s%s%s%s%s%s%s%s%s%s%s",
-"Usage: " PROGNAME " [-nSv][-b bindir][-d destdir][-i includedir][-l libdir]\n"
+"Usage: " PROGNAME " [-nqSv][-b bindir][-d destdir][-i includedir][-l libdir]\n"
 "                 [-O system][-p prefix][-s sbindir][directory...]\n"
 "  -n	Do not actually write Makefiles\n"
+"  -q	Quiet mode (default)\n"
 "  -v	Verbose mode\n"
 "  -b	Binary files directory (default: \"",
 			_usage_get_path(configure, "bindir"), "\")\n"
@@ -161,6 +162,9 @@ int main(int argc, char * argv[])
 				break;
 			case 'p':
 				paths.prefix = optarg;
+				break;
+			case 'q':
+				prefs.flags = prefs.flags & ~PREFS_v;
 				break;
 			case 'S':
 				prefs.flags |= PREFS_S;
