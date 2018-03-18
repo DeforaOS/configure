@@ -20,14 +20,14 @@ test_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 $(OBJDIR)test$(EXEEXT): $(test_OBJS)
 	$(CC) -o $(OBJDIR)test$(EXEEXT) $(test_OBJS) $(test_LDFLAGS)
 
-test2_OBJS = $(OBJDIR)test.o
+test2_OBJS = $(OBJDIR)test2.o
 test2_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 test2_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) -lobjc
 
 $(OBJDIR)test2$(EXEEXT): $(test2_OBJS)
 	$(CC) -o $(OBJDIR)test2$(EXEEXT) $(test2_OBJS) $(test2_LDFLAGS)
 
-test3_OBJS = $(OBJDIR)test.o
+test3_OBJS = $(OBJDIR)test3.o
 test3_CXXFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CXXFLAGSF) $(CXXFLAGS)
 test3_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)  -lsocket -lm
 
@@ -40,8 +40,11 @@ $(OBJDIR)test.o: test.c
 $(OBJDIR)main.o: main.c
 	$(CC) $(test_CFLAGS) -o $(OBJDIR)main.o -c main.c
 
-$(OBJDIR)test.o: test.m
-	$(CC) $(test2_CFLAGS) -o $(OBJDIR)test.o -c test.m
+$(OBJDIR)test2.o: test2.m
+	$(CC) $(test2_CFLAGS) -o $(OBJDIR)test2.o -c test2.m
+
+$(OBJDIR)test3.o: test3.cpp
+	$(CXX) $(test3_CXXFLAGS) -o $(OBJDIR)test3.o -c test3.cpp
 
 $(OBJDIR)test.o: test.cpp
 	$(CXX) $(test3_CXXFLAGS) -o $(OBJDIR)test.o -c test.cpp
