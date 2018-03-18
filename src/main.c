@@ -91,8 +91,8 @@ static int _usage(void)
 	if((configure = configure_new(NULL)) == NULL)
 		return configure_error(2, "%s", error_get(NULL));
 	fprintf(stderr, "%s%s%s%s%s%s%s%s%s%s%s%s%s",
-"Usage: " PROGNAME " [-nSv][-b bindir][-d destdir][-l libdir][-O system][-p prefix]\n"
-"       [-s sbindir][directory...]\n"
+"Usage: " PROGNAME " [-nSv][-b bindir][-d destdir][-i includedir][-l libdir]\n"
+"                 [-O system][-p prefix][-s sbindir][directory...]\n"
 "  -n	Do not actually write Makefiles\n"
 "  -v	Verbose mode\n"
 "  -b	Binary files directory (default: \"",
