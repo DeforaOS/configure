@@ -1050,6 +1050,7 @@ static int _target_binary(Makefile * makefile, String const * target)
 }
 
 static void _flags_asm(Makefile * makefile, String const * target);
+static void _flags_asmpp(Makefile * makefile, String const * target);
 static void _flags_c(Makefile * makefile, String const * target);
 static void _flags_cxx(Makefile * makefile, String const * target);
 static void _flags_verilog(Makefile * makefile, String const * target);
@@ -1092,8 +1093,14 @@ static int _target_flags(Makefile * makefile, String const * target)
 		if(!done[type])
 			switch(type)
 			{
-				case OT_ASM_SOURCE:
 				case OT_ASMPP_SOURCE:
+					done[OT_ASMPP_SOURCE] = 1;
+					_flags_asmpp(makefile, target);
+					if(done[OT_ASM_SOURCE])
+						break;
+					/* fallback */
+				case OT_ASM_SOURCE:
+					done[OT_ASM_SOURCE] = 1;
 					_flags_asm(makefile, target);
 					break;
 				case OT_OBJC_SOURCE:
@@ -1131,9 +1138,20 @@ static void _flags_asm(Makefile * makefile, String const * target)
 {
 	String const * p;
 
-	_makefile_print(makefile, "%s%s", target, "_ASFLAGS = $(CPPFLAGSF)"
-			" $(CPPFLAGS) $(ASFLAGSF) $(ASFLAGS)");
+	_makefile_print(makefile, "%s%s", target, "_ASFLAGS = $(ASFLAGSF)"
+			" $(ASFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "asflags")) != NULL)
+		_makefile_print(makefile, " %s", p);
+	_makefile_print(makefile, "%c", '\n');
+}
+
+static void _flags_asmpp(Makefile * makefile, String const * target)
+{
+	String const * p;
+
+	_makefile_print(makefile, "%s%s", target, "_CPPFLAGS = $(CPPFLAGSF)"
+			" $(CPPFLAGS)");
+	if((p = _makefile_get_config(makefile, target, "cppflags")) != NULL)
 		_makefile_print(makefile, " %s", p);
 	_makefile_print(makefile, "%c", '\n');
 }
@@ -1384,11 +1402,24 @@ static int _target_object(Makefile * makefile,
 	switch(source_type(extension))
 	{
 		case OT_ASM_SOURCE:
-		case OT_ASMPP_SOURCE:
-			_makefile_print(makefile, "\n%s%s%s%s\n%s%s",
-					target, "_OBJS = ", "$(OBJDIR)", target,
+			_makefile_print(makefile, "\n%s%s%s\n%s%s",
+					target, "_OBJS = $(OBJDIR)", target,
 					target, "_ASFLAGS ="
-					" $(CPPFLAGSF) $(CPPFLAGS) $(ASFLAGSF)"
+					" $(ASFLAGSF) $(ASFLAGS)");
+			if((p = _makefile_get_config(makefile, target,
+							"asflags")) != NULL)
+				_makefile_print(makefile, " %s", p);
+			_makefile_print(makefile, "%c", '\n');
+			break;
+		case OT_ASMPP_SOURCE:
+			_makefile_print(makefile, "\n%s%s%s\n%s%s%s",
+					target, "_OBJS = $(OBJDIR)", target,
+					target, "_ASFLAGS = $(", target,
+					"_CPPFLAGS)");
+			if((p = _makefile_get_config(makefile, target,
+							"cppflags")) != NULL)
+				_makefile_print(makefile, " %s", p);
+			_makefile_print(makefile, "%s", " $(ASFLAGSF)"
 					" $(ASFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
 							"asflags")) != NULL)
