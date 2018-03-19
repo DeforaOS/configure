@@ -57,7 +57,7 @@ $(OBJDIR)test4.o: test4.asm
 	$(AS) $(test4_ASFLAGS) -o $(OBJDIR)test4.o test4.asm
 
 $(OBJDIR)test4.o: test4.S
-	$(AS) $(test4_ASFLAGS) -o $(OBJDIR)test4.o test4.S
+	$(AS) $(test4_CPPFLAGS) $(test4_ASFLAGS) -o $(OBJDIR)test4.o test4.S
 
 clean:
 	$(RM) -- $(test_OBJS) $(test2_OBJS) $(test3_OBJS) $(test4_OBJS)
