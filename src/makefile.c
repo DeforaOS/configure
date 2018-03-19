@@ -1414,13 +1414,13 @@ static int _target_object(Makefile * makefile,
 		case OT_ASMPP_SOURCE:
 			_makefile_print(makefile, "\n%s%s%s", target,
 					"_OBJS = $(OBJDIR)", target);
-			_makefile_print(makefile, "\n%s%s%s", target,
-					"_ASFLAGS = $(", target, "_CPPFLAGS)");
+			_makefile_print(makefile, "\n%s%s", target,
+					"_CPPFLAGS = $(CPPFLAGSF) $(CPPFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
 							"cppflags")) != NULL)
 				_makefile_print(makefile, " %s", p);
-			_makefile_print(makefile, "%s", " $(ASFLAGSF)"
-					" $(ASFLAGS)");
+			_makefile_print(makefile, "\n%s%s", target,
+					"_ASFLAGS = $(ASFLAGSF) $(ASFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
 							"asflags")) != NULL)
 				_makefile_print(makefile, " %s", p);
@@ -1720,7 +1720,11 @@ static int _target_source(Makefile * makefile,
 			if(tt == TT_LIBTOOL)
 				_makefile_print(makefile, "%s",
 						"$(LIBTOOL) --mode=compile ");
-			_makefile_print(makefile, "%s%s%s", "$(AS) $(", target,
+			_makefile_print(makefile, "%s", "$(AS)");
+			if(ot == OT_ASMPP_SOURCE)
+				_makefile_print(makefile, "%s%s%s", " $(",
+						target, "_CPPFLAGS)");
+			_makefile_print(makefile, "%s%s%s", " $(", target,
 					"_ASFLAGS)");
 			if(tt == TT_OBJECT)
 				_makefile_print(makefile, "%s%s%s%s%s%s",
