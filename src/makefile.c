@@ -1402,9 +1402,9 @@ static int _target_object(Makefile * makefile,
 	switch(source_type(extension))
 	{
 		case OT_ASM_SOURCE:
-			_makefile_print(makefile, "\n%s%s%s\n%s%s",
-					target, "_OBJS = $(OBJDIR)", target,
-					target, "_ASFLAGS ="
+			_makefile_print(makefile, "\n%s%s%s",
+					target, "_OBJS = $(OBJDIR)", target);
+			_makefile_print(makefile, "\n%s%s", target, "_ASFLAGS ="
 					" $(ASFLAGSF) $(ASFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
 							"asflags")) != NULL)
@@ -1412,10 +1412,10 @@ static int _target_object(Makefile * makefile,
 			_makefile_print(makefile, "%c", '\n');
 			break;
 		case OT_ASMPP_SOURCE:
-			_makefile_print(makefile, "\n%s%s%s\n%s%s%s",
-					target, "_OBJS = $(OBJDIR)", target,
-					target, "_ASFLAGS = $(", target,
-					"_CPPFLAGS)");
+			_makefile_print(makefile, "\n%s%s%s", target,
+					"_OBJS = $(OBJDIR)", target);
+			_makefile_print(makefile, "\n%s%s%s", target,
+					"_ASFLAGS = $(", target, "_CPPFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
 							"cppflags")) != NULL)
 				_makefile_print(makefile, " %s", p);
