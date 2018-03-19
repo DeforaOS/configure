@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)object.o
+TARGETS	= $(OBJDIR)object.o $(OBJDIR)object2.o
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -16,11 +16,18 @@ all: $(TARGETS)
 object.o_OBJS = $(OBJDIR)object.o
 object.o_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 
+object2.o_OBJS = $(OBJDIR)object2.o
+object2.o_CPPFLAGS = $(CPPFLAGSF) $(CPPFLAGS) -nostdinc
+object2.o_ASFLAGS = $(ASFLAGSF) $(ASFLAGS)
+
 $(OBJDIR)object.o: object.c a.c b.c
 	$(CC) $(object.o_CFLAGS) -o $(OBJDIR)object.o -c object.c
 
+$(OBJDIR)object2.o: object2.S
+	$(AS) $(object2.o_CPPFLAGS) $(object2.o_ASFLAGS) -o $(OBJDIR)object2.o object2.S
+
 clean:
-	$(RM) -- $(object.o_OBJS)
+	$(RM) -- $(object.o_OBJS) $(object2.o_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
