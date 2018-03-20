@@ -1721,11 +1721,22 @@ static int _target_source(Makefile * makefile,
 				_makefile_print(makefile, "%s",
 						"$(LIBTOOL) --mode=compile ");
 			_makefile_print(makefile, "%s", "$(AS)");
+			source[len] = '.'; /* FIXME ugly */
 			if(ot == OT_ASMPP_SOURCE)
+			{
 				_makefile_print(makefile, "%s%s%s", " $(",
 						target, "_CPPFLAGS)");
+				if((p = _makefile_get_config(makefile, source,
+								"cppflags"))
+						!= NULL)
+					_makefile_print(makefile, " %s", p);
+			}
 			_makefile_print(makefile, "%s%s%s", " $(", target,
 					"_ASFLAGS)");
+			if((p = _makefile_get_config(makefile, source,
+							"asflags")) != NULL)
+				_makefile_print(makefile, " %s", p);
+			source[len] = '\0'; /* FIXME ugly */
 			if(tt == TT_OBJECT)
 				_makefile_print(makefile, "%s%s%s%s%s%s",
 						" -o $(OBJDIR)", target, " ",
