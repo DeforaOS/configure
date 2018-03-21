@@ -1428,10 +1428,14 @@ static int _target_object(Makefile * makefile,
 			break;
 		case OT_C_SOURCE:
 		case OT_OBJC_SOURCE:
-			_makefile_print(makefile, "\n%s%s%s%s\n%s%s",
-					target, "_OBJS = ", "$(OBJDIR)", target,
-					target, "_CFLAGS ="
-					" $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF)"
+			_makefile_print(makefile, "\n%s%s%s%s", target,
+					"_OBJS = ", "$(OBJDIR)", target);
+			_makefile_print(makefile, "\n%s%s", target, "_CFLAGS ="
+					" $(CPPFLAGSF) $(CPPFLAGS)");
+			if((p = _makefile_get_config(makefile, target,
+							"cppflags")) != NULL)
+				_makefile_print(makefile, " %s", p);
+			_makefile_print(makefile, "%s", " $(CFLAGSF)"
 					" $(CFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
 							"cflags")) != NULL)
@@ -1440,10 +1444,14 @@ static int _target_object(Makefile * makefile,
 			break;
 		case OT_CXX_SOURCE:
 		case OT_OBJCXX_SOURCE:
-			_makefile_print(makefile, "\n%s%s%s%s\n%s%s",
-					target, "_OBJS = ", "$(OBJDIR)", target,
-					target, "_CXXFLAGS ="
-					" $(CPPFLAGSF) $(CPPFLAGS) $(CXXFLAGSF)"
+			_makefile_print(makefile, "\n%s%s%s%s", target,
+					"_OBJS = ", "$(OBJDIR)", target);
+			_makefile_print(makefile, "\n%s%s", target,
+					"_CXXFLAGS = $(CPPFLAGSF) $(CPPFLAGS)");
+			if((p = _makefile_get_config(makefile, target,
+							"cppflags")) != NULL)
+				_makefile_print(makefile, " %s", p);
+			_makefile_print(makefile, "%s", " $(CXXFLAGSF)"
 					" $(CXXFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
 							"cxxflags")) != NULL)
