@@ -54,8 +54,13 @@ _coverage()
 		return 2
 	fi
 	#build the project in a separate directory
-	$MKDIR "$tmpdir/src" "$tmpdir/tests" &&
-	(cd ../src && $MAKE CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" OBJDIR="$tmpdir/src/") &&
+	for i in src tools; do
+		[ -d "../$i" ] || continue
+		$MKDIR -- "$tmpdir/$i" &&
+		(cd "../$i" && $MAKE CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" OBJDIR="$tmpdir/$i/")
+	done
+	unset i
+	$MKDIR -- "$tmpdir/tests" &&
 	$MAKE CC="$CC" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" OBJDIR="$tmpdir/tests/" "$tmpdir/tests/$TARGET"
 	res=$?
 	#look for any code executed
