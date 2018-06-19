@@ -164,8 +164,8 @@
 				&package; project, and introduced here.</para>
 			<para>These scripts are primarily meant to allow further integration of the
 				build process, as defined by the Makefiles generated, with the requirements
-				of a software project beyond that of compiling code.  &package; is already
-				known to have been successfully integrated this way with:<itemizedlist>
+				of a software project beyond that of compiling code. &package; provides
+				support through these scripts for:<itemizedlist>
 					<listitem><para>AppBroker: integration with the DeforaOS distributed
 							computing framework (see appbroker.sh)</para></listitem>
 					<listitem><para><ulink url="http://www.docbook.org/">DocBook</ulink>:
@@ -185,6 +185,12 @@
 								url="http://pkgconfig.freedesktop.org/">pkg-config</ulink>: unified
 							interface to define compilation and linking rules to installed software
 							(see pkgconfig.sh)</para></listitem>
+					<listitem><para>syntax checkers: convenience scripts for a number of
+							programming languages and markup formats are provided, such as C (see
+							clint.sh), HTML (see htmllint.sh), <ulink
+								url="https://www.php.net/">PHP</ulink> (see phplint.sh), Python PEP-8
+							(see pylint.sh), POSIX shell scripts (see shlint.sh), or XML (see
+							xmllint.sh)</para></listitem>
 				</itemizedlist>
 			</para>
 			<refsect3>
