@@ -1,0 +1,39 @@
+TARGETS	= $(OBJDIR)main.class $(OBJDIR)app.class
+OBJDIR	=
+PREFIX	= /usr/local
+DESTDIR	=
+BINDIR	= $(PREFIX)/bin
+SBINDIR	= $(PREFIX)/sbin
+JAVAC	= javac
+EXEEXT	=
+RM	= rm -f
+LN	= ln -f
+MKDIR	= mkdir -m 0755 -p
+INSTALL	= install
+
+
+all: $(TARGETS)
+
+main.class_OBJS = $(OBJDIR)main.class
+main.class_JFLAGS = $(JFLAGSF) $(JFLAGS) -verbose
+
+app.class_OBJS = $(OBJDIR)app.class
+app.class_JFLAGS = $(JFLAGSF) $(JFLAGS)
+
+$(OBJDIR)main.class: main.java
+	$(JAVAC) $(main.class_JFLAGS) main.java
+
+$(OBJDIR)app.class: app.java
+	$(JAVAC) $(app.class_JFLAGS) app.java
+
+clean:
+	$(RM) -- $(main.class_OBJS) $(app.class_OBJS)
+
+distclean: clean
+	$(RM) -- $(TARGETS)
+
+install: all
+
+uninstall:
+
+.PHONY: all clean distclean install uninstall
