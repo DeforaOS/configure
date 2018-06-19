@@ -1848,9 +1848,8 @@ static int _target_source(Makefile * makefile,
 				ret = _source_subdir(makefile, source);
 			q = _makefile_get_config(makefile, source, "vflags");
 			source[len] = '\0';
-			_makefile_print(makefile, "%s", "$(VERILOG)");
-			_makefile_print(makefile, "%s%s%s", " $(", target,
-					"_VFLAGS)");
+			_makefile_print(makefile, "%s%s%s", "$(VERILOG) $(",
+					target, "_VFLAGS)");
 			if(q != NULL)
 				_makefile_print(makefile, " %s", q);
 			if(tt == TT_OBJECT)
