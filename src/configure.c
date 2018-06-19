@@ -136,6 +136,7 @@ const struct ExtensionType _sExtensionType[] =
 	{ "s",		OT_ASM_SOURCE		},
 	{ "S",		OT_ASMPP_SOURCE		},
 	{ "sx",		OT_ASMPP_SOURCE		},
+	{ "java",	OT_JAVA_SOURCE		},
 	{ "m",		OT_OBJC_SOURCE		},
 	{ "mm",		OT_OBJCXX_SOURCE	},
 	{ "v",		OT_VERILOG_SOURCE	},

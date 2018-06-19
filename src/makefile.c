@@ -528,6 +528,7 @@ static void _targets_cflags(Makefile * makefile);
 static void _targets_cxxflags(Makefile * makefile);
 static void _targets_exeext(Makefile * makefile);
 static void _targets_ldflags(Makefile * makefile);
+static void _targets_jflags(Makefile * makefile);
 static void _targets_vflags(Makefile * makefile);
 static void _binary_ldflags(Makefile * makefile, String const * ldflags);
 static void _variables_binary(Makefile * makefile, char * done)
@@ -546,6 +547,7 @@ static void _variables_binary(Makefile * makefile, char * done)
 		_targets_cflags(makefile);
 		_targets_cxxflags(makefile);
 		_targets_ldflags(makefile);
+		_targets_jflags(makefile);
 		_targets_vflags(makefile);
 		_targets_exeext(makefile);
 	}
@@ -654,6 +656,23 @@ static void _targets_ldflags(Makefile * makefile)
 		_binary_ldflags(makefile, p);
 		_makefile_print(makefile, "%c", '\n');
 	}
+}
+
+static void _targets_jflags(Makefile * makefile)
+{
+	String const * j;
+	String const * jff;
+	String const * jf;
+
+	j = _makefile_get_config(makefile, NULL, "javac");
+	jff = _makefile_get_config(makefile, NULL, "jflags_force");
+	jf = _makefile_get_config(makefile, NULL, "jflags");
+	if(j != NULL || jff != NULL || jf != NULL)
+		_makefile_output_program(makefile, "javac", 1);
+	if(jff != NULL)
+		_makefile_output_variable(makefile, "JFLAGSF", jff);
+	if(jf != NULL)
+		_makefile_output_variable(makefile, "JFLAGS", jf);
 }
 
 static void _targets_vflags(Makefile * makefile)
@@ -1011,6 +1030,10 @@ static int _objs_source(Makefile * makefile, String * source, TargetType tt)
 					source,
 					(tt == TT_LIBTOOL) ? ".lo" : ".o");
 			break;
+		case OT_JAVA_SOURCE:
+			_makefile_print(makefile, "%s%s%s", " $(OBJDIR)",
+					source, ".class");
+			break;
 		case OT_VERILOG_SOURCE:
 			_makefile_print(makefile, "%s%s%s", " $(OBJDIR)",
 					source, ".o");
@@ -1053,6 +1076,7 @@ static void _flags_asm(Makefile * makefile, String const * target);
 static void _flags_asmpp(Makefile * makefile, String const * target);
 static void _flags_c(Makefile * makefile, String const * target);
 static void _flags_cxx(Makefile * makefile, String const * target);
+static void _flags_java(Makefile * makefile, String const * target);
 static void _flags_verilog(Makefile * makefile, String const * target);
 static int _target_flags(Makefile * makefile, String const * target)
 {
@@ -1102,6 +1126,10 @@ static int _target_flags(Makefile * makefile, String const * target)
 				case OT_ASM_SOURCE:
 					done[OT_ASM_SOURCE] = 1;
 					_flags_asm(makefile, target);
+					break;
+				case OT_JAVA_SOURCE:
+					done[OT_JAVA_SOURCE] = 1;
+					_flags_java(makefile, target);
 					break;
 				case OT_OBJC_SOURCE:
 					done[OT_C_SOURCE] = 1;
@@ -1194,6 +1222,17 @@ static void _flags_cxx(Makefile * makefile, String const * target)
 			"_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "ldflags")) != NULL)
 		_binary_ldflags(makefile, p);
+	_makefile_print(makefile, "%c", '\n');
+}
+
+static void _flags_java(Makefile * makefile, String const * target)
+{
+	String const * p;
+
+	_makefile_print(makefile, "%s%s", target,
+			"_JFLAGS = $(JFLAGSF) $(JFLAGS)");
+	if((p = _makefile_get_config(makefile, target, "jflags")) != NULL)
+		_makefile_print(makefile, " %s", p);
 	_makefile_print(makefile, "%c", '\n');
 }
 
@@ -1455,6 +1494,16 @@ static int _target_object(Makefile * makefile,
 					" $(CXXFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
 							"cxxflags")) != NULL)
+				_makefile_print(makefile, " %s", p);
+			_makefile_print(makefile, "%c", '\n');
+			break;
+		case OT_JAVA_SOURCE:
+			_makefile_print(makefile, "\n%s%s%s%s\n%s%s",
+					target, "_OBJS = ",
+					"$(OBJDIR)", target, target, "_JFLAGS ="
+					" $(JFLAGSF) $(JFLAGS)");
+			if((p = _makefile_get_config(makefile, target,
+							"jflags")) != NULL)
 				_makefile_print(makefile, " %s", p);
 			_makefile_print(makefile, "%c", '\n');
 			break;
@@ -1831,6 +1880,25 @@ static int _target_source(Makefile * makefile,
 						source, ".o");
 			_makefile_print(makefile, "%s%s%s%s\n", " -c ", source, ".",
 					extension);
+			break;
+		case OT_JAVA_SOURCE:
+			_makefile_print(makefile, "%s%s", "\n$(OBJDIR)",
+					target);
+			_makefile_print(makefile, "%s%s%s%s", ": ", source, ".",
+					extension);
+			source[len] = '.'; /* FIXME ugly */
+			_source_depends(makefile, source);
+			_makefile_print(makefile, "%s", "\n\t");
+			if(strchr(source, '/') != NULL)
+				ret = _source_subdir(makefile, source);
+			q = _makefile_get_config(makefile, source, "jflags");
+			source[len] = '\0';
+			_makefile_print(makefile, "%s%s%s", "$(JAVAC) $(",
+					target, "_JFLAGS)");
+			if(q != NULL)
+				_makefile_print(makefile, " %s", q);
+			_makefile_print(makefile, "%s%s%s%s%c", " ", source,
+					".", extension, '\n');
 			break;
 		case OT_VERILOG_SOURCE:
 			if(tt == TT_OBJECT)
