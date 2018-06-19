@@ -103,6 +103,8 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/command/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/include/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/include/Makefile.NetBSD \
+		$(PACKAGE)-$(VERSION)/tests/java/project.conf \
+		$(PACKAGE)-$(VERSION)/tests/java/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/library/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/library/Makefile.Darwin \
 		$(PACKAGE)-$(VERSION)/tests/library/Makefile.Linux \
