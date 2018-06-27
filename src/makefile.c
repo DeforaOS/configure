@@ -2253,6 +2253,7 @@ static int _install_targets(Makefile * makefile)
 }
 
 static void _install_target_binary(Makefile * makefile, String const * target);
+static void _install_target_command(Makefile * makefile, String const * target);
 static int _install_target_library(Makefile * makefile, String const * target);
 static void _install_target_libtool(Makefile * makefile, String const * target);
 static void _install_target_object(Makefile * makefile, String const * target);
@@ -2272,6 +2273,7 @@ static int _install_target(Makefile * makefile, String const * target)
 			_install_target_binary(makefile, target);
 			break;
 		case TT_COMMAND:
+			_install_target_command(makefile, target);
 			break;
 		case TT_LIBRARY:
 			ret = _install_target_library(makefile, target);
@@ -2292,6 +2294,29 @@ static int _install_target(Makefile * makefile, String const * target)
 			break;
 	}
 	return ret;
+}
+
+static void _install_target_command(Makefile * makefile, String const * target)
+{
+	String const * path;
+	int phony;
+	String const * mode;
+	mode_t m = 0644;
+	String * p;
+
+	if((path = _makefile_get_config(makefile, target, "install")) == NULL)
+		return;
+	phony = _makefile_is_phony(makefile, target);
+	if((mode = _makefile_get_config(makefile, target, "mode")) == NULL
+			/* XXX these tests are not sufficient */
+			|| mode[0] == '\0'
+			|| (m = strtol(mode, &p, 8)) == 0
+			|| *p != '\0')
+		mode = "0644";
+	_makefile_mkdir(makefile, path);
+	_makefile_print(makefile, "%s%s%s%s%s%s/%s\n",
+			"\t$(INSTALL) -m ", mode, phony ? " " : " $(OBJDIR)",
+			target, " $(DESTDIR)", path, target);
 }
 
 static void _install_target_binary(Makefile * makefile, String const * target)
@@ -2744,6 +2769,8 @@ static int _uninstall_target(Makefile * makefile,
 					path, target, "$(EXEEXT)");
 			break;
 		case TT_COMMAND:
+			_makefile_print(makefile, "\t%s%s/%s\n", rm_destdir,
+					path, target);
 			break;
 		case TT_LIBRARY:
 			if(_uninstall_target_library(makefile, target,
