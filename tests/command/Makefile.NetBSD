@@ -1,4 +1,4 @@
-TARGETS	= phony target
+TARGETS	= phony target xinstall
 RM	= rm -f
 LN	= ln -f
 MKDIR	= mkdir -m 0755 -p
@@ -13,6 +13,9 @@ phony:
 target:
 	$(MAKE) command
 
+xinstall:
+	$(MAKE) command
+
 clean:
 	$(RM) --
 
@@ -20,7 +23,10 @@ distclean: clean
 	$(RM) -- $(TARGETS)
 
 install: all
+	$(MKDIR) $(DESTDIR)$(PREFIX)
+	$(INSTALL) -m 0644 $(OBJDIR)xinstall $(DESTDIR)$(PREFIX)/xinstall
 
 uninstall:
+	$(RM) -- $(DESTDIR)$(PREFIX)/xinstall
 
 .PHONY: all clean distclean install uninstall phony
