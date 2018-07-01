@@ -1,4 +1,4 @@
-TARGETS	= phony target xinstall
+TARGETS	= phony $(OBJDIR)target $(OBJDIR)xinstall
 RM	= rm -f
 LN	= ln -f
 MKDIR	= mkdir -m 0755 -p
@@ -10,10 +10,10 @@ all: $(TARGETS)
 phony:
 	exit 42
 
-target:
+$(OBJDIR)target:
 	$(MAKE) command
 
-xinstall:
+$(OBJDIR)xinstall:
 	$(MAKE) command
 
 clean:
