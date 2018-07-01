@@ -27,6 +27,7 @@
 #variables
 CONFIGSH="${0%/platform.sh}/config.sh"
 DESTDIR=
+LDSOCONF="/etc/ld.so.conf"
 PREFIX="/usr/local"
 PROGNAME="platform.sh"
 SOEXT=".so"
@@ -41,11 +42,11 @@ _platform_library()
 	libdir=$(_platform_variable "LIBDIR")
 	path="/lib:/usr/lib:$libdir"
 
-	if [ -f "$DESTDIR/etc/ld.so.conf" ]; then
+	if [ -f "$DESTDIR$LDSOCONF" ]; then
 		while read line; do
 			#XXX breaks on whitespace
 			[ -n "${line%#*}" ] && path="$path:$line"
-		done < "$DESTDIR/etc/ld.so.conf"
+		done < "$DESTDIR$LDSOCONF"
 	fi
 	(IFS=:; for p in $path; do
 		if [ -f "$DESTDIR$p/lib$library$SOEXT" ]; then
