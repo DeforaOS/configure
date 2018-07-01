@@ -338,7 +338,10 @@ static int _variables_targets(Makefile * makefile)
 							prints);
 					break;
 				case TT_COMMAND:
-					_makefile_print(makefile, " %s",
+					phony = _makefile_is_phony(makefile,
+							prints);
+					_makefile_print(makefile, " %s%s", phony
+							? "" : "$(OBJDIR)",
 							prints);
 					break;
 				case TT_LIBRARY:
@@ -1252,8 +1255,10 @@ static void _command_security(Makefile * makefile, String const * target,
 static int _target_command(Makefile * makefile, String const * target)
 {
 	String const * p;
+	int phony;
 
-	_makefile_print(makefile, "\n%s:", target);
+	phony = _makefile_is_phony(makefile, target);
+	_makefile_print(makefile, "\n%s%s:", phony ? "" : "$(OBJDIR)", target);
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
