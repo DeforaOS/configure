@@ -163,8 +163,10 @@
 				Although primarily dedicated to the generation of build systems through
 				Makefiles, primarily to compile source code in the C/C++ and assembly
 				languages, &package; can be extended for integration with external software
-				and processes such as translations, documentation generation, dynamic
-				bindings...
+				and processes such as translations, documentation generation, or dynamic
+				bindings for instance.</para>
+			<para>
+				Basic support for Java and Verilog is also available.
 			</para>
 		</refsect2>
 		<refsect2>
