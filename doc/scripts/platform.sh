@@ -69,6 +69,8 @@ _library_ldsoconf()
 				#remove trailing comments
 				line="${line%#*}"
 
+				#recurse into the file included
+				#XXX does not support globbing
 				filename="${ldsoconf%/*}/${line#include }"
 				[ -f "$filename" ] &&
 					_library_ldsoconf "$filename"
