@@ -43,10 +43,11 @@ _platform_library()
 	path="/lib:/usr/lib:$libdir"
 
 	if [ -f "$DESTDIR$LDSOCONF" ]; then
-		while read line; do
-			#XXX breaks on whitespace
-			[ -n "${line%#*}" ] && path="$path:$line"
-		done < "$DESTDIR$LDSOCONF"
+		paths=$(_library_ldsoconf "$DESTDIR$LDSOCONF")
+		#XXX breaks on whitespace
+		for p in $paths; do
+			path="$path:$p"
+		done
 	fi
 	(IFS=:; for p in $path; do
 		if [ -f "$DESTDIR$p/lib$library$SOEXT" ]; then
@@ -54,6 +55,26 @@ _platform_library()
 			return
 		fi
 	done)
+}
+
+_library_ldsoconf()
+{
+	ldsoconf="$1"
+
+	while read line; do
+		case "$line" in
+			"#"*)
+				;;
+			"include "*)
+				filename="${ldsoconf%/*}/${line#include }"
+				[ -f "$filename" ] &&
+					_library_ldsoconf "$filename"
+				;;
+			*)
+				echo "$line"
+				;;
+		esac
+	done < "$ldsoconf"
 }
 
 
