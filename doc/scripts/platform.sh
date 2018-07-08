@@ -66,11 +66,16 @@ _library_ldsoconf()
 			"#"*)
 				;;
 			"include "*)
+				#remove trailing comments
+				line="${line%#*}"
+
 				filename="${ldsoconf%/*}/${line#include }"
 				[ -f "$filename" ] &&
 					_library_ldsoconf "$filename"
 				;;
 			*)
+				#remove trailing comments
+				line="${line%#*}"
 				echo "$line"
 				;;
 		esac
