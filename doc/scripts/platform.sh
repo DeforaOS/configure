@@ -25,7 +25,7 @@
 
 
 #variables
-CONFIGSH="${0%/platform.sh}/config.sh"
+CONFIGSH="${0%/platform.sh}/../config.sh"
 DESTDIR=
 LDSOCONF="/etc/ld.so.conf"
 PREFIX="/usr/local"
