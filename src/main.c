@@ -185,7 +185,7 @@ int main(int argc, char * argv[])
 		ret = configure_error(2, "%s", error_get(NULL));
 	else if(optind == argc)
 	{
-		if((ret = configure_project(configure, ".")) != 0)
+		if((ret = configure_project(configure, NULL)) != 0)
 			configure_error(2, "%s", error_get(NULL));
 	}
 	else

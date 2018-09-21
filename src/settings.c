@@ -111,17 +111,20 @@ static int _settings_do(Configure * configure, String const * directory,
 	}
 	if(configure_is_flag_set(configure, PREFS_n))
 		return 0;
-	if((filename = string_new_append(directory, "/config.", extension,
-					NULL)) == NULL)
+	if(directory == NULL || string_length(directory) == 0)
+		filename = string_new_append("config.", extension, NULL);
+	else
+		filename = string_new_append(directory, "/config.", extension,
+					NULL);
+	if(filename == NULL)
 		return 1;
+	if(configure_is_flag_set(configure, PREFS_v))
+		printf("%s%s\n", "Creating ", filename);
 	if((fp = fopen(filename, "w")) == NULL)
 		configure_error(0, "%s: %s", filename, strerror(errno));
 	string_delete(filename);
 	if(fp == NULL)
 		return 1;
-	if(configure_is_flag_set(configure, PREFS_v))
-		printf("%s%s/%s%s\n", "Creating ", directory, "config.",
-				extension);
 	switch(i)
 	{
 		case ST_H:

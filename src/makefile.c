@@ -103,8 +103,11 @@ int makefile(Configure * configure, String const * directory, configArray * ca,
 	String * filename;
 	int ret = 0;
 
-	if((filename = string_new_append(directory, "/", MAKEFILE, NULL))
-			== NULL)
+	if(directory == NULL || string_length(directory) == 0)
+		filename = string_new(MAKEFILE);
+	else
+		filename = string_new_append(directory, "/", MAKEFILE, NULL);
+	if(filename == NULL)
 		return -1;
 	makefile.configure = configure;
 	makefile.fp = NULL;
@@ -114,8 +117,7 @@ int makefile(Configure * configure, String const * directory, configArray * ca,
 	else
 	{
 		if(_makefile_is_flag_set(&makefile, PREFS_v))
-			printf("%s%s/%s", "Creating ", directory,
-					MAKEFILE "\n");
+			printf("%s%s\n", "Creating ", filename);
 		ret |= _makefile_write(&makefile, ca, from, to);
 		if(makefile.fp != NULL)
 			fclose(makefile.fp);
