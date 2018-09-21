@@ -519,14 +519,12 @@ static int _project_load_subdirs(ConfigurePrefs * prefs, char const * directory,
 
 static int _project_load_subdirs_subdir(ConfigurePrefs * prefs,
 		char const * directory, configArray * ca, char const * subdir)
-	/* FIXME error checking */
 {
 	int ret;
 	String * p;
 
-	p = string_new(directory);
-	string_append(&p, "/");
-	string_append(&p, subdir);
+	if((p = string_new_append(directory, "/", subdir, NULL)) == NULL)
+		return error_print(PROGNAME);
 	ret = _project_load(prefs, p, ca);
 	string_delete(p);
 	return ret;
