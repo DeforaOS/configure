@@ -439,15 +439,13 @@ static int _project_do(Configure * configure, configArray * ca)
 	for(i = 0; i < cnt; i++)
 	{
 		array_get_copy(ca, i, &configure->project);
-		if((di = config_get(configure->project, "", "directory"))
-				== NULL)
-			continue;
+		di = config_get(configure->project, NULL, "directory");
 		for(j = i; j < cnt; j++)
 		{
 			array_get_copy(ca, j, &cj);
 			if((dj = config_get(cj, NULL, "directory")) == NULL)
 				continue;
-			if(string_find(dj, di) == NULL)
+			if(di != NULL && string_find(dj, di) == NULL)
 				break;
 		}
 		if(makefile(configure, di, ca, i, j) != 0)

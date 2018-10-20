@@ -2138,8 +2138,9 @@ static int _dist_subdir(Makefile * makefile, Config * subdir)
 	String const * quote;
 
 	path = _makefile_get_config(makefile, NULL, "directory");
-	len = string_length(path);
-	path = config_get(subdir, NULL, "directory");
+	len = (path != NULL) ? string_length(path) : 0;
+	if((path = config_get(subdir, NULL, "directory")) == NULL)
+		path = "";
 	path = &path[len];
 	if(path[0] == '/')
 		path++;
