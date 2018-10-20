@@ -445,7 +445,7 @@ static int _project_do(Configure * configure, configArray * ca)
 		for(j = i; j < cnt; j++)
 		{
 			array_get_copy(ca, j, &cj);
-			if((dj = config_get(cj, "", "directory")) == NULL)
+			if((dj = config_get(cj, NULL, "directory")) == NULL)
 				continue;
 			if(string_find(dj, di) == NULL)
 				break;
@@ -465,7 +465,7 @@ static int _project_load(ConfigurePrefs * prefs, String const * directory,
 	String const * subdirs = NULL;
 
 	if(directory == NULL || string_length(directory) == 0)
-		path = string_new_append(PROJECT_CONF, NULL);
+		path = string_new(PROJECT_CONF);
 	else
 		path = string_new_append(directory, "/", PROJECT_CONF, NULL);
 	if(path == NULL)
@@ -475,7 +475,7 @@ static int _project_load(ConfigurePrefs * prefs, String const * directory,
 		string_delete(path);
 		return configure_error(1, "%s", error_get(NULL));
 	}
-	config_set(config, "", "directory", directory);
+	config_set(config, NULL, "directory", directory);
 	if(prefs->flags & PREFS_v)
 		printf("%s%s%s", "Loading project file ", path, "\n");
 	if(config_load(config, path) != 0)
@@ -483,7 +483,7 @@ static int _project_load(ConfigurePrefs * prefs, String const * directory,
 	else
 	{
 		array_append(ca, &config);
-		subdirs = config_get(config, "", "subdirs");
+		subdirs = config_get(config, NULL, "subdirs");
 	}
 	string_delete(path);
 	if(subdirs == NULL)
