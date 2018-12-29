@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)clint.log $(OBJDIR)fixme.log $(OBJDIR)htmllint.log $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)tests.log $(OBJDIR)xmllint.log
+TARGETS	= $(OBJDIR)clint.log $(OBJDIR)htmllint.log $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)tests.log $(OBJDIR)xmllint.log
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
