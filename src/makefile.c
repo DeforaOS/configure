@@ -2250,7 +2250,8 @@ static int _install_targets(Makefile * makefile)
 			continue;
 		c = targets[i];
 		targets[i] = '\0';
-		ret |= _install_target(makefile, targets);
+		if(_makefile_is_enabled(makefile, targets) != 0)
+			ret |= _install_target(makefile, targets);
 		if(c == '\0')
 			break;
 		targets += i + 1;
@@ -2704,7 +2705,8 @@ static int _write_uninstall(Makefile * makefile)
 				continue;
 			c = targets[i];
 			targets[i] = '\0';
-			ret = _uninstall_target(makefile, targets);
+			if(_makefile_is_enabled(makefile, targets) != 0)
+				ret = _uninstall_target(makefile, targets);
 			if(c == '\0')
 				break;
 			targets += i + 1;
