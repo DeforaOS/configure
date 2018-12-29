@@ -123,7 +123,7 @@ while getopts "cO:P:" name; do
 			export "${OPTARG%%=*}"="${OPTARG#*=}"
 			;;
 		P)
-			#XXX ignored for compatibility
+			CPPFLAGS="$CPPFLAGS -I$OPTARG/include"
 			;;
 		?)
 			_usage
