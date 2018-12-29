@@ -41,6 +41,13 @@ test4_CPPFLAGS = $(CPPFLAGSF) $(CPPFLAGS)
 $(OBJDIR)test4$(EXEEXT): $(test4_OBJS)
 	$(CC) -o $(OBJDIR)test4$(EXEEXT) $(test4_OBJS) $(test4_LDFLAGS)
 
+test5_OBJS = $(OBJDIR)test5.o $(OBJDIR)main.o
+test5_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+test5_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+
+$(OBJDIR)test5$(EXEEXT): $(test5_OBJS)
+	$(CC) -o $(OBJDIR)test5$(EXEEXT) $(test5_OBJS) $(test5_LDFLAGS)
+
 $(OBJDIR)test.o: test.c
 	$(CC) $(test_CFLAGS) -o $(OBJDIR)test.o -c test.c
 
@@ -59,8 +66,14 @@ $(OBJDIR)test4.o: test4.asm
 $(OBJDIR)test4.o: test4.S
 	$(AS) $(test4_CPPFLAGS) -nostdinc $(test4_ASFLAGS) -o $(OBJDIR)test4.o test4.S
 
+$(OBJDIR)test5.o: test5.c
+	$(CC) $(test5_CFLAGS) -o $(OBJDIR)test5.o -c test5.c
+
+$(OBJDIR)main.o: main.c
+	$(CC) $(test5_CFLAGS) -o $(OBJDIR)main.o -c main.c
+
 clean:
-	$(RM) -- $(test_OBJS) $(test2_OBJS) $(test3_OBJS) $(test4_OBJS)
+	$(RM) -- $(test_OBJS) $(test2_OBJS) $(test3_OBJS) $(test4_OBJS) $(test5_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
