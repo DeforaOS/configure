@@ -33,6 +33,7 @@ PROJECTCONF="../project.conf"
 DATE="date"
 DEBUG="_debug"
 FIND="find"
+GREP="grep"
 LINT="lint -g"
 SORT="sort -n"
 TR="tr"
@@ -59,8 +60,16 @@ _clint()
 	done < "$PROJECTCONF"
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
-		for filename in $($FIND "../$subdir" -type f -a -name '*.c' | $SORT); do
-			(_clint_file "$filename")
+		for filename in $($FIND "../$subdir" -type f | $SORT); do
+			case "$filename" in
+				*.c)
+					(_clint_lint "$filename" ||
+						_clint_rtrim "$filename")
+					;;
+				*.h)
+					(_clint_rtrim "$filename")
+					;;
+			esac
 			if [ $? -ne 0 ]; then
 				echo "$PROGNAME: $filename: FAIL" 1>&2
 				ret=2
@@ -70,12 +79,28 @@ _clint()
 	return $ret
 }
 
-_clint_file()
+_clint_lint()
 {
 	filename="$1"
 
 	echo
 	$DEBUG $LINT $CPPFLAGS $CFLAGS "$filename" 2>&1
+	ret=$?
+	if [ $ret -eq 0 ]; then
+		echo "OK"
+	else
+		echo "FAIL"
+	fi
+	return $ret
+}
+
+_clint_rtrim()
+{
+	filename="$1"
+	regex="[ 	]\\+\$"
+
+	echo
+	$DEBUG $GREP -vq "$regex" "$filename" 2>&1
 	ret=$?
 	if [ $ret -eq 0 ]; then
 		echo "OK"
