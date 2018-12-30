@@ -72,6 +72,8 @@ _clint()
 
 _clint_file()
 {
+	filename="$1"
+
 	echo
 	$DEBUG $LINT $CPPFLAGS $CFLAGS "$filename" 2>&1
 	ret=$?
