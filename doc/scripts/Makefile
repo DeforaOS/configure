@@ -32,6 +32,8 @@ install: all
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 manual.css.xml $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/manual.css.xml
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
+	$(INSTALL) -m 0644 markdown.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/markdown.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 phplint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/phplint.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 pkgconfig.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/pkgconfig.sh
@@ -56,6 +58,7 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/gtkdoc.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/htmllint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/manual.css.xml
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/markdown.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/phplint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/pkgconfig.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/platform.sh

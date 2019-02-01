@@ -68,6 +68,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/doc/scripts/gtkdoc.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/htmllint.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/manual.css.xml \
+		$(PACKAGE)-$(VERSION)/doc/scripts/markdown.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/phplint.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/pkgconfig.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/platform.sh \
