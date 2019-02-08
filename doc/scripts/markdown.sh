@@ -62,13 +62,11 @@ _markdown()
 			$DEBUG $MD2RST "$source"		|| return 2
 			$DEBUG $RST2HTML "${target%.*}.rst" > "$target"
 			res=$?
-			$RM -- "${target%.*}.rst"
 			;;
 		1|2|3|4|5|6|7|8|9)
 			$DEBUG $MD2RST "$source"		|| return 2
 			$DEBUG $RST2MAN "${target%.*}.rst" > "$target"
 			res=$?
-			$RM -- "${target%.*}.rst"
 			;;
 		*)
 			_error "$target: Unknown type"
@@ -78,7 +76,7 @@ _markdown()
 
 	if [ $res -ne 0 ]; then
 		_error "$target: Could not create target"
-		$RM -- "$target"
+		$DEBUG $RM -- "$target"
 		return 2
 	fi
 }
@@ -168,7 +166,20 @@ while [ $# -gt 0 ]; do
 	esac
 
 	#clean
-	[ "$clean" -ne 0 ] && continue
+	if [ "$clean" -ne 0 ]; then
+		case "$ext" in
+			html|1|2|3|4|5|6|7|8|9)
+				tmpfile="${target#$OBJDIR}"
+				tmpfile="${source%.*}.rst"
+				$DEBUG $RM -- "$tmpfile"
+				;;
+			*)
+				_error "$target: Unknown type"
+				return 2
+				;;
+		esac
+		exit $?
+	fi
 
 	#uninstall
 	if [ "$uninstall" -eq 1 ]; then
