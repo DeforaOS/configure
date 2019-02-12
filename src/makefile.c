@@ -2641,7 +2641,7 @@ static int _write_phony(Makefile * makefile, char const ** targets)
 		_makefile_print(makefile, " %s", targets[i]);
 	if(_write_phony_targets(makefile) != 0)
 		return 1;
-	_makefile_print(makefile, "%s", "\n");
+	_makefile_print(makefile, "\n");
 	return 0;
 }
 
