@@ -2312,14 +2312,14 @@ static int _install_target(Makefile * makefile, String const * target)
 static void _install_target_command(Makefile * makefile, String const * target)
 {
 	String const * path;
-	int phony;
 	String const * mode;
 	mode_t m = 0644;
 	String * p;
 
 	if((path = _makefile_get_config(makefile, target, "install")) == NULL)
 		return;
-	phony = _makefile_is_phony(makefile, target);
+	if(_makefile_is_phony(makefile, target))
+		return;
 	if((mode = _makefile_get_config(makefile, target, "mode")) == NULL
 			/* XXX these tests are not sufficient */
 			|| mode[0] == '\0'
