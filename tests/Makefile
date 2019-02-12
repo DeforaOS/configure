@@ -28,7 +28,7 @@ $(OBJDIR)phplint.log: ../doc/scripts/phplint.sh
 $(OBJDIR)pylint.log: ../doc/scripts/pylint.sh
 	../doc/scripts/pylint.sh -P "$(PREFIX)" -- "$(OBJDIR)pylint.log"
 
-$(OBJDIR)shlint.log: ../doc/scripts/shlint.sh
+$(OBJDIR)shlint.log: ../doc/scripts/appbroker.sh ../doc/scripts/clint.sh ../doc/scripts/coverage.sh ../doc/scripts/docbook.sh ../doc/scripts/fixme.sh ../doc/scripts/gettext.sh ../doc/scripts/gtkdoc.sh ../doc/scripts/htmllint.sh ../doc/scripts/markdown.sh ../doc/scripts/phplint.sh ../doc/scripts/pkgconfig.sh ../doc/scripts/platform.sh ../doc/scripts/pylint.sh ../doc/scripts/shlint.sh ../doc/scripts/subst.sh ../doc/scripts/xmllint.sh tests.sh
 	../doc/scripts/shlint.sh -P "$(PREFIX)" -- "$(OBJDIR)shlint.log"
 
 $(OBJDIR)tests.log: $(OBJDIR)../tools/configure$(EXEEXT) binary/project.conf binary/Makefile.Darwin binary/Makefile.DeforaOS binary/Makefile.NetBSD binary/Makefile.Windows command/project.conf command/Makefile.NetBSD include/project.conf include/Makefile.NetBSD java/project.conf java/Makefile.NetBSD library/project.conf library/Makefile.Darwin library/Makefile.Linux library/Makefile.NetBSD library/Makefile.Windows libtool/project.conf libtool/Makefile.Darwin libtool/Makefile.Linux libtool/Makefile.NetBSD libtool/Makefile.Windows object/project.conf object/Makefile.NetBSD package/project.conf package/Makefile.NetBSD package/config.h.NetBSD package/config.sh.NetBSD plugin/Makefile.Darwin plugin/Makefile.NetBSD script/project.conf script/Makefile.NetBSD verilog/project.conf verilog/Makefile.NetBSD tests.sh
