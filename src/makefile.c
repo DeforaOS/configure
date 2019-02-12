@@ -2974,17 +2974,20 @@ static int _makefile_is_phony(Makefile * makefile, char const * target)
 /* makefile_expand */
 static int _makefile_expand(Makefile * makefile, char const * field)
 {
-	String * q;
 	int res;
+	char c;
 
-	if((q = string_new(field)) == NULL
-			|| string_replace(&q, ",", " ") != 0)
-	{
-		string_delete(q);
+	if(field == NULL)
 		return -1;
+	res = _makefile_print(makefile, " ");
+	while((c = *(field++)) != '\0')
+	{
+		if(c == ' ' || c == '\t')
+			res |= _makefile_print(makefile, "\\");
+		else if(c == ',')
+			c = ' ';
+		res |= _makefile_print(makefile, "%c", c);
 	}
-	res = _makefile_print(makefile, " %s", q);
-	string_delete(q);
 	return (res >= 0) ? 0 : -1;
 }
 
