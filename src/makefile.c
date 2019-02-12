@@ -3064,19 +3064,17 @@ static int _makefile_output_variable(Makefile * makefile, String const * name,
 		String const * value)
 {
 	int res;
-	char const * align;
-	char const * equals;
+	size_t len;
 
 	if(makefile->fp == NULL)
 		return 0;
-	if(name == NULL)
+	if(name == NULL || (len = strlen(name)) == 0)
 		return -1;
 	if(value == NULL)
 		value = "";
-	align = (strlen(name) >= 8) ? "" : "\t";
-	equals = (strlen(value) > 0) ? "= " : "=";
-	res = _makefile_print(makefile, "%s%s%s%s\n", name, align, equals,
-			value);
+	res = _makefile_print(makefile, "%s%s%s%s\n", name,
+			(len >= 8) ? "" : "\t",
+			(strlen(value) > 0) ? "= " : "=", value);
 	return (res >= 0) ? 0 : -1;
 }
 
