@@ -3097,8 +3097,8 @@ static int _makefile_output_variable(Makefile * makefile, String const * name,
 static int _makefile_mkdir(Makefile * makefile, char const * directory)
 {
 	/* FIXME keep track of the directories created */
-	return _makefile_print(makefile, "%s%s\n", "\t$(MKDIR) $(DESTDIR)",
-			directory);
+	return (_makefile_print(makefile, "%s%s\n", "\t$(MKDIR) $(DESTDIR)",
+				directory) >= 0) ? 0 : -1;
 }
 
 

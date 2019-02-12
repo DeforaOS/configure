@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)test phony
+TARGETS	= $(OBJDIR)test phony s\ p\ a\ c\ e\ s $(OBJDIR)s\ p\ a\ c\ e\ s\ 2
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -19,11 +19,19 @@ $(OBJDIR)disabled: a.c b.c
 phony: a.c b.c
 	./script.sh -P "$(PREFIX)" -- "phony"
 
+s\ p\ a\ c\ e\ s: $(OBJDIR)s\ p\ a\ c\ e\ s\ 2
+	./s\ c\ r\ i\ p\ t.sh -P "$(PREFIX)" -- "s p a c e s"
+
+$(OBJDIR)s\ p\ a\ c\ e\ s\ 2:
+	./s\ c\ r\ i\ p\ t.sh -P "$(PREFIX)" -- "$(OBJDIR)s p a c e s 2"
+
 clean:
-	$(RM) -- $(test_OBJS) $(disabled_OBJS) $(phony_OBJS)
+	$(RM) --
 	./script.sh -c -P "/somewhere/else" -- "$(OBJDIR)test"
 	./script.sh -c -P "$(PREFIX)" -- "$(OBJDIR)disabled"
 	./script.sh -c -P "$(PREFIX)" -- "phony"
+	./s\ c\ r\ i\ p\ t.sh -c -P "$(PREFIX)" -- "s p a c e s"
+	./s\ c\ r\ i\ p\ t.sh -c -P "$(PREFIX)" -- "$(OBJDIR)s p a c e s 2"
 
 distclean: clean
 	$(RM) -- $(TARGETS)
@@ -31,9 +39,13 @@ distclean: clean
 install: all
 	./script.sh -P "$(DESTDIR)/somewhere/else/again" -i -- "$(OBJDIR)test"
 	./script.sh -P "$(DESTDIR)$(PREFIX)" -i -- "phony"
+	./s\ c\ r\ i\ p\ t.sh -P "$(DESTDIR)$(PREFIX)" -i -- "s p a c e s"
+	./s\ c\ r\ i\ p\ t.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)s p a c e s 2"
 
 uninstall:
 	./script.sh -P "$(DESTDIR)/somewhere/else/again" -u -- "test"
 	./script.sh -P "$(DESTDIR)$(PREFIX)" -u -- "phony"
+	./s\ c\ r\ i\ p\ t.sh -P "$(DESTDIR)$(PREFIX)" -u -- "s p a c e s"
+	./s\ c\ r\ i\ p\ t.sh -P "$(DESTDIR)$(PREFIX)" -u -- "s p a c e s 2"
 
-.PHONY: all clean distclean install uninstall phony
+.PHONY: all clean distclean install uninstall phony s\ p\ a\ c\ e\ s
