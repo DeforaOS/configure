@@ -81,6 +81,7 @@ static int _makefile_output_variable(Makefile * makefile, String const * name,
 		String const * value);
 static int _makefile_mkdir(Makefile * makefile, char const * directory);
 static int _makefile_print(Makefile * makefile, char const * format, ...);
+static int _makefile_print_escape(Makefile * makefile, char const * str);
 static int _makefile_remove(Makefile * makefile, int recursive, ...);
 static int _makefile_subdirs(Makefile * makefile, char const * target);
 static int _makefile_target(Makefile * makefile, char const * target, ...);
@@ -342,8 +343,9 @@ static int _variables_targets(Makefile * makefile)
 				case TT_COMMAND:
 					phony = _makefile_is_phony(makefile,
 							prints);
-					_makefile_print(makefile, " %s%s", phony
-							? "" : "$(OBJDIR)",
+					_makefile_print(makefile, " %s", phony
+							? "" : "$(OBJDIR)");
+					_makefile_print_escape(makefile,
 							prints);
 					break;
 				case TT_LIBRARY:
@@ -1260,7 +1262,9 @@ static int _target_command(Makefile * makefile, String const * target)
 	int phony;
 
 	phony = _makefile_is_phony(makefile, target);
-	_makefile_print(makefile, "\n%s%s:", phony ? "" : "$(OBJDIR)", target);
+	_makefile_print(makefile, "\n%s", phony ? "" : "$(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, ":");
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
@@ -2323,9 +2327,13 @@ static void _install_target_command(Makefile * makefile, String const * target)
 			|| *p != '\0')
 		mode = "0644";
 	_makefile_mkdir(makefile, path);
-	_makefile_print(makefile, "%s%s%s%s%s%s/%s\n",
-			"\t$(INSTALL) -m ", mode, phony ? " " : " $(OBJDIR)",
-			target, " $(DESTDIR)", path, target);
+	_makefile_print(makefile, "%s%s%s", "\t$(INSTALL) -m ", mode,
+			" $(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s%s", " $(DESTDIR)", path);
+	_makefile_print(makefile, "/");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "\n");
 }
 
 static void _install_target_binary(Makefile * makefile, String const * target)
@@ -2662,8 +2670,11 @@ static int _write_phony_targets(Makefile * makefile)
 				case TT_COMMAND:
 				case TT_SCRIPT:
 					if(_makefile_is_phony(makefile, prints))
-						_makefile_print(makefile, " %s",
+					{
+						_makefile_print(makefile, " ");
+						_makefile_print_escape(makefile,
 								prints);
+					}
 					break;
 			}
 		if(c == '\0')
@@ -2779,8 +2790,9 @@ static int _uninstall_target(Makefile * makefile,
 					path, target, "$(EXEEXT)");
 			break;
 		case TT_COMMAND:
-			_makefile_print(makefile, "\t%s%s/%s\n", rm_destdir,
-					path, target);
+			_makefile_print(makefile, "\t%s%s/", rm_destdir, path);
+			_makefile_print_escape(makefile, target);
+			_makefile_print(makefile, "\n");
 			break;
 		case TT_LIBRARY:
 			if(_uninstall_target_library(makefile, target,
@@ -3091,6 +3103,25 @@ static int _makefile_print(Makefile * makefile, char const * format, ...)
 		ret = vfprintf(makefile->fp, format, ap);
 	va_end(ap);
 	return ret;
+}
+
+
+/* makefile_print_escape */
+static int _makefile_print_escape(Makefile * makefile, char const * str)
+{
+	if(str == NULL)
+		return -1;
+	if(makefile->fp == NULL)
+		return 0;
+	while(*str != '\0')
+	{
+		if(*str == ' ' || *str == '\t')
+			if(fputc('\\', makefile->fp) == EOF)
+				return -1;
+		if(fputc(*(str++), makefile->fp) == EOF)
+			return -1;
+	}
+	return 0;
 }
 
 
