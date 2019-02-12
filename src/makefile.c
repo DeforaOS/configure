@@ -2012,7 +2012,9 @@ static int _clean_targets(Makefile * makefile)
 			continue;
 		c = targets[i];
 		targets[i] = '\0';
-		if(_makefile_get_type(makefile, targets) != TT_COMMAND)
+		if(_makefile_get_type(makefile, targets) != TT_COMMAND
+				&& _makefile_get_type(makefile, targets)
+				!= TT_SCRIPT)
 			_makefile_print(makefile, "%s%s%s", " $(", targets,
 					"_OBJS)");
 		if(c == '\0')
