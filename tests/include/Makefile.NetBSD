@@ -15,6 +15,8 @@ clean:
 distclean: clean
 
 install: all
+	$(MKDIR) $(DESTDIR)$(INCLUDEDIR)/s\ p\ /a\ c\ e
+	$(INSTALL) -m 0644 s\ p\ a\ c\ e.h $(DESTDIR)$(INCLUDEDIR)/s\ p\ /a\ c\ e/s\ p\ a\ c\ e.h
 	$(MKDIR) $(DESTDIR)$(INCLUDEDIR)
 	$(INSTALL) -m 0644 stdio.h $(DESTDIR)$(INCLUDEDIR)/stdio.h
 	$(MKDIR) $(DESTDIR)$(INCLUDEDIR)/staging
@@ -23,6 +25,7 @@ install: all
 	$(INSTALL) -m 0644 sys/socket.h $(DESTDIR)$(INCLUDEDIR)/sys/socket.h
 
 uninstall:
+	$(RM) -- $(DESTDIR)$(INCLUDEDIR)/s\ p\ /a\ c\ e/s\ p\ a\ c\ e.h
 	$(RM) -- $(DESTDIR)$(INCLUDEDIR)/stdio.h
 	$(RM) -- $(DESTDIR)$(INCLUDEDIR)/staging/stdlib.h
 	$(RM) -- $(DESTDIR)$(INCLUDEDIR)/sys/socket.h
