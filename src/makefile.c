@@ -364,8 +364,9 @@ static int _variables_targets(Makefile * makefile)
 				case TT_SCRIPT:
 					phony = _makefile_is_phony(makefile,
 							prints);
-					_makefile_print(makefile, " %s%s", phony
-							? "" : "$(OBJDIR)",
+					_makefile_print(makefile, " %s", phony
+							? "" : "$(OBJDIR)");
+					_makefile_print_escape(makefile,
 							prints);
 					break;
 				case TT_PLUGIN:
@@ -1621,13 +1622,16 @@ static int _target_script(Makefile * makefile,
 	if(_makefile_is_flag_set(makefile, PREFS_S))
 		_script_security(makefile, target, script);
 	phony = _makefile_is_phony(makefile, target);
-	_makefile_print(makefile, "\n%s%s:", phony ? "" : "$(OBJDIR)",
-			target);
+	_makefile_print(makefile, "\n%s", phony ? "" : "$(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, ":");
 	_script_depends(makefile, target);
 	if((prefix = _makefile_get_config(makefile, target, "prefix")) == NULL)
 		prefix = "$(PREFIX)";
-	_makefile_print(makefile, "\n\t%s -P \"%s\" -- \"%s%s\"\n", script,
-			prefix, phony ? "" : "$(OBJDIR)", target);
+	_makefile_print(makefile, "\n\t");
+	_makefile_print_escape(makefile, script);
+	_makefile_print(makefile, " -P \"%s\" -- \"%s%s\"\n", prefix,
+			phony ? "" : "$(OBJDIR)", target);
 	return 0;
 }
 
@@ -2035,8 +2039,10 @@ static int _clean_targets(Makefile * makefile)
 							"prefix")) == NULL)
 				prefix = "$(PREFIX)";
 			phony = _makefile_is_phony(makefile, targets);
-			_makefile_print(makefile, "\t%s%s%s%s%s%s%s\n", p,
-					" -c -P \"", prefix, "\" -- \"",
+			_makefile_print(makefile, "\t");
+			_makefile_print_escape(makefile, p);
+			_makefile_print(makefile, "%s%s%s%s%s%s\n", " -c -P \"",
+					prefix, "\" -- \"",
 					phony ? "" : "$(OBJDIR)", targets,
 					"\"");
 		}
@@ -2467,8 +2473,9 @@ static void _install_target_script(Makefile * makefile, String const * target)
 	if((script = _makefile_get_config(makefile, target, "script")) == NULL)
 		return;
 	phony = _makefile_is_phony(makefile, target);
-	_makefile_print(makefile, "\t%s%s%s%s%s%s%s", script,
-			" -P \"$(DESTDIR)",
+	_makefile_print(makefile, "\t");
+	_makefile_print_escape(makefile, script);
+	_makefile_print(makefile, "%s%s%s%s%s%s", " -P \"$(DESTDIR)",
 			(path[0] != '\0') ? path : "$(PREFIX)",
 			"\" -i -- \"", phony ? "" : "$(OBJDIR)", target,
 			"\"\n");
@@ -2875,7 +2882,9 @@ static void _uninstall_target_script(Makefile * makefile,
 
 	if((script = _makefile_get_config(makefile, target, "script")) == NULL)
 		return;
-	_makefile_print(makefile, "\t%s%s%s%s%s%s", script, " -P \"$(DESTDIR)",
+	_makefile_print(makefile, "\t");
+	_makefile_print_escape(makefile, script);
+	_makefile_print(makefile, "%s%s%s%s%s", " -P \"$(DESTDIR)",
 			(path[0] != '\0') ? path : "$(PREFIX)", "\" -u -- \"",
 			target, "\"\n");
 }
