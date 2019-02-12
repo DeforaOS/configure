@@ -1,4 +1,4 @@
-TARGETS	= phony $(OBJDIR)target $(OBJDIR)xinstall
+TARGETS	= phony s\ p\ a\ c\ e\ s $(OBJDIR)s\ p\ a\ c\ e\ s\ 2 $(OBJDIR)target $(OBJDIR)xinstall
 RM	= rm -f
 LN	= ln -f
 MKDIR	= mkdir -m 0755 -p
@@ -9,6 +9,12 @@ all: $(TARGETS)
 
 phony:
 	exit 42
+
+s\ p\ a\ c\ e\ s:
+	echo $@
+
+$(OBJDIR)s\ p\ a\ c\ e\ s\ 2:
+	echo $@
 
 $(OBJDIR)target:
 	$(MAKE) command
@@ -24,9 +30,12 @@ distclean: clean
 
 install: all
 	$(MKDIR) $(DESTDIR)$(PREFIX)
+	$(INSTALL) -m 0644 $(OBJDIR)s\ p\ a\ c\ e\ s\ 2 $(DESTDIR)$(PREFIX)/s\ p\ a\ c\ e\ s\ 2
+	$(MKDIR) $(DESTDIR)$(PREFIX)
 	$(INSTALL) -m 0644 $(OBJDIR)xinstall $(DESTDIR)$(PREFIX)/xinstall
 
 uninstall:
+	$(RM) -- $(DESTDIR)$(PREFIX)/s\ p\ a\ c\ e\ s\ 2
 	$(RM) -- $(DESTDIR)$(PREFIX)/xinstall
 
-.PHONY: all clean distclean install uninstall phony
+.PHONY: all clean distclean install uninstall phony s\ p\ a\ c\ e\ s
