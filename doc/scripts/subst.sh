@@ -36,7 +36,6 @@ LIBEXECDIR=
 MANDIR=
 PROGNAME="subst.sh"
 SYSCONFDIR=
-[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 #executables
 CHMOD="chmod"
 DATE="date"
@@ -46,6 +45,7 @@ INSTALL="install"
 MKDIR="mkdir -m 0755 -p"
 RM="rm -f"
 SED="sed"
+[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
 #functions

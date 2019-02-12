@@ -25,8 +25,8 @@
 
 
 #variables
+CONFIGSH="${0%/markdown.sh}/../config.sh"
 PREFIX="/usr/local"
-[ -f "../config.sh" ] && . "../config.sh"
 PROGNAME="markdown.sh"
 #executables
 DEBUG="_debug"
@@ -36,6 +36,7 @@ MKDIR="mkdir -m 0755 -p"
 RM="rm -f"
 RST2HTML="rst2html5-2.7.py"
 RST2MAN="rst2man-2.7.py"
+[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
 #functions
