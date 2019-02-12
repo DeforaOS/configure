@@ -35,7 +35,7 @@ clean:
 		if [ -n "$(OBJDIR)" ]; then \
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/" clean; \
 		else $(MAKE) clean; fi) || exit; done
-	$(RM) -- $(configure.1_OBJS) $(configure.html_OBJS) $(project.conf.5_OBJS) $(project.conf.html_OBJS)
+	$(RM) --
 	./scripts/docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)configure.1"
 	./scripts/docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)configure.html"
 	./scripts/docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)project.conf.5"
@@ -46,7 +46,7 @@ distclean:
 		if [ -n "$(OBJDIR)" ]; then \
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/" distclean; \
 		else $(MAKE) distclean; fi) || exit; done
-	$(RM) -- $(configure.1_OBJS) $(configure.html_OBJS) $(project.conf.5_OBJS) $(project.conf.html_OBJS)
+	$(RM) --
 	./scripts/docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)configure.1"
 	./scripts/docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)configure.html"
 	./scripts/docbook.sh -c -P "$(PREFIX)" -- "$(OBJDIR)project.conf.5"
