@@ -63,6 +63,10 @@ _markdown()
 			$DEBUG $RST2HTML "${target%.*}.rst" > "$target"
 			res=$?
 			;;
+		rst)
+			$DEBUG $MD2RST "$source"		|| return 2
+			res=$?
+			;;
 		1|2|3|4|5|6|7|8|9)
 			$DEBUG $MD2RST "$source"		|| return 2
 			$DEBUG $RST2MAN "${target%.*}.rst" > "$target"
@@ -172,6 +176,8 @@ while [ $# -gt 0 ]; do
 				tmpfile="${target#$OBJDIR}"
 				tmpfile="${source%.*}.rst"
 				$DEBUG $RM -- "$tmpfile"
+				;;
+			rst)
 				;;
 			*)
 				_error "$target: Unknown type"
