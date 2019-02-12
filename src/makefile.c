@@ -2529,15 +2529,22 @@ static int _install_include(Makefile * makefile, String const * include)
 				return 2;
 	}
 	/* FIXME keep track of the directories created */
-	_makefile_print(makefile, "%s%s", "\t$(MKDIR) $(DESTDIR)", install);
+	_makefile_print(makefile, "%s", "\t$(MKDIR) $(DESTDIR)");
+	_makefile_print_escape(makefile, install);
 	if(p != NULL)
 	{
-		_makefile_print(makefile, "/%s", p);
+		_makefile_print(makefile, "/");
+		_makefile_print_escape(makefile, p);
 		string_delete(p);
 	}
 	_makefile_print(makefile, "\n");
-	_makefile_print(makefile, "%s%s%s%s/%s\n", "\t$(INSTALL) -m 0644 ",
-			include, " $(DESTDIR)", install, include);
+	_makefile_print(makefile, "%s", "\t$(INSTALL) -m 0644 ");
+	_makefile_print_escape(makefile, include);
+	_makefile_print(makefile, "%s", " $(DESTDIR)");
+	_makefile_print_escape(makefile, install);
+	_makefile_print(makefile, "/");
+	_makefile_print_escape(makefile, include);
+	_makefile_print(makefile, "\n");
 	return 0;
 }
 
@@ -2899,8 +2906,11 @@ static int _uninstall_include(Makefile * makefile,
 	if((install = _makefile_get_config(makefile, include, "install"))
 			== NULL)
 		install = "$(INCLUDEDIR)";
-	_makefile_print(makefile, "%s%s/%s\n", "\t$(RM) -- $(DESTDIR)", install,
-			include);
+	_makefile_print(makefile, "%s", "\t$(RM) -- $(DESTDIR)");
+	_makefile_print_escape(makefile, install);
+	_makefile_print(makefile, "/");
+	_makefile_print_escape(makefile, include);
+	_makefile_print(makefile, "\n");
 	return 0;
 }
 
