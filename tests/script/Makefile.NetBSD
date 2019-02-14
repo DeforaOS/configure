@@ -26,7 +26,6 @@ $(OBJDIR)s\ p\ a\ c\ e\ s\ 2:
 	./s\ c\ r\ i\ p\ t.sh -P "$(PREFIX)" -- "$(OBJDIR)s p a c e s 2"
 
 clean:
-	$(RM) --
 	./script.sh -c -P "/somewhere/else" -- "$(OBJDIR)test"
 	./script.sh -c -P "$(PREFIX)" -- "$(OBJDIR)disabled"
 	./script.sh -c -P "$(PREFIX)" -- "phony"

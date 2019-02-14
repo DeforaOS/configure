@@ -23,7 +23,6 @@ $(OBJDIR)xinstall:
 	$(MAKE) command
 
 clean:
-	$(RM) --
 
 distclean: clean
 	$(RM) -- $(TARGETS)
