@@ -195,7 +195,7 @@ static int _write_variables(Makefile * makefile)
 	ret |= _variables_executables(makefile);
 	ret |= _variables_includes(makefile);
 	ret |= _variables_subdirs(makefile);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 	return ret;
 }
 
@@ -258,7 +258,7 @@ static int _variables_print(Makefile * makefile,
 		prints += i + 1;
 		i = 0;
 	}
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 	string_delete(q);
 	return 0;
 }
@@ -380,7 +380,7 @@ static int _variables_targets(Makefile * makefile)
 		prints += i + 1;
 		i = 0;
 	}
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 	string_delete(q);
 	return ret;
 }
@@ -631,7 +631,7 @@ static void _targets_cxxflags(Makefile * makefile)
 		if(configure_get_os(makefile->configure) == HO_GNU_LINUX
 				&& string_find(cxxff, "-ansi"))
 			_makefile_print(makefile, "%s", " -D _GNU_SOURCE");
-		_makefile_print(makefile, "%c", '\n');
+		_makefile_print(makefile, "\n");
 	}
 	if(cxxf != NULL)
 	{
@@ -639,7 +639,7 @@ static void _targets_cxxflags(Makefile * makefile)
 		if(configure_get_os(makefile->configure) == HO_GNU_LINUX
 				&& string_find(cxxf, "-ansi"))
 			_makefile_print(makefile, "%s", " -D _GNU_SOURCE");
-		_makefile_print(makefile, "%c", '\n');
+		_makefile_print(makefile, "\n");
 	}
 }
 
@@ -656,13 +656,13 @@ static void _targets_ldflags(Makefile * makefile)
 	{
 		_makefile_print(makefile, "%s", "LDFLAGSF=");
 		_binary_ldflags(makefile, p);
-		_makefile_print(makefile, "%c", '\n');
+		_makefile_print(makefile, "\n");
 	}
 	if((p = _makefile_get_config(makefile, NULL, "ldflags")) != NULL)
 	{
 		_makefile_print(makefile, "%s", "LDFLAGS\t=");
 		_binary_ldflags(makefile, p);
-		_makefile_print(makefile, "%c", '\n');
+		_makefile_print(makefile, "\n");
 	}
 }
 
@@ -1007,7 +1007,7 @@ static int _target_objs(Makefile * makefile, String const * target)
 		sources += i + 1;
 		i = 0;
 	}
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 	string_delete(q);
 	return ret;
 }
@@ -1065,14 +1065,14 @@ static int _target_binary(Makefile * makefile, String const * target)
 		return 1;
 	if(_target_flags(makefile, target) != 0)
 		return 1;
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 	/* output the binary target */
 	_makefile_print(makefile, "%s%s%s%s%s%s", "$(OBJDIR)", target,
 			"$(EXEEXT)", ": $(", target, "_OBJS)");
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 	/* build the binary */
 	_makefile_print(makefile, "%s%s%s%s%s%s%s", "\t$(CC) -o $(OBJDIR)",
 			target, "$(EXEEXT) $(", target, "_OBJS) $(", target,
@@ -1178,7 +1178,7 @@ static void _flags_asm(Makefile * makefile, String const * target)
 			" $(ASFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "asflags")) != NULL)
 		_makefile_print(makefile, " %s", p);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 }
 
 static void _flags_asmpp(Makefile * makefile, String const * target)
@@ -1189,7 +1189,7 @@ static void _flags_asmpp(Makefile * makefile, String const * target)
 			" $(CPPFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "cppflags")) != NULL)
 		_makefile_print(makefile, " %s", p);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 }
 
 static void _flags_c(Makefile * makefile, String const * target)
@@ -1212,7 +1212,7 @@ static void _flags_c(Makefile * makefile, String const * target)
 			"_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "ldflags")) != NULL)
 		_binary_ldflags(makefile, p);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 }
 
 static void _flags_cxx(Makefile * makefile, String const * target)
@@ -1230,7 +1230,7 @@ static void _flags_cxx(Makefile * makefile, String const * target)
 			"_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "ldflags")) != NULL)
 		_binary_ldflags(makefile, p);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 }
 
 static void _flags_java(Makefile * makefile, String const * target)
@@ -1241,7 +1241,7 @@ static void _flags_java(Makefile * makefile, String const * target)
 			"_JFLAGS = $(JFLAGSF) $(JFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "jflags")) != NULL)
 		_makefile_print(makefile, " %s", p);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 }
 
 static void _flags_verilog(Makefile * makefile, String const * target)
@@ -1252,7 +1252,7 @@ static void _flags_verilog(Makefile * makefile, String const * target)
 			"_VFLAGS = $(VFLAGSF) $(VFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "vflags")) != NULL)
 		_makefile_print(makefile, " %s", p);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 }
 
 static void _command_security(Makefile * makefile, String const * target,
@@ -1326,7 +1326,7 @@ static int _target_library(Makefile * makefile, String const * target)
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 	/* build the shared library */
 	_makefile_print(makefile, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname,
 			(os != HO_MACOSX && os != HO_WIN32)
@@ -1352,7 +1352,7 @@ static int _target_library(Makefile * makefile, String const * target)
 	if((p = _makefile_get_config(makefile, q, "ldflags")) != NULL)
 		_binary_ldflags(makefile, p);
 	string_delete(q);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 	if(os == HO_MACOSX)
 	{
 		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target,
@@ -1391,7 +1391,7 @@ static int _target_library_static(Makefile * makefile,
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 	/* build the static library */
 	_makefile_print(makefile, "%s%s%s%s%s",
 			"\t$(AR) $(ARFLAGS) $(OBJDIR)", target, ".a $(",
@@ -1460,7 +1460,7 @@ static int _target_object(Makefile * makefile,
 			if((p = _makefile_get_config(makefile, target,
 							"asflags")) != NULL)
 				_makefile_print(makefile, " %s", p);
-			_makefile_print(makefile, "%c", '\n');
+			_makefile_print(makefile, "\n");
 			break;
 		case OT_ASMPP_SOURCE:
 			_makefile_print(makefile, "\n%s%s%s", target,
@@ -1475,7 +1475,7 @@ static int _target_object(Makefile * makefile,
 			if((p = _makefile_get_config(makefile, target,
 							"asflags")) != NULL)
 				_makefile_print(makefile, " %s", p);
-			_makefile_print(makefile, "%c", '\n');
+			_makefile_print(makefile, "\n");
 			break;
 		case OT_C_SOURCE:
 		case OT_OBJC_SOURCE:
@@ -1491,7 +1491,7 @@ static int _target_object(Makefile * makefile,
 			if((p = _makefile_get_config(makefile, target,
 							"cflags")) != NULL)
 				_makefile_print(makefile, " %s", p);
-			_makefile_print(makefile, "%c", '\n');
+			_makefile_print(makefile, "\n");
 			break;
 		case OT_CXX_SOURCE:
 		case OT_OBJCXX_SOURCE:
@@ -1507,7 +1507,7 @@ static int _target_object(Makefile * makefile,
 			if((p = _makefile_get_config(makefile, target,
 							"cxxflags")) != NULL)
 				_makefile_print(makefile, " %s", p);
-			_makefile_print(makefile, "%c", '\n');
+			_makefile_print(makefile, "\n");
 			break;
 		case OT_JAVA_SOURCE:
 			_makefile_print(makefile, "\n%s%s%s%s\n%s%s",
@@ -1517,7 +1517,7 @@ static int _target_object(Makefile * makefile,
 			if((p = _makefile_get_config(makefile, target,
 							"jflags")) != NULL)
 				_makefile_print(makefile, " %s", p);
-			_makefile_print(makefile, "%c", '\n');
+			_makefile_print(makefile, "\n");
 			break;
 		case OT_VERILOG_SOURCE:
 			_makefile_print(makefile, "\n%s%s%s%s\n%s%s",
@@ -1527,7 +1527,7 @@ static int _target_object(Makefile * makefile,
 			if((p = _makefile_get_config(makefile, target,
 							"vflags")) != NULL)
 				_makefile_print(makefile, " %s", p);
-			_makefile_print(makefile, "%c", '\n');
+			_makefile_print(makefile, "\n");
 			break;
 		case OT_UNKNOWN:
 			fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
@@ -1552,7 +1552,7 @@ static int _target_plugin(Makefile * makefile,
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 	/* build the plug-in */
 	_makefile_print(makefile, "%s%s%s%s%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)",
 			target, "$(SOEXT) $(", target, "_OBJS) $(", target,
@@ -1562,7 +1562,7 @@ static int _target_plugin(Makefile * makefile,
 	if((p = _makefile_get_config(makefile, q, "ldflags")) != NULL)
 		_binary_ldflags(makefile, p);
 	string_delete(q);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 	return 0;
 }
 
@@ -1817,7 +1817,7 @@ static int _target_source(Makefile * makefile,
 				_makefile_print(makefile, "%s%s%s%s%s%s",
 						" -o $(OBJDIR)", source, ".o ",
 						source, ".", extension);
-			_makefile_print(makefile, "%c", '\n');
+			_makefile_print(makefile, "\n");
 			break;
 		case OT_C_SOURCE:
 		case OT_OBJC_SOURCE:
@@ -2028,7 +2028,7 @@ static int _clean_targets(Makefile * makefile)
 		i = 0;
 	}
 	if(cnt > 0)
-		_makefile_print(makefile, "%c", '\n');
+		_makefile_print(makefile, "\n");
 	targets = q;
 	/* let each scripted target remove the relevant object files */
 	for(i = 0;; i++)
@@ -3167,7 +3167,7 @@ static int _makefile_remove(Makefile * makefile, int recursive, ...)
 		sep = " ";
 	}
 	va_end(ap);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 	return 0;
 }
 
@@ -3208,7 +3208,7 @@ static int _makefile_target(Makefile * makefile, char const * target, ...)
 	while((p = va_arg(ap, char const *)) != NULL)
 		_makefile_print(makefile, "%s%s", sep, p);
 	va_end(ap);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 	return 0;
 }
 
@@ -3226,7 +3226,7 @@ static int _makefile_targetv(FILE * fp, char const * target,
 	if(depends != NULL)
 		for(p = depends; *p != NULL; p++)
 			_makefile_print(makefile, " %s", *p);
-	_makefile_print(makefile, "%c", '\n');
+	_makefile_print(makefile, "\n");
 	return 0;
 }
 #endif
