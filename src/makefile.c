@@ -82,6 +82,8 @@ static int _makefile_output_variable(Makefile * makefile, String const * name,
 static int _makefile_mkdir(Makefile * makefile, char const * directory);
 static int _makefile_print(Makefile * makefile, char const * format, ...);
 static int _makefile_print_escape(Makefile * makefile, char const * str);
+static int _makefile_print_escape_variable(Makefile * makefile,
+		char const * str);
 static int _makefile_remove(Makefile * makefile, int recursive, ...);
 static int _makefile_subdirs(Makefile * makefile, char const * target);
 static int _makefile_target(Makefile * makefile, char const * target, ...);
@@ -336,9 +338,12 @@ static int _variables_targets(Makefile * makefile)
 			switch(enum_string(TT_LAST, sTargetType, type))
 			{
 				case TT_BINARY:
-					_makefile_print(makefile,
-							" $(OBJDIR)%s$(EXEEXT)",
+					_makefile_print(makefile, "%s",
+							" $(OBJDIR)");
+					_makefile_print_escape(makefile,
 							prints);
+					_makefile_print(makefile, "%s",
+							"$(EXEEXT)");
 					break;
 				case TT_COMMAND:
 					phony = _makefile_is_phony(makefile,
@@ -994,7 +999,9 @@ static int _target_objs(Makefile * makefile, String const * target)
 	if((sources = string_new(p)) == NULL)
 		return 1;
 	q = sources;
-	_makefile_print(makefile, "%s%s%s", "\n", target, "_OBJS =");
+	_makefile_print(makefile, "\n");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_OBJS =");
 	for(i = 0; ret == 0; i++)
 	{
 		if(sources[i] != ',' && sources[i] != '\0')
@@ -1034,8 +1041,9 @@ static int _objs_source(Makefile * makefile, String * source, TargetType tt)
 		case OT_CXX_SOURCE:
 		case OT_OBJC_SOURCE:
 		case OT_OBJCXX_SOURCE:
-			_makefile_print(makefile, "%s%s%s", " $(OBJDIR)",
-					source,
+			_makefile_print(makefile, "%s", " $(OBJDIR)");
+			_makefile_print_escape(makefile, source);
+			_makefile_print(makefile, "%s",
 					(tt == TT_LIBTOOL) ? ".lo" : ".o");
 			break;
 		case OT_JAVA_SOURCE:
@@ -1067,16 +1075,23 @@ static int _target_binary(Makefile * makefile, String const * target)
 		return 1;
 	_makefile_print(makefile, "\n");
 	/* output the binary target */
-	_makefile_print(makefile, "%s%s%s%s%s%s", "$(OBJDIR)", target,
-			"$(EXEEXT)", ": $(", target, "_OBJS)");
+	_makefile_print(makefile, "%s", "$(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s", "$(EXEEXT): $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_OBJS)");
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
 	_makefile_print(makefile, "\n");
 	/* build the binary */
-	_makefile_print(makefile, "%s%s%s%s%s%s%s", "\t$(CC) -o $(OBJDIR)",
-			target, "$(EXEEXT) $(", target, "_OBJS) $(", target,
-			"_LDFLAGS)\n");
+	_makefile_print(makefile, "%s", "\t$(CC) -o $(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s", "$(EXEEXT) $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_OBJS) $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_LDFLAGS)\n");
 	return 0;
 }
 
@@ -1196,8 +1211,8 @@ static void _flags_c(Makefile * makefile, String const * target)
 {
 	String const * p;
 
-	_makefile_print(makefile, "%s%s", target, "_CFLAGS = $(CPPFLAGSF)"
-			" $(CPPFLAGS)");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "cppflags")) != NULL)
 		_makefile_print(makefile, " %s", p);
 	_makefile_print(makefile, "%s", " $(CFLAGSF) $(CFLAGS)");
@@ -1208,8 +1223,9 @@ static void _flags_c(Makefile * makefile, String const * target)
 				&& string_find(p, "-ansi"))
 			_makefile_print(makefile, "%s", " -D _GNU_SOURCE");
 	}
-	_makefile_print(makefile, "\n%s%s", target,
-			"_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
+	_makefile_print(makefile, "\n");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "ldflags")) != NULL)
 		_binary_ldflags(makefile, p);
 	_makefile_print(makefile, "\n");
@@ -1219,15 +1235,16 @@ static void _flags_cxx(Makefile * makefile, String const * target)
 {
 	String const * p;
 
-	_makefile_print(makefile, "%s%s", target, "_CXXFLAGS = $(CPPFLAGSF)"
-			" $(CPPFLAGS)");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_CXXFLAGS = $(CPPFLAGSF) $(CPPFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "cppflags")) != NULL)
 		_makefile_print(makefile, " %s", p);
 	_makefile_print(makefile, "%s", " $(CXXFLAGSF) $(CXXFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "cxxflags")) != NULL)
 		_makefile_print(makefile, " %s", p);
-	_makefile_print(makefile, "\n%s%s", target,
-			"_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
+	_makefile_print(makefile, "\n");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "ldflags")) != NULL)
 		_binary_ldflags(makefile, p);
 	_makefile_print(makefile, "\n");
@@ -1453,8 +1470,9 @@ static int _target_object(Makefile * makefile,
 	switch(source_type(extension))
 	{
 		case OT_ASM_SOURCE:
-			_makefile_print(makefile, "\n%s%s%s",
-					target, "_OBJS = $(OBJDIR)", target);
+			_makefile_print(makefile, "\n%s%s",
+					target, "_OBJS = $(OBJDIR)");
+			_makefile_print_escape(makefile, target);
 			_makefile_print(makefile, "\n%s%s", target, "_ASFLAGS ="
 					" $(ASFLAGSF) $(ASFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
@@ -1463,8 +1481,9 @@ static int _target_object(Makefile * makefile,
 			_makefile_print(makefile, "\n");
 			break;
 		case OT_ASMPP_SOURCE:
-			_makefile_print(makefile, "\n%s%s%s", target,
-					"_OBJS = $(OBJDIR)", target);
+			_makefile_print(makefile, "\n%s%s", target,
+					"_OBJS = $(OBJDIR)");
+			_makefile_print_escape(makefile, target);
 			_makefile_print(makefile, "\n%s%s", target,
 					"_CPPFLAGS = $(CPPFLAGSF) $(CPPFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
@@ -1479,8 +1498,9 @@ static int _target_object(Makefile * makefile,
 			break;
 		case OT_C_SOURCE:
 		case OT_OBJC_SOURCE:
-			_makefile_print(makefile, "\n%s%s%s%s", target,
-					"_OBJS = ", "$(OBJDIR)", target);
+			_makefile_print(makefile, "\n%s%s%s", target,
+					"_OBJS = ", "$(OBJDIR)");
+			_makefile_print_escape(makefile, target);
 			_makefile_print(makefile, "\n%s%s", target, "_CFLAGS ="
 					" $(CPPFLAGSF) $(CPPFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
@@ -1495,8 +1515,9 @@ static int _target_object(Makefile * makefile,
 			break;
 		case OT_CXX_SOURCE:
 		case OT_OBJCXX_SOURCE:
-			_makefile_print(makefile, "\n%s%s%s%s", target,
-					"_OBJS = ", "$(OBJDIR)", target);
+			_makefile_print(makefile, "\n%s%s%s", target,
+					"_OBJS = ", "$(OBJDIR)");
+			_makefile_print_escape(makefile, target);
 			_makefile_print(makefile, "\n%s%s", target,
 					"_CXXFLAGS = $(CPPFLAGSF) $(CPPFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
@@ -1796,41 +1817,61 @@ static int _target_source(Makefile * makefile,
 			source[len] = '.'; /* FIXME ugly */
 			if(ot == OT_ASMPP_SOURCE)
 			{
-				_makefile_print(makefile, "%s%s%s", " $(",
-						target, "_CPPFLAGS)");
+				_makefile_print(makefile, "%s", " $(");
+				_makefile_print_escape_variable(makefile,
+						target);
+				_makefile_print(makefile, "%s", "_CPPFLAGS)");
 				if((p = _makefile_get_config(makefile, source,
 								"cppflags"))
 						!= NULL)
 					_makefile_print(makefile, " %s", p);
 			}
-			_makefile_print(makefile, "%s%s%s", " $(", target,
-					"_ASFLAGS)");
+			_makefile_print(makefile, "%s", " $(");
+			_makefile_print_escape_variable(makefile, target);
+			_makefile_print(makefile, "%s", "_ASFLAGS)");
 			if((p = _makefile_get_config(makefile, source,
 							"asflags")) != NULL)
 				_makefile_print(makefile, " %s", p);
 			source[len] = '\0'; /* FIXME ugly */
 			if(tt == TT_OBJECT)
-				_makefile_print(makefile, "%s%s%s%s%s%s",
-						" -o $(OBJDIR)", target, " ",
-						source, ".", extension);
+			{
+				_makefile_print(makefile, "%s", " -o $(OBJDIR)");
+				_makefile_print_escape(makefile, target);
+				_makefile_print(makefile, " ");
+				_makefile_print_escape(makefile, source);
+				_makefile_print(makefile, ".%s\n", extension);
+			}
 			else
-				_makefile_print(makefile, "%s%s%s%s%s%s",
-						" -o $(OBJDIR)", source, ".o ",
-						source, ".", extension);
-			_makefile_print(makefile, "\n");
+			{
+				_makefile_print(makefile, "%s", " -o $(OBJDIR)");
+				_makefile_print_escape(makefile, source);
+				_makefile_print(makefile, ".o ");
+				_makefile_print_escape(makefile, source);
+				_makefile_print(makefile, ".%s\n", extension);
+			}
 			break;
 		case OT_C_SOURCE:
 		case OT_OBJC_SOURCE:
 			if(tt == TT_OBJECT)
-				_makefile_print(makefile, "%s%s", "\n$(OBJDIR)",
-						target);
+			{
+				_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+				_makefile_print_escape(makefile, target);
+			}
 			else
-				_makefile_print(makefile, "%s%s%s", "\n$(OBJDIR)",
-						source, ".o");
+			{
+				_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+				_makefile_print_escape(makefile, source);
+				_makefile_print(makefile, ".o");
+			}
 			if(tt == TT_LIBTOOL)
-				_makefile_print(makefile, " %s%s", source, ".lo");
-			_makefile_print(makefile, "%s%s%s%s", ": ", source, ".",
-					extension);
+			{
+				_makefile_print(makefile, " ");
+				_makefile_print_escape(makefile, source);
+				_makefile_print(makefile, "%s" ".lo");
+			}
+			_makefile_print(makefile, ": ");
+			_makefile_print_escape(makefile, source);
+			_makefile_print(makefile, ".%s", extension);
 			source[len] = '.'; /* FIXME ugly */
 			_source_depends(makefile, source);
 			_makefile_print(makefile, "%s", "\n\t");
@@ -1846,8 +1887,9 @@ static int _target_source(Makefile * makefile,
 			_makefile_print(makefile, "%s", "$(CC)");
 			if(p != NULL)
 				_makefile_print(makefile, " %s", p);
-			_makefile_print(makefile, "%s%s%s", " $(", target,
-					"_CFLAGS)");
+			_makefile_print(makefile, "%s", " $(");
+			_makefile_print_escape_variable(makefile, target);
+			_makefile_print(makefile, "%s", "_CFLAGS)");
 			if(q != NULL)
 			{
 				_makefile_print(makefile, " %s", q);
@@ -1858,46 +1900,66 @@ static int _target_source(Makefile * makefile,
 							" -D _GNU_SOURCE");
 			}
 			if(tt == TT_OBJECT)
-				_makefile_print(makefile, "%s%s",
-						" -o $(OBJDIR)", target);
+			{
+				_makefile_print(makefile, "%s",
+						" -o $(OBJDIR)");
+				_makefile_print_escape(makefile, target);
+			}
 			else
-				_makefile_print(makefile, "%s%s%s",
-						" -o $(OBJDIR)", source, ".o");
-			_makefile_print(makefile, "%s%s%s%s%c", " -c ", source, ".",
-					extension, '\n');
+			{
+				_makefile_print(makefile, "%s",
+						" -o $(OBJDIR)");
+				_makefile_print_escape(makefile, source);
+				_makefile_print(makefile, ".o");
+			}
+			_makefile_print(makefile, "%s", " -c ");
+			_makefile_print_escape(makefile, source);
+			_makefile_print(makefile, ".%s\n", extension);
 			break;
 		case OT_CXX_SOURCE:
 		case OT_OBJCXX_SOURCE:
 			if(tt == TT_OBJECT)
-				_makefile_print(makefile, "%s%s", "\n$(OBJDIR)",
-						target);
+			{
+				_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+				_makefile_print_escape(makefile, target);
+			}
 			else
-				_makefile_print(makefile, "%s%s%s", "\n$(OBJDIR)",
-						source, ".o");
+			{
+				_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+				_makefile_print_escape(makefile, source);
+				_makefile_print(makefile, "%s", ".o");
+			}
 			_makefile_print(makefile, "%s%s%s%s", ": ", source, ".",
 					extension);
 			source[len] = '.'; /* FIXME ugly */
 			_source_depends(makefile, source);
 			p = _makefile_get_config(makefile, source, "cxxflags");
 			source[len] = '\0';
-			_makefile_print(makefile, "%s", "\n\t");
+			_makefile_print(makefile, "\n\t");
 			if(strchr(source, '/') != NULL)
 				ret = _source_subdir(makefile, source);
 			if(tt == TT_LIBTOOL)
 				_makefile_print(makefile, "%s",
 						"$(LIBTOOL) --mode=compile ");
-			_makefile_print(makefile, "%s%s%s", "$(CXX) $(", target,
-					"_CXXFLAGS)");
+			_makefile_print(makefile, "%s", "$(CXX) $(");
+			_makefile_print_escape(makefile, target);
+			_makefile_print(makefile, "%s", "_CXXFLAGS)");
 			if(p != NULL)
 				_makefile_print(makefile, " %s", p);
 			if(tt == TT_OBJECT)
-				_makefile_print(makefile, "%s%s", " -o $(OBJDIR)",
-						target);
+			{
+				_makefile_print(makefile, "%s", " -o $(OBJDIR)");
+				_makefile_print_escape(makefile, target);
+			}
 			else
-				_makefile_print(makefile, "%s%s%s", " -o $(OBJDIR)",
-						source, ".o");
-			_makefile_print(makefile, "%s%s%s%s\n", " -c ", source, ".",
-					extension);
+			{
+				_makefile_print(makefile, "%s", " -o $(OBJDIR)");
+				_makefile_print_escape(makefile, source);
+				_makefile_print(makefile, ".o");
+			}
+			_makefile_print(makefile, "%s", " -c ");
+			_makefile_print_escape(makefile, source);
+			_makefile_print(makefile, ".%s\n", extension);
 			break;
 		case OT_JAVA_SOURCE:
 			_makefile_print(makefile, "%s%s", "\n$(OBJDIR)",
@@ -2021,8 +2083,9 @@ static int _clean_targets(Makefile * makefile)
 		{
 			if(cnt++ == 0)
 				_makefile_print(makefile, "%s", "\t$(RM) --");
-			_makefile_print(makefile, "%s%s%s", " $(", targets,
-					"_OBJS)");
+			_makefile_print(makefile, "%s", " $(");
+			_makefile_print_escape_variable(makefile, targets);
+			_makefile_print(makefile, "%s", "_OBJS)");
 		}
 		if(c == '\0')
 			break;
@@ -2359,9 +2422,13 @@ static void _install_target_binary(Makefile * makefile, String const * target)
 	if((path = _makefile_get_config(makefile, target, "install")) == NULL)
 		return;
 	_makefile_mkdir(makefile, path);
-	_makefile_print(makefile, "%s%s%s%s/%s%s\n",
-			"\t$(INSTALL) -m 0755 $(OBJDIR)", target,
-			"$(EXEEXT) $(DESTDIR)", path, target, "$(EXEEXT)");
+	_makefile_print(makefile, "%s", "\t$(INSTALL) -m 0755 $(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s", "$(EXEEXT) $(DESTDIR)");
+	_makefile_print_escape(makefile, path);
+	_makefile_print(makefile, "/");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s\n", "$(EXEEXT)");
 }
 
 static int _install_target_library(Makefile * makefile, String const * target)
@@ -2810,8 +2877,11 @@ static int _uninstall_target(Makefile * makefile,
 	switch(tt)
 	{
 		case TT_BINARY:
-			_makefile_print(makefile, "\t%s%s/%s%s\n", rm_destdir,
-					path, target, "$(EXEEXT)");
+			_makefile_print(makefile, "\t%s", rm_destdir);
+			_makefile_print_escape(makefile, path);
+			_makefile_print(makefile, "/");
+			_makefile_print_escape(makefile, target);
+			_makefile_print(makefile, "$(EXEEXT)\n");
 			break;
 		case TT_COMMAND:
 			_makefile_print(makefile, "\t%s%s/", rm_destdir, path);
@@ -2829,8 +2899,11 @@ static int _uninstall_target(Makefile * makefile,
 					target, ".la\n");
 			break;
 		case TT_OBJECT:
-			_makefile_print(makefile, "\t%s%s/%s\n", rm_destdir,
-					path, target);
+			_makefile_print(makefile, "\t%s", rm_destdir);
+			_makefile_print_escape(makefile, path);
+			_makefile_print(makefile, "/");
+			_makefile_print_escape(makefile, target);
+			_makefile_print(makefile, "\n");
 			break;
 		case TT_PLUGIN:
 			_makefile_print(makefile, "\t%s%s/%s%s\n", rm_destdir,
@@ -3115,8 +3188,11 @@ static int _makefile_output_variable(Makefile * makefile, String const * name,
 static int _makefile_mkdir(Makefile * makefile, char const * directory)
 {
 	/* FIXME keep track of the directories created */
-	return (_makefile_print(makefile, "%s%s\n", "\t$(MKDIR) $(DESTDIR)",
-				directory) >= 0) ? 0 : -1;
+	if(_makefile_print(makefile, "%s", "\t$(MKDIR) $(DESTDIR)") < 0
+			|| _makefile_print_escape(makefile, directory) < 0
+			|| _makefile_print(makefile, "\n") < 0)
+		return -1;
+	return 0;
 }
 
 
@@ -3149,6 +3225,27 @@ static int _makefile_print_escape(Makefile * makefile, char const * str)
 			if(fputc('\\', makefile->fp) == EOF)
 				return -1;
 		if(fputc(*(str++), makefile->fp) == EOF)
+			return -1;
+	}
+	return 0;
+}
+
+
+/* makefile_print_escape_variable */
+static int _makefile_print_escape_variable(Makefile * makefile,
+		char const * str)
+{
+	char c;
+
+	if(str == NULL)
+		return -1;
+	if(makefile->fp == NULL)
+		return 0;
+	while((c = *(str++)) != '\0')
+	{
+		if(c == ' ' || c == '\t')
+			c = '_';
+		if(fputc(c, makefile->fp) == EOF)
 			return -1;
 	}
 	return 0;
