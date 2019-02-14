@@ -2884,7 +2884,9 @@ static int _uninstall_target(Makefile * makefile,
 			_makefile_print(makefile, "$(EXEEXT)\n");
 			break;
 		case TT_COMMAND:
-			_makefile_print(makefile, "\t%s%s/", rm_destdir, path);
+			_makefile_print(makefile, "\t%s", rm_destdir);
+			_makefile_print_escape(makefile, path);
+			_makefile_print(makefile, "/");
 			_makefile_print_escape(makefile, target);
 			_makefile_print(makefile, "\n");
 			break;
