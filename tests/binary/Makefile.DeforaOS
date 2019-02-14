@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)test$(EXEEXT) $(OBJDIR)test2$(EXEEXT) $(OBJDIR)test3$(EXEEXT) $(OBJDIR)test4$(EXEEXT)
+TARGETS	= $(OBJDIR)test$(EXEEXT) $(OBJDIR)test2$(EXEEXT) $(OBJDIR)test3$(EXEEXT) $(OBJDIR)test\ 5$(EXEEXT)
 OBJDIR	=
 PREFIX	= /Apps/$(VENDOR)
 DESTDIR	=
@@ -41,12 +41,12 @@ test4_CPPFLAGS = $(CPPFLAGSF) $(CPPFLAGS)
 $(OBJDIR)test4$(EXEEXT): $(test4_OBJS)
 	$(CC) -o $(OBJDIR)test4$(EXEEXT) $(test4_OBJS) $(test4_LDFLAGS)
 
-test5_OBJS = $(OBJDIR)test5.o $(OBJDIR)main.o
-test5_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
-test5_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+test_5_OBJS = $(OBJDIR)test\ 5.o $(OBJDIR)main.o
+test_5_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+test_5_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-$(OBJDIR)test5$(EXEEXT): $(test5_OBJS)
-	$(CC) -o $(OBJDIR)test5$(EXEEXT) $(test5_OBJS) $(test5_LDFLAGS)
+$(OBJDIR)test\ 5$(EXEEXT): $(test_5_OBJS)
+	$(CC) -o $(OBJDIR)test\ 5$(EXEEXT) $(test_5_OBJS) $(test_5_LDFLAGS)
 
 $(OBJDIR)test.o: test.c
 	$(CC) $(test_CFLAGS) -o $(OBJDIR)test.o -c test.c
@@ -66,14 +66,14 @@ $(OBJDIR)test4.o: test4.asm
 $(OBJDIR)test4.o: test4.S
 	$(AS) $(test4_CPPFLAGS) -nostdinc $(test4_ASFLAGS) -o $(OBJDIR)test4.o test4.S
 
-$(OBJDIR)test5.o: test5.c
-	$(CC) $(test5_CFLAGS) -o $(OBJDIR)test5.o -c test5.c
+$(OBJDIR)test\ 5.o: test\ 5.c
+	$(CC) $(test_5_CFLAGS) -o $(OBJDIR)test\ 5.o -c test\ 5.c
 
 $(OBJDIR)main.o: main.c
-	$(CC) $(test5_CFLAGS) -o $(OBJDIR)main.o -c main.c
+	$(CC) $(test_5_CFLAGS) -o $(OBJDIR)main.o -c main.c
 
 clean:
-	$(RM) -- $(test_OBJS) $(test2_OBJS) $(test3_OBJS) $(test4_OBJS) $(test5_OBJS)
+	$(RM) -- $(test_OBJS) $(test2_OBJS) $(test3_OBJS) $(test4_OBJS) $(test_5_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
@@ -81,8 +81,11 @@ distclean: clean
 install: all
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m 0755 $(OBJDIR)test$(EXEEXT) $(DESTDIR)$(BINDIR)/test$(EXEEXT)
+	$(MKDIR) $(DESTDIR)$(BINDIR)/test\ 5
+	$(INSTALL) -m 0755 $(OBJDIR)test\ 5$(EXEEXT) $(DESTDIR)$(BINDIR)/test\ 5/test\ 5$(EXEEXT)
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(BINDIR)/test$(EXEEXT)
+	$(RM) -- $(DESTDIR)$(BINDIR)/test\ 5/test\ 5$(EXEEXT)
 
 .PHONY: all clean distclean install uninstall
