@@ -1995,6 +1995,7 @@ static int _clean_targets(Makefile * makefile)
 	String const * p;
 	String * targets;
 	String * q;
+	size_t cnt;
 	size_t i;
 	char c;
 	int phony;
@@ -2005,8 +2006,7 @@ static int _clean_targets(Makefile * makefile)
 		return 1;
 	q = targets;
 	/* remove all of the object files */
-	_makefile_print(makefile, "%s", "\t$(RM) --");
-	for(i = 0;; i++)
+	for(i = 0, cnt = 0;; i++)
 	{
 		if(targets[i] != ',' && targets[i] != '\0')
 			continue;
@@ -2015,15 +2015,20 @@ static int _clean_targets(Makefile * makefile)
 		if(_makefile_get_type(makefile, targets) != TT_COMMAND
 				&& _makefile_get_type(makefile, targets)
 				!= TT_SCRIPT)
+		{
+			if(cnt++ == 0)
+				_makefile_print(makefile, "%s", "\t$(RM) --");
 			_makefile_print(makefile, "%s%s%s", " $(", targets,
 					"_OBJS)");
+		}
 		if(c == '\0')
 			break;
 		targets[i] = c;
 		targets += i + 1;
 		i = 0;
 	}
-	_makefile_print(makefile, "%c", '\n');
+	if(cnt > 0)
+		_makefile_print(makefile, "%c", '\n');
 	targets = q;
 	/* let each scripted target remove the relevant object files */
 	for(i = 0;; i++)
