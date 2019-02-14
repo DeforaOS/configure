@@ -1883,6 +1883,9 @@ static int _target_source(Makefile * makefile,
 			_makefile_print(makefile, "%s", "\n\t");
 			if(strchr(source, '/') != NULL)
 				ret = _source_subdir(makefile, source);
+			if(tt == TT_LIBTOOL)
+				_makefile_print(makefile, "%s",
+						"$(LIBTOOL) --mode=compile ");
 			_makefile_print(makefile, "%s%s%s", "$(CXX) $(", target,
 					"_CXXFLAGS)");
 			if(p != NULL)
