@@ -1052,8 +1052,9 @@ static int _objs_source(Makefile * makefile, String * source, TargetType tt)
 			_makefile_print(makefile, "%s", ".class");
 			break;
 		case OT_VERILOG_SOURCE:
-			_makefile_print(makefile, "%s%s%s", " $(OBJDIR)",
-					source, ".o");
+			_makefile_print(makefile, "%s", " $(OBJDIR)");
+			_makefile_print_escape(makefile, source);
+			_makefile_print(makefile, "%s", ".o");
 			break;
 		case OT_UNKNOWN:
 			ret = 1;
@@ -1266,7 +1267,8 @@ static void _flags_verilog(Makefile * makefile, String const * target)
 {
 	String const * p;
 
-	_makefile_print(makefile, "%s%s", target,
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s",
 			"_VFLAGS = $(VFLAGSF) $(VFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "vflags")) != NULL)
 		_makefile_print(makefile, " %s", p);
@@ -1543,10 +1545,14 @@ static int _target_object(Makefile * makefile, String const * target)
 			_makefile_print(makefile, "\n");
 			break;
 		case OT_VERILOG_SOURCE:
-			_makefile_print(makefile, "\n%s%s%s%s\n%s%s",
-					target, "_OBJS = ",
-					"$(OBJDIR)", target, target, "_VFLAGS ="
-					" $(VFLAGSF) $(VFLAGS)");
+			_makefile_print(makefile, "\n");
+			_makefile_print_escape_variable(makefile, target);
+			_makefile_print(makefile, "%s", "_OBJS = $(OBJDIR)");
+			_makefile_print_escape(makefile, target);
+			_makefile_print(makefile, "\n");
+			_makefile_print_escape_variable(makefile, target);
+			_makefile_print(makefile, "%s",
+					"_VFLAGS = $(VFLAGSF) $(VFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
 							"vflags")) != NULL)
 				_makefile_print(makefile, " %s", p);
@@ -1987,32 +1993,47 @@ static int _target_source(Makefile * makefile, String const * target,
 			break;
 		case OT_VERILOG_SOURCE:
 			if(tt == TT_OBJECT)
-				_makefile_print(makefile, "%s%s", "\n$(OBJDIR)",
-						target);
+			{
+				_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+				_makefile_print_escape(makefile, target);
+			}
 			else
-				_makefile_print(makefile, "%s%s%s", "\n$(OBJDIR)",
-						source, ".o");
-			_makefile_print(makefile, "%s%s%s%s", ": ", source, ".",
-					extension);
+			{
+				_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+				_makefile_print_escape(makefile, source);
+				_makefile_print(makefile, ".o");
+			}
+			_makefile_print(makefile, ": ");
+			_makefile_print_escape(makefile, source);
+			_makefile_print(makefile, ".%s", extension);
 			source[len] = '.'; /* FIXME ugly */
 			_source_depends(makefile, source);
-			_makefile_print(makefile, "%s", "\n\t");
+			_makefile_print(makefile, "\n\t");
 			if(strchr(source, '/') != NULL)
 				ret = _source_subdir(makefile, source);
 			q = _makefile_get_config(makefile, source, "vflags");
 			source[len] = '\0';
-			_makefile_print(makefile, "%s%s%s", "$(VERILOG) $(",
-					target, "_VFLAGS)");
+			_makefile_print(makefile, "%s", "$(VERILOG) $(");
+			_makefile_print_escape_variable(makefile, target);
+			_makefile_print(makefile, "%s", "_VFLAGS)");
 			if(q != NULL)
 				_makefile_print(makefile, " %s", q);
 			if(tt == TT_OBJECT)
-				_makefile_print(makefile, "%s%s",
-						" -o $(OBJDIR)", target);
+			{
+				_makefile_print(makefile, "%s",
+						" -o $(OBJDIR)");
+				_makefile_print_escape(makefile, target);
+			}
 			else
-				_makefile_print(makefile, "%s%s%s",
-						" -o $(OBJDIR)", source, ".o");
-			_makefile_print(makefile, "%s%s%s%s%c", " ", source,
-					".", extension, '\n');
+			{
+				_makefile_print(makefile, "%s",
+						" -o $(OBJDIR)");
+				_makefile_print_escape(makefile, source);
+				_makefile_print(makefile, ".o");
+			}
+			_makefile_print(makefile, " ");
+			_makefile_print_escape(makefile, source);
+			_makefile_print(makefile, "%s%s\n", ".", extension);
 			break;
 		case OT_UNKNOWN:
 			fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
