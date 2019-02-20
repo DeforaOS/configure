@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)top.vhdl $(OBJDIR)top.vvp $(OBJDIR)top.fpga
+TARGETS	= $(OBJDIR)top.vhdl $(OBJDIR)top.vvp $(OBJDIR)top.fpga $(OBJDIR)s\ p\ a\ c\ e.fpga
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -23,6 +23,9 @@ top.vvp_VFLAGS = $(VFLAGSF) $(VFLAGS)
 top.fpga_OBJS = $(OBJDIR)top.fpga
 top.fpga_VFLAGS = $(VFLAGSF) $(VFLAGS) -tfpga
 
+s_p_a_c_e.fpga_OBJS = $(OBJDIR)s\ p\ a\ c\ e.fpga
+s_p_a_c_e.fpga_VFLAGS = $(VFLAGSF) $(VFLAGS) -tfpga
+
 $(OBJDIR)top.vhdl: top.v
 	$(VERILOG) $(top.vhdl_VFLAGS) -o $(OBJDIR)top.vhdl top.v
 
@@ -32,8 +35,11 @@ $(OBJDIR)top.vvp: top.v
 $(OBJDIR)top.fpga: top.v
 	$(VERILOG) $(top.fpga_VFLAGS) -o $(OBJDIR)top.fpga top.v
 
+$(OBJDIR)s\ p\ a\ c\ e.fpga: s\ p\ a\ c\ e.v
+	$(VERILOG) $(s_p_a_c_e.fpga_VFLAGS) -o $(OBJDIR)s\ p\ a\ c\ e.fpga s\ p\ a\ c\ e.v
+
 clean:
-	$(RM) -- $(top.vhdl_OBJS) $(top.vvp_OBJS) $(top.fpga_OBJS)
+	$(RM) -- $(top.vhdl_OBJS) $(top.vvp_OBJS) $(top.fpga_OBJS) $(s_p_a_c_e.fpga_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
