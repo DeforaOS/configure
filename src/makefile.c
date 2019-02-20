@@ -1638,6 +1638,7 @@ static int _target_script(Makefile * makefile,
 {
 	String const * prefix;
 	String const * script;
+	String const * flags;
 	int phony;
 
 	if((script = _makefile_get_config(makefile, target, "script")) == NULL)
@@ -1646,6 +1647,7 @@ static int _target_script(Makefile * makefile,
 				": No script for target\n");
 		return 1;
 	}
+	flags = _makefile_get_config(makefile, target, "flags");
 	if(makefile->fp == NULL)
 		_script_check(makefile, target, script);
 	if(_makefile_is_flag_set(makefile, PREFS_S))
@@ -1659,8 +1661,11 @@ static int _target_script(Makefile * makefile,
 		prefix = "$(PREFIX)";
 	_makefile_print(makefile, "\n\t");
 	_makefile_print_escape(makefile, script);
-	_makefile_print(makefile, " -P \"%s\" -- \"%s%s\"\n", prefix,
-			phony ? "" : "$(OBJDIR)", target);
+	_makefile_print(makefile, " -P \"%s\"", prefix);
+	if(flags != NULL && flags[0] != '\0')
+		_makefile_print(makefile, " %s", flags);
+	_makefile_print(makefile, " -- \"%s%s\"\n", phony ? "" : "$(OBJDIR)",
+			target);
 	return 0;
 }
 
@@ -2083,6 +2088,7 @@ static int _write_clean(Makefile * makefile)
 static int _clean_targets(Makefile * makefile)
 {
 	String const * prefix;
+	String const * flags;
 	String const * p;
 	String * targets;
 	String * q;
@@ -2137,13 +2143,18 @@ static int _clean_targets(Makefile * makefile)
 			if((prefix = _makefile_get_config(makefile, targets,
 							"prefix")) == NULL)
 				prefix = "$(PREFIX)";
+			flags = _makefile_get_config(makefile, targets,
+					"flags");
 			phony = _makefile_is_phony(makefile, targets);
 			_makefile_print(makefile, "\t");
 			_makefile_print_escape(makefile, p);
-			_makefile_print(makefile, "%s%s%s%s%s%s\n", " -c -P \"",
-					prefix, "\" -- \"",
-					phony ? "" : "$(OBJDIR)", targets,
+			_makefile_print(makefile, "%s%s%s", " -c -P \"", prefix,
 					"\"");
+			if(flags != NULL && flags[0] != '\0')
+				_makefile_print(makefile, " %s", flags);
+			_makefile_print(makefile, "%s%s%s%s", " -- \"",
+					phony ? "" : "$(OBJDIR)",
+					targets, "\"\n");
 		}
 		if(c == '\0')
 			break;
@@ -2569,19 +2580,23 @@ static void _install_target_script(Makefile * makefile, String const * target)
 {
 	String const * path;
 	String const * script;
+	String const * flags;
 	int phony;
 
 	if((path = _makefile_get_config(makefile, target, "install")) == NULL)
 		return;
 	if((script = _makefile_get_config(makefile, target, "script")) == NULL)
 		return;
+	flags = _makefile_get_config(makefile, target, "flags");
 	phony = _makefile_is_phony(makefile, target);
 	_makefile_print(makefile, "\t");
 	_makefile_print_escape(makefile, script);
-	_makefile_print(makefile, "%s%s%s%s%s%s", " -P \"$(DESTDIR)",
-			(path[0] != '\0') ? path : "$(PREFIX)",
-			"\" -i -- \"", phony ? "" : "$(OBJDIR)", target,
-			"\"\n");
+	_makefile_print(makefile, "%s%s%s", " -P \"$(DESTDIR)",
+			(path[0] != '\0') ? path : "$(PREFIX)", "\" -i");
+	if(flags != NULL && flags[0] != '\0')
+		_makefile_print(makefile, " %s", flags);
+	_makefile_print(makefile, "%s%s%s%s", " -- \"",
+			phony ? "" : "$(OBJDIR)", target, "\"\n");
 }
 
 static int _install_include(Makefile * makefile, String const * include);
@@ -2997,14 +3012,18 @@ static void _uninstall_target_script(Makefile * makefile,
 		String const * target, String const * path)
 {
 	String const * script;
+	String const * flags;
 
 	if((script = _makefile_get_config(makefile, target, "script")) == NULL)
 		return;
+	flags = _makefile_get_config(makefile, target, "flags");
 	_makefile_print(makefile, "\t");
 	_makefile_print_escape(makefile, script);
-	_makefile_print(makefile, "%s%s%s%s%s", " -P \"$(DESTDIR)",
-			(path[0] != '\0') ? path : "$(PREFIX)", "\" -u -- \"",
-			target, "\"\n");
+	_makefile_print(makefile, "%s%s%s", " -P \"$(DESTDIR)",
+			(path[0] != '\0') ? path : "$(PREFIX)", "\" -u");
+	if(flags != NULL && flags[0] != '\0')
+		_makefile_print(makefile, " %s", flags);
+	_makefile_print(makefile, "%s%s%s", " -- \"", target, "\"\n");
 }
 
 static int _uninstall_include(Makefile * makefile,
