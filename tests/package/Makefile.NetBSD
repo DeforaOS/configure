@@ -18,6 +18,7 @@ dist:
 	$(LN) -s -- "$$PWD" $(OBJDIR)$(PACKAGE)-$(VERSION)
 	@cd $(OBJDIR). && $(TAR) -czvf $(PACKAGE)-$(VERSION)$(TGZEXT) -- \
 		$(PACKAGE)-$(VERSION)/Makefile \
+		"$(PACKAGE)-$(VERSION)/s p a c e.md" \
 		$(PACKAGE)-$(VERSION)/project.conf
 	$(RM) -- $(OBJDIR)$(PACKAGE)-$(VERSION)
 
