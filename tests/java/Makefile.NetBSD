@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)main.class $(OBJDIR)app.class
+TARGETS	= $(OBJDIR)main.class $(OBJDIR)app.class $(OBJDIR)s\ p\ a\ c\ e.class
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -20,14 +20,20 @@ main.class_JFLAGS = $(JFLAGSF) $(JFLAGS) -verbose
 app.class_OBJS = $(OBJDIR)app.class
 app.class_JFLAGS = $(JFLAGSF) $(JFLAGS)
 
+s_p_a_c_e.class_OBJS = $(OBJDIR)s\ p\ a\ c\ e.class
+s_p_a_c_e.class_JFLAGS = $(JFLAGSF) $(JFLAGS)
+
 $(OBJDIR)main.class: main.java
 	$(JAVAC) $(main.class_JFLAGS) main.java
 
 $(OBJDIR)app.class: app.java
 	$(JAVAC) $(app.class_JFLAGS) app.java
 
+$(OBJDIR)s\ p\ a\ c\ e.class: s\ p\ a\ c\ e.java
+	$(JAVAC) $(s_p_a_c_e.class_JFLAGS) s\ p\ a\ c\ e.java
+
 clean:
-	$(RM) -- $(main.class_OBJS) $(app.class_OBJS)
+	$(RM) -- $(main.class_OBJS) $(app.class_OBJS) $(s_p_a_c_e.class_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
