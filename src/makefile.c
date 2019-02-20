@@ -876,8 +876,7 @@ static int _variables_subdirs(Makefile * makefile)
 
 static int _targets_all(Makefile * makefile);
 static int _targets_subdirs(Makefile * makefile);
-static int _targets_target(Makefile * makefile,
-		String const * target);
+static int _targets_target(Makefile * makefile, String const * target);
 static int _write_targets(Makefile * makefile)
 {
 	int ret = 0;
@@ -1398,8 +1397,7 @@ static int _target_library(Makefile * makefile, String const * target)
 	return 0;
 }
 
-static int _target_library_static(Makefile * makefile,
-		String const * target)
+static int _target_library_static(Makefile * makefile, String const * target)
 {
 	String const * p;
 	String * q;
@@ -1428,8 +1426,7 @@ static int _target_library_static(Makefile * makefile,
 	return 0;
 }
 
-static int _target_libtool(Makefile * makefile,
-		String const * target)
+static int _target_libtool(Makefile * makefile, String const * target)
 {
 	String const * p;
 
@@ -1449,8 +1446,7 @@ static int _target_libtool(Makefile * makefile,
 	return 0;
 }
 
-static int _target_object(Makefile * makefile,
-		String const * target)
+static int _target_object(Makefile * makefile, String const * target)
 {
 	String const * p;
 	String const * extension;
@@ -1742,8 +1738,8 @@ static void _script_security(Makefile * makefile, String const * target,
 	string_delete(path);
 }
 
-static int _target_source(Makefile * makefile,
-		String const * target, String * source);
+static int _target_source(Makefile * makefile, String const * target,
+		String * source);
 static int _objects_target(Makefile * makefile,
 		String const * target)
 {
@@ -1778,8 +1774,8 @@ static int _objects_target(Makefile * makefile,
 static int _source_depends(Makefile * makefile,
 		String const * source);
 static int _source_subdir(Makefile * makefile, String * source);
-static int _target_source(Makefile * makefile,
-		String const * target, String * source)
+static int _target_source(Makefile * makefile, String const * target,
+		String * source)
 	/* FIXME check calls to _source_depends() */
 {
 	int ret = 0;
