@@ -363,7 +363,8 @@ static int _variables_targets(Makefile * makefile)
 					break;
 				case TT_OBJECT:
 				case TT_UNKNOWN:
-					_makefile_print(makefile, " $(OBJDIR)%s",
+					_makefile_print(makefile, " $(OBJDIR)");
+					_makefile_print_escape(makefile,
 							prints);
 					break;
 				case TT_SCRIPT:
@@ -1047,8 +1048,9 @@ static int _objs_source(Makefile * makefile, String * source, TargetType tt)
 					(tt == TT_LIBTOOL) ? ".lo" : ".o");
 			break;
 		case OT_JAVA_SOURCE:
-			_makefile_print(makefile, "%s%s%s", " $(OBJDIR)",
-					source, ".class");
+			_makefile_print(makefile, "%s", " $(OBJDIR)");
+			_makefile_print_escape(makefile, source);
+			_makefile_print(makefile, "%s", ".class");
 			break;
 		case OT_VERILOG_SOURCE:
 			_makefile_print(makefile, "%s%s%s", " $(OBJDIR)",
@@ -1254,8 +1256,8 @@ static void _flags_java(Makefile * makefile, String const * target)
 {
 	String const * p;
 
-	_makefile_print(makefile, "%s%s", target,
-			"_JFLAGS = $(JFLAGSF) $(JFLAGS)");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_JFLAGS = $(JFLAGSF) $(JFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "jflags")) != NULL)
 		_makefile_print(makefile, " %s", p);
 	_makefile_print(makefile, "\n");
@@ -1531,10 +1533,14 @@ static int _target_object(Makefile * makefile,
 			_makefile_print(makefile, "\n");
 			break;
 		case OT_JAVA_SOURCE:
-			_makefile_print(makefile, "\n%s%s%s%s\n%s%s",
-					target, "_OBJS = ",
-					"$(OBJDIR)", target, target, "_JFLAGS ="
-					" $(JFLAGSF) $(JFLAGS)");
+			_makefile_print(makefile, "\n");
+			_makefile_print_escape_variable(makefile, target);
+			_makefile_print(makefile, "%s", "_OBJS = $(OBJDIR)");
+			_makefile_print_escape(makefile, target);
+			_makefile_print(makefile, "\n");
+			_makefile_print_escape_variable(makefile, target);
+			_makefile_print(makefile, "%s",
+					"_JFLAGS = $(JFLAGSF) $(JFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
 							"jflags")) != NULL)
 				_makefile_print(makefile, " %s", p);
@@ -1962,23 +1968,26 @@ static int _target_source(Makefile * makefile,
 			_makefile_print(makefile, ".%s\n", extension);
 			break;
 		case OT_JAVA_SOURCE:
-			_makefile_print(makefile, "%s%s", "\n$(OBJDIR)",
-					target);
-			_makefile_print(makefile, "%s%s%s%s", ": ", source, ".",
-					extension);
+			_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+			_makefile_print_escape(makefile, target);
+			_makefile_print(makefile, ": ");
+			_makefile_print_escape(makefile, source);
+			_makefile_print(makefile, ".%s", extension);
 			source[len] = '.'; /* FIXME ugly */
 			_source_depends(makefile, source);
-			_makefile_print(makefile, "%s", "\n\t");
+			_makefile_print(makefile, "\n\t");
 			if(strchr(source, '/') != NULL)
 				ret = _source_subdir(makefile, source);
 			q = _makefile_get_config(makefile, source, "jflags");
 			source[len] = '\0';
-			_makefile_print(makefile, "%s%s%s", "$(JAVAC) $(",
-					target, "_JFLAGS)");
+			_makefile_print(makefile, "%s", "$(JAVAC) $(");
+			_makefile_print_escape_variable(makefile, target);
+			_makefile_print(makefile, "%s", "_JFLAGS)");
 			if(q != NULL)
 				_makefile_print(makefile, " %s", q);
-			_makefile_print(makefile, "%s%s%s%s%c", " ", source,
-					".", extension, '\n');
+			_makefile_print(makefile, " ");
+			_makefile_print_escape(makefile, source);
+			_makefile_print(makefile, ".%s\n", extension);
 			break;
 		case OT_VERILOG_SOURCE:
 			if(tt == TT_OBJECT)
