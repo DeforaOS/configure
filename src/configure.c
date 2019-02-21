@@ -68,6 +68,9 @@ struct _Configure {
 	HostOS os;
 	HostKernel kernel;
 	Config * config;
+
+	/* prefs */
+	String * prefs_os;
 };
 
 
@@ -158,8 +161,22 @@ Configure * configure_new(ConfigurePrefs * prefs)
 	if((configure = object_new(sizeof(*configure))) == NULL)
 		return NULL;
 	if(prefs != NULL)
-		/* FIXME copy strings */
+	{
+		/* copy the strings */
+		if(prefs->os != NULL)
+		{
+			if((configure->prefs_os = string_new(prefs->os))
+					== NULL)
+			{
+				configure_delete(configure);
+				return NULL;
+			}
+		}
+		else
+			configure->prefs_os = NULL;
 		configure->prefs = *prefs;
+		configure->prefs.os = configure->prefs_os;
+	}
 	else
 		memset(&configure->prefs, 0, sizeof(configure->prefs));
 	_new_detect(configure);
@@ -280,6 +297,8 @@ static int _new_load_config(Configure * configure)
 /* configure_delete */
 void configure_delete(Configure * configure)
 {
+	if(configure->prefs_os != NULL)
+		string_delete(configure->prefs_os);
 	if(configure->config != NULL)
 		config_delete(configure->config);
 	object_delete(configure);
