@@ -2740,25 +2740,23 @@ static int _dist_install(Makefile * makefile,
 		char const * directory, char const * mode,
 		char const * filename)
 {
-	char sep = (configure_get_os(makefile->configure) != HO_WIN32)
-		? '/' : '\\';
 	String * p;
 	char const * q;
 
-	if(strchr(filename, sep) != NULL)
+	if(strchr(filename, '/') != NULL)
 	{
 		if((p = string_new(filename)) == NULL)
 			return -1;
 		q = dirname(p);
-		/* FIXME keep track of the directories created */
-		_makefile_print(makefile, "%s%s%c%s\n", "\t$(MKDIR) $(DESTDIR)",
-				directory, sep, q);
+		/* TODO keep track of the directories created */
+		_makefile_print(makefile, "%s%s/%s\n", "\t$(MKDIR) $(DESTDIR)",
+				directory, q);
 		string_delete(p);
 	}
 	else
 		_makefile_mkdir(makefile, directory);
-	_makefile_print(makefile, "%s%s%s%s%s%s%c%s\n", "\t$(INSTALL) -m ",
-			mode, " ", filename, " $(DESTDIR)", directory, sep,
+	_makefile_print(makefile, "%s%s%s%s%s%s/%s\n", "\t$(INSTALL) -m ",
+			mode, " ", filename, " $(DESTDIR)", directory,
 			filename);
 	return 0;
 }
