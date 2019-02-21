@@ -2635,6 +2635,7 @@ static int _install_include(Makefile * makefile, String const * include)
 	char const * install;
 	ssize_t i;
 	String * p = NULL;
+	String * directory;
 
 	if((install = _makefile_get_config(makefile, include, "install"))
 			== NULL)
@@ -2644,16 +2645,17 @@ static int _install_include(Makefile * makefile, String const * include)
 			if((p = string_new_length(include, i)) == NULL)
 				return 2;
 	}
-	/* FIXME keep track of the directories created */
-	_makefile_print(makefile, "%s", "\t$(MKDIR) $(DESTDIR)");
-	_makefile_print_escape(makefile, install);
 	if(p != NULL)
 	{
-		_makefile_print(makefile, "/");
-		_makefile_print_escape(makefile, p);
+		directory = string_new_append(install, "/", p, NULL);
 		string_delete(p);
 	}
-	_makefile_print(makefile, "\n");
+	else
+		directory = string_new(install);
+	if(directory == NULL)
+		return 2;
+	_makefile_mkdir(makefile, directory);
+	string_delete(directory);
 	_makefile_print(makefile, "%s", "\t$(INSTALL) -m 0644 ");
 	_makefile_print_escape(makefile, include);
 	_makefile_print(makefile, "%s", " $(DESTDIR)");
