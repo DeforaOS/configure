@@ -133,7 +133,7 @@ extern const struct ExtensionType * sExtensionType;
 typedef struct _ConfigurePrefs
 {
 	unsigned int flags;
-	char * os;
+	String const * os;
 } ConfigurePrefs;
 # define PREFS_n	0x1
 # define PREFS_S	0x2
