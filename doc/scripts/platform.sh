@@ -31,6 +31,8 @@ LDSOCONF="/etc/ld.so.conf"
 PREFIX="/usr/local"
 PROGNAME="platform.sh"
 SOEXT=".so"
+#executables
+UNAME="uname"
 [ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
@@ -91,6 +93,24 @@ _platform_variable()
 	variable="$1"
 
 	case "$variable" in
+		ARCH)
+			if [ -n "$ARCH" ]; then
+				echo "$ARCH"
+				return 0
+			fi
+			ARCH=$($UNAME -m)
+			case "$ARCH" in
+				amd64|x86_64)
+					echo "amd64"
+					;;
+				i[3456]86)
+					echo "i386"
+					;;
+				*)
+					echo "unknown"
+					;;
+			esac
+			;;
 		BINDIR)
 			echo "$PREFIX/bin"
 			;;
