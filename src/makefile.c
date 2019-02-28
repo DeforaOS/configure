@@ -379,9 +379,12 @@ static int _variables_targets(Makefile * makefile)
 							prints);
 					break;
 				case TT_PLUGIN:
-					_makefile_print(makefile,
-							" $(OBJDIR)%s$(SOEXT)",
+					_makefile_print(makefile, "%s",
+							" $(OBJDIR)");
+					_makefile_print_escape(makefile,
 							prints);
+					_makefile_print(makefile, "%s",
+							"$(SOEXT)");
 					break;
 			}
 		if(c == '\0')
@@ -1580,8 +1583,7 @@ static int _target_object(Makefile * makefile, String const * target)
 	return 0;
 }
 
-static int _target_plugin(Makefile * makefile,
-		String const * target)
+static int _target_plugin(Makefile * makefile, String const * target)
 {
 	String const * p;
 	String * q;
@@ -1590,16 +1592,23 @@ static int _target_plugin(Makefile * makefile,
 		return 1;
 	if(_target_flags(makefile, target) != 0)
 		return 1;
-	_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target,
-			"$(SOEXT): $(", target, "_OBJS)");
+	_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s", "$(SOEXT): $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_OBJS)");
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
 	_makefile_print(makefile, "\n");
 	/* build the plug-in */
-	_makefile_print(makefile, "%s%s%s%s%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)",
-			target, "$(SOEXT) $(", target, "_OBJS) $(", target,
-			"_LDFLAGS)");
+	_makefile_print(makefile, "%s", "\t$(CCSHARED) -o $(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s", "$(SOEXT) $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_OBJS) $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_LDFLAGS)");
 	if((q = string_new_append(target, "$(SOEXT)", NULL)) == NULL)
 		return error_print(PROGNAME);
 	if((p = _makefile_get_config(makefile, q, "ldflags")) != NULL)
@@ -2591,9 +2600,14 @@ static void _install_target_plugin(Makefile * makefile, String const * target)
 			|| *p != '\0')
 		mode = "0755";
 	_makefile_mkdir(makefile, path);
-	_makefile_print(makefile, "%s%04o%s%s%s%s%s%s%s", "\t$(INSTALL) -m ", m,
-			" $(OBJDIR)", target, "$(SOEXT) $(DESTDIR)", path, "/",
-			target, "$(SOEXT)\n");
+	_makefile_print(makefile, "%s%04o%s", "\t$(INSTALL) -m ", m,
+			" $(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s", "$(SOEXT) $(DESTDIR)");
+	_makefile_print_escape(makefile, path);
+	_makefile_print(makefile, "/");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s", "$(SOEXT)\n");
 }
 
 static void _install_target_script(Makefile * makefile, String const * target)
@@ -2976,8 +2990,11 @@ static int _uninstall_target(Makefile * makefile,
 			_makefile_print(makefile, "\n");
 			break;
 		case TT_PLUGIN:
-			_makefile_print(makefile, "\t%s%s/%s%s\n", rm_destdir,
-					path, target, "$(SOEXT)");
+			_makefile_print(makefile, "\t%s", rm_destdir);
+			_makefile_print_escape(makefile, path);
+			_makefile_print(makefile, "/");
+			_makefile_print_escape(makefile, target);
+			_makefile_print(makefile, "$(SOEXT)\n");
 			break;
 		case TT_SCRIPT:
 			_uninstall_target_script(makefile, target, path);
