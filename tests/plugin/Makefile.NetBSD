@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)test$(SOEXT)
+TARGETS	= $(OBJDIR)test$(SOEXT) $(OBJDIR)s\ p\ a\ c\ e$(SOEXT)
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -24,11 +24,21 @@ test_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 $(OBJDIR)test$(SOEXT): $(test_OBJS) a.c b.c
 	$(CCSHARED) -o $(OBJDIR)test$(SOEXT) $(test_OBJS) $(test_LDFLAGS)
 
+s_p_a_c_e_OBJS = $(OBJDIR)s\ p\ a\ c\ e.o
+s_p_a_c_e_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+s_p_a_c_e_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+
+$(OBJDIR)s\ p\ a\ c\ e$(SOEXT): $(s_p_a_c_e_OBJS) s\ p\ a\ c\ e.c
+	$(CCSHARED) -o $(OBJDIR)s\ p\ a\ c\ e$(SOEXT) $(s_p_a_c_e_OBJS) $(s_p_a_c_e_LDFLAGS)
+
 $(OBJDIR)test.o: test.c
 	$(CC) $(test_CFLAGS) -o $(OBJDIR)test.o -c test.c
 
+$(OBJDIR)s\ p\ a\ c\ e.o: s\ p\ a\ c\ e.c
+	$(CC) $(s_p_a_c_e_CFLAGS) -o $(OBJDIR)s\ p\ a\ c\ e.o -c s\ p\ a\ c\ e.c
+
 clean:
-	$(RM) -- $(test_OBJS)
+	$(RM) -- $(test_OBJS) $(s_p_a_c_e_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
@@ -36,8 +46,11 @@ distclean: clean
 install: all
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/configure
 	$(INSTALL) -m 0755 $(OBJDIR)test$(SOEXT) $(DESTDIR)$(LIBDIR)/configure/test$(SOEXT)
+	$(MKDIR) $(DESTDIR)$(LIBDIR)/s\ p\ a\ c\ e
+	$(INSTALL) -m 0755 $(OBJDIR)s\ p\ a\ c\ e$(SOEXT) $(DESTDIR)$(LIBDIR)/s\ p\ a\ c\ e/s\ p\ a\ c\ e$(SOEXT)
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(LIBDIR)/configure/test$(SOEXT)
+	$(RM) -- $(DESTDIR)$(LIBDIR)/s\ p\ a\ c\ e/s\ p\ a\ c\ e$(SOEXT)
 
 .PHONY: all clean distclean install uninstall
