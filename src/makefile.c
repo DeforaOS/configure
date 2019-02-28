@@ -1335,22 +1335,22 @@ static int _target_library(Makefile * makefile, String const * target)
 	if(soname == NULL)
 		return 1;
 	if(os == HO_MACOSX)
-		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", soname, ": $(",
-				target, "_OBJS)");
+		_makefile_print(makefile, "%s%s", "\n$(OBJDIR)", soname);
 	else if(os == HO_WIN32)
-		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", soname, ": $(",
-				target, "_OBJS)");
+		_makefile_print(makefile, "%s%s", "\n$(OBJDIR)", soname);
 	else
-		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
-				".0: $(", target, "_OBJS)");
+		_makefile_print(makefile, "%s%s%s", "\n$(OBJDIR)", soname,
+				".0");
+	_makefile_print(makefile, ": $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_OBJS)");
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
 	_makefile_print(makefile, "\n");
 	/* build the shared library */
 	_makefile_print(makefile, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname,
-			(os != HO_MACOSX && os != HO_WIN32)
-			? ".0" : "");
+			(os != HO_MACOSX && os != HO_WIN32) ? ".0" : "");
 	if((p = _makefile_get_config(makefile, target, "install")) != NULL)
 	{
 		/* soname is not available on MacOS X */
@@ -1362,8 +1362,11 @@ static int _target_library(Makefile * makefile, String const * target)
 			_makefile_print(makefile, "%s%s", " -Wl,-soname,",
 					soname);
 	}
-	_makefile_print(makefile, "%s%s%s%s%s", " $(", target, "_OBJS) $(",
-			target, "_LDFLAGS)");
+	_makefile_print(makefile, "%s", " $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_OBJS) $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_LDFLAGS)");
 	if((q = string_new_append(target, "$(SOEXT)", NULL)) == NULL)
 	{
 		string_delete(soname);
@@ -1377,19 +1380,19 @@ static int _target_library(Makefile * makefile, String const * target)
 	{
 		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target,
 				".0$(SOEXT): $(OBJDIR)", soname, "\n");
-		_makefile_print(makefile, "%s%s%s%s%s%s", "\t$(LN) -s -- ", soname,
-				" $(OBJDIR)", target, ".0$(SOEXT)", "\n");
-		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target,
-				"$(SOEXT): $(OBJDIR)", soname, "\n");
-		_makefile_print(makefile, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
-				" $(OBJDIR)", target, "$(SOEXT)\n");
+		_makefile_print(makefile, "%s%s%s%s%s\n", "\t$(LN) -s -- ",
+				soname, " $(OBJDIR)", target, ".0$(SOEXT)");
+		_makefile_print(makefile, "%s%s%s%s\n", "\n$(OBJDIR)", target,
+				"$(SOEXT): $(OBJDIR)", soname);
+		_makefile_print(makefile, "%s%s%s%s%s", "\t$(LN) -s -- ",
+				soname, " $(OBJDIR)", target, "$(SOEXT)\n");
 	}
 	else if(os != HO_WIN32)
 	{
 		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
 				": $(OBJDIR)", soname, ".0\n");
-		_makefile_print(makefile, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
-				".0 $(OBJDIR)", soname, "\n");
+		_makefile_print(makefile, "%s%s%s%s\n", "\t$(LN) -s -- ",
+				soname, ".0 $(OBJDIR)", soname);
 		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target,
 				"$(SOEXT): $(OBJDIR)", soname, ".0\n");
 		_makefile_print(makefile, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
@@ -1412,15 +1415,16 @@ static int _target_library_static(Makefile * makefile, String const * target)
 		return error_print(PROGNAME);
 	_makefile_print(makefile, "\n");
 	/* build the static library */
-	_makefile_print(makefile, "%s%s%s%s%s",
-			"\t$(AR) $(ARFLAGS) $(OBJDIR)", target, ".a $(",
-			target, "_OBJS)");
+	_makefile_print(makefile, "%s", "\t$(AR) $(ARFLAGS) $(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s", ".a $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_OBJS)");
 	len = strlen(target) + 3;
 	if((q = malloc(len)) == NULL)
 		return 1;
 	snprintf(q, len, "%s.a", target);
-	if((p = _makefile_get_config(makefile, q, "ldflags"))
-			!= NULL)
+	if((p = _makefile_get_config(makefile, q, "ldflags")) != NULL)
 		_binary_ldflags(makefile, p);
 	free(q);
 	_makefile_print(makefile, "%s%s%s",
