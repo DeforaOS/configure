@@ -1880,7 +1880,7 @@ static int _target_source(Makefile * makefile, String const * target,
 			{
 				_makefile_print(makefile, " ");
 				_makefile_print_escape(makefile, source);
-				_makefile_print(makefile, "%s" ".lo");
+				_makefile_print(makefile, "%s", ".lo");
 			}
 			_makefile_print(makefile, ": ");
 			_makefile_print_escape(makefile, source);
