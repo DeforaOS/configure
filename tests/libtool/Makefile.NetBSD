@@ -26,7 +26,7 @@ libtest_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 $(OBJDIR)libtest.la: $(libtest_OBJS)
 	$(LIBTOOL) --mode=link $(CC) -o $(OBJDIR)libtest.la $(libtest_OBJS) -rpath $(LIBDIR) $(libtest_LDFLAGS)
 
-$(OBJDIR)test.o test.lo: test.c
+$(OBJDIR)test.o $(OBJDIR)test.lo: test.c
 	$(LIBTOOL) --mode=compile $(CC) $(libtest_CFLAGS) -o $(OBJDIR)test.o -c test.c
 
 clean:
