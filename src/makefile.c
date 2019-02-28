@@ -358,8 +358,11 @@ static int _variables_targets(Makefile * makefile)
 							makefile, prints);
 					break;
 				case TT_LIBTOOL:
-					_makefile_print(makefile, " $(OBJDIR)%s%s",
-							prints, ".la");
+					_makefile_print(makefile, "%s",
+							" $(OBJDIR)");
+					_makefile_print_escape(makefile,
+							prints);
+					_makefile_print(makefile, "%s", ".la");
 					break;
 				case TT_OBJECT:
 				case TT_UNKNOWN:
@@ -1440,15 +1443,22 @@ static int _target_libtool(Makefile * makefile, String const * target)
 		return 1;
 	if(_target_flags(makefile, target) != 0)
 		return 1;
-	_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target, ".la: $(",
-			target, "_OBJS)\n");
-	_makefile_print(makefile, "%s%s%s%s%s",
-			"\t$(LIBTOOL) --mode=link $(CC) -o $(OBJDIR)", target,
-			".la $(", target, "_OBJS)");
+	_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, ".la: $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_OBJS)\n");
+	_makefile_print(makefile, "%s",
+			"\t$(LIBTOOL) --mode=link $(CC) -o $(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s", ".la $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_OBJS)");
 	if((p = _makefile_get_config(makefile, target, "ldflags")) != NULL)
 		_binary_ldflags(makefile, p);
-	_makefile_print(makefile, "%s%s%s", " -rpath $(LIBDIR) $(", target,
-			"_LDFLAGS)\n");
+	_makefile_print(makefile, "%s", " -rpath $(LIBDIR) $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_LDFLAGS)\n");
 	return 0;
 }
 
@@ -2540,12 +2550,17 @@ static void _install_target_libtool(Makefile * makefile, String const * target)
 	if((path = _makefile_get_config(makefile, target, "install")) == NULL)
 		return;
 	_makefile_mkdir(makefile, path);
-	_makefile_print(makefile, "%s%s%s%s/%s%s",
-			"\t$(LIBTOOL) --mode=install $(INSTALL)"
-			" -m 0755 $(OBJDIR)", target, ".la $(DESTDIR)", path,
-			target, ".la\n");
-	_makefile_print(makefile, "%s/%s\n",
-			"\t$(LIBTOOL) --mode=finish $(DESTDIR)", path);
+	_makefile_print(makefile, "%s", "\t$(LIBTOOL) --mode=install $(INSTALL)"
+			" -m 0755 $(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, ".la $(DESTDIR)");
+	_makefile_print_escape(makefile, path);
+	_makefile_print(makefile, "/");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, ".la\n");
+	_makefile_print(makefile, "%s", "\t$(LIBTOOL) --mode=finish $(DESTDIR)");
+	_makefile_print_escape(makefile, path);
+	_makefile_print(makefile, "\n");
 }
 
 static void _install_target_object(Makefile * makefile, String const * target)
@@ -2942,9 +2957,12 @@ static int _uninstall_target(Makefile * makefile,
 				return 1;
 			break;
 		case TT_LIBTOOL:
-			_makefile_print(makefile, "\t%s%s%s/%s%s", "$(LIBTOOL)"
-					" --mode=uninstall ", rm_destdir, path,
-					target, ".la\n");
+			_makefile_print(makefile, "\t%s%s", "$(LIBTOOL)"
+					" --mode=uninstall ", rm_destdir);
+			_makefile_print_escape(makefile, path);
+			_makefile_print(makefile, "/");
+			_makefile_print_escape(makefile, target);
+			_makefile_print(makefile, ".la\n");
 			break;
 		case TT_OBJECT:
 			_makefile_print(makefile, "\t%s", rm_destdir);
