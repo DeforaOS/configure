@@ -1,5 +1,11 @@
 PACKAGE	= test
 VERSION	= 0.0.0
+OBJDIR	=
+PREFIX	= /usr/local
+DESTDIR	=
+MKDIR	= mkdir -m 0755 -p
+INSTALL	= install
+RM	= rm -f
 RM	= rm -f
 LN	= ln -f
 TAR	= tar
@@ -34,7 +40,10 @@ distcheck: dist
 	$(RM) -r -- $(PACKAGE)-$(VERSION)
 
 install: all
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/s\ p\ a\ c\ e
+	$(INSTALL) -m 0644 s\ p\ a\ c\ e.md $(DESTDIR)$(PREFIX)/share/doc/s\ p\ a\ c\ e/s\ p\ a\ c\ e.md
 
 uninstall:
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/s\ p\ a\ c\ e/s\ p\ a\ c\ e.md
 
 .PHONY: all clean distclean dist distcheck install uninstall
