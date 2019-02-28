@@ -1814,7 +1814,8 @@ static int _target_source(Makefile * makefile, String const * target,
 				_makefile_print(makefile, "%s%s%s",
 						"\n$(OBJDIR)", source, ".o");
 			if(tt == TT_LIBTOOL)
-				_makefile_print(makefile, " %s.lo", source);
+				_makefile_print(makefile, " $(OBJDIR)%s.lo",
+						source);
 			_makefile_print(makefile, "%s%s%s%s", ": ", source, ".",
 					extension);
 			source[len] = '.'; /* FIXME ugly */
@@ -1878,7 +1879,7 @@ static int _target_source(Makefile * makefile, String const * target,
 			}
 			if(tt == TT_LIBTOOL)
 			{
-				_makefile_print(makefile, " ");
+				_makefile_print(makefile, " $(OBJDIR)");
 				_makefile_print_escape(makefile, source);
 				_makefile_print(makefile, "%s", ".lo");
 			}
