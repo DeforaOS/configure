@@ -2688,9 +2688,8 @@ static int _install_include(Makefile * makefile, String const * include)
 
 static int _dist_check(Makefile * makefile, char const * target,
 		char const * mode);
-static int _dist_install(Makefile * makefile,
-		char const * directory, char const * mode,
-		char const * filename);
+static int _dist_install(Makefile * makefile, char const * directory,
+		char const * mode, char const * filename);
 static int _install_dist(Makefile * makefile)
 {
 	int ret = 0;
@@ -2758,9 +2757,8 @@ static int _dist_check(Makefile * makefile, char const * target,
 	return 0;
 }
 
-static int _dist_install(Makefile * makefile,
-		char const * directory, char const * mode,
-		char const * filename)
+static int _dist_install(Makefile * makefile, char const * directory,
+		char const * mode, char const * filename)
 {
 	String * p;
 	char const * q;
@@ -2777,9 +2775,15 @@ static int _dist_install(Makefile * makefile,
 	}
 	else
 		_makefile_mkdir(makefile, directory);
-	_makefile_print(makefile, "%s%s%s%s%s%s/%s\n", "\t$(INSTALL) -m ",
-			mode, " ", filename, " $(DESTDIR)", directory,
-			filename);
+	_makefile_print(makefile, "%s", "\t$(INSTALL) -m ");
+	_makefile_print_escape(makefile, mode);
+	_makefile_print(makefile, " ");
+	_makefile_print_escape(makefile, filename);
+	_makefile_print(makefile, " $(DESTDIR)");
+	_makefile_print_escape(makefile, directory);
+	_makefile_print(makefile, "/");
+	_makefile_print_escape(makefile, filename);
+	_makefile_print(makefile, "\n");
 	return 0;
 }
 
@@ -3072,8 +3076,11 @@ static int _uninstall_dist(Makefile * makefile,
 
 	if((install = _makefile_get_config(makefile, dist, "install")) == NULL)
 		return 0;
-	_makefile_print(makefile, "%s%s/%s\n", "\t$(RM) -- $(DESTDIR)", install,
-			dist);
+	_makefile_print(makefile, "%s", "\t$(RM) -- $(DESTDIR)");
+	_makefile_print_escape(makefile, install);
+	_makefile_print(makefile, "/");
+	_makefile_print_escape(makefile, dist);
+	_makefile_print(makefile, "\n");
 	return 0;
 }
 
