@@ -179,8 +179,7 @@ static int _variables_print(Makefile * makefile,
 	       	char const * input, char const * output);
 static int _variables_dist(Makefile * makefile);
 static int _variables_targets(Makefile * makefile);
-static int _variables_targets_library(Makefile * makefile,
-		char const * target);
+static int _variables_targets_library(Makefile * makefile, char const * target);
 static int _variables_executables(Makefile * makefile);
 static int _variables_includes(Makefile * makefile);
 static int _variables_subdirs(Makefile * makefile);
@@ -397,8 +396,7 @@ static int _variables_targets(Makefile * makefile)
 	return ret;
 }
 
-static int _variables_targets_library(Makefile * makefile,
-		char const * target)
+static int _variables_targets_library(Makefile * makefile, char const * target)
 {
 	String * soname;
 	String const * p;
@@ -500,8 +498,8 @@ static void _variables_library(Makefile * makefile, char * done);
 static void _variables_library_static(Makefile * makefile);
 static void _variables_libtool(Makefile * makefile, char * done);
 static void _variables_script(Makefile * makefile, char * done);
-static void _executables_variables(Makefile * makefile,
-	       	String const * target, char * done)
+static void _executables_variables(Makefile * makefile, String const * target,
+		char * done)
 {
 	String const * type;
 	TargetType tt;
@@ -2855,12 +2853,9 @@ static int _write_phony_targets(Makefile * makefile)
 	return 0;
 }
 
-static int _uninstall_target(Makefile * makefile,
-		String const * target);
-static int _uninstall_include(Makefile * makefile,
-		String const * include);
-static int _uninstall_dist(Makefile * makefile,
-		String const * dist);
+static int _uninstall_target(Makefile * makefile, String const * target);
+static int _uninstall_include(Makefile * makefile, String const * include);
+static int _uninstall_dist(Makefile * makefile, String const * dist);
 static int _write_uninstall(Makefile * makefile)
 {
 	int ret = 0;
@@ -2936,12 +2931,11 @@ static int _write_uninstall(Makefile * makefile)
 	return ret;
 }
 
-static int _uninstall_target_library(Makefile * makefile,
-		String const * target, String const * path);
-static void _uninstall_target_script(Makefile * makefile,
-		String const * target, String const * path);
-static int _uninstall_target(Makefile * makefile,
-		String const * target)
+static int _uninstall_target_library(Makefile * makefile, String const * target,
+		String const * path);
+static void _uninstall_target_script(Makefile * makefile, String const * target,
+		String const * path);
+static int _uninstall_target(Makefile * makefile, String const * target)
 {
 	String const * type;
 	String const * path;
@@ -3005,8 +2999,8 @@ static int _uninstall_target(Makefile * makefile,
 	return 0;
 }
 
-static int _uninstall_target_library(Makefile * makefile,
-		String const * target, String const * path)
+static int _uninstall_target_library(Makefile * makefile, String const * target,
+		String const * path)
 {
 	String * soname;
 	String const * p;
@@ -3052,8 +3046,8 @@ static int _uninstall_target_library(Makefile * makefile,
 	return 0;
 }
 
-static void _uninstall_target_script(Makefile * makefile,
-		String const * target, String const * path)
+static void _uninstall_target_script(Makefile * makefile, String const * target,
+		String const * path)
 {
 	String const * script;
 	String const * flags;
@@ -3070,8 +3064,7 @@ static void _uninstall_target_script(Makefile * makefile,
 	_makefile_print(makefile, "%s%s%s", " -- \"", target, "\"\n");
 }
 
-static int _uninstall_include(Makefile * makefile,
-		String const * include)
+static int _uninstall_include(Makefile * makefile, String const * include)
 {
 	String const * install;
 
@@ -3086,8 +3079,7 @@ static int _uninstall_include(Makefile * makefile,
 	return 0;
 }
 
-static int _uninstall_dist(Makefile * makefile,
-		String const * dist)
+static int _uninstall_dist(Makefile * makefile, String const * dist)
 {
 	String const * install;
 
