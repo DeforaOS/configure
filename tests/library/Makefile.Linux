@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)libtest.a $(OBJDIR)libtest$(SOEXT).0.0 $(OBJDIR)libtest$(SOEXT).0 $(OBJDIR)libtest$(SOEXT)
+TARGETS	= $(OBJDIR)libtest.a $(OBJDIR)libtest$(SOEXT).0.0 $(OBJDIR)libtest$(SOEXT).0 $(OBJDIR)libtest$(SOEXT) $(OBJDIR)libs\ p\ a\ c\ e.a $(OBJDIR)libs\ p\ a\ c\ e$(SOEXT).0.0 $(OBJDIR)libs\ p\ a\ c\ e$(SOEXT).0 $(OBJDIR)libs\ p\ a\ c\ e$(SOEXT)
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -35,11 +35,31 @@ $(OBJDIR)libtest$(SOEXT).0: $(OBJDIR)libtest$(SOEXT).0.0
 $(OBJDIR)libtest$(SOEXT): $(OBJDIR)libtest$(SOEXT).0.0
 	$(LN) -s -- libtest$(SOEXT).0.0 $(OBJDIR)libtest$(SOEXT)
 
+libs_p_a_c_e_OBJS = $(OBJDIR)s\ p\ a\ c\ e.o
+libs_p_a_c_e_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+libs_p_a_c_e_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+
+$(OBJDIR)libs\ p\ a\ c\ e.a: $(libs_p_a_c_e_OBJS) s\ p\ a\ c\ e.c
+	$(AR) $(ARFLAGS) $(OBJDIR)libs\ p\ a\ c\ e.a $(libs_p_a_c_e_OBJS)
+	$(RANLIB) $(OBJDIR)libs\ p\ a\ c\ e.a
+
+$(OBJDIR)libs\ p\ a\ c\ e$(SOEXT).0.0: $(libs_p_a_c_e_OBJS) s\ p\ a\ c\ e.c
+	$(CCSHARED) -o $(OBJDIR)libs\ p\ a\ c\ e$(SOEXT).0.0 -Wl,-soname,libs\ p\ a\ c\ e$(SOEXT).0 $(libs_p_a_c_e_OBJS) $(libs_p_a_c_e_LDFLAGS)
+
+$(OBJDIR)libs\ p\ a\ c\ e$(SOEXT).0: $(OBJDIR)libs\ p\ a\ c\ e$(SOEXT).0.0
+	$(LN) -s -- libs\ p\ a\ c\ e$(SOEXT).0.0 $(OBJDIR)libs\ p\ a\ c\ e$(SOEXT).0
+
+$(OBJDIR)libs\ p\ a\ c\ e$(SOEXT): $(OBJDIR)libs\ p\ a\ c\ e$(SOEXT).0.0
+	$(LN) -s -- libs\ p\ a\ c\ e$(SOEXT).0.0 $(OBJDIR)libs\ p\ a\ c\ e$(SOEXT)
+
 $(OBJDIR)test.o: test.c
 	$(CC) $(libtest_CFLAGS) -o $(OBJDIR)test.o -c test.c
 
+$(OBJDIR)s\ p\ a\ c\ e.o: s\ p\ a\ c\ e.c
+	$(CC) $(libs_p_a_c_e_CFLAGS) -o $(OBJDIR)s\ p\ a\ c\ e.o -c s\ p\ a\ c\ e.c
+
 clean:
-	$(RM) -- $(libtest_OBJS)
+	$(RM) -- $(libtest_OBJS) $(libs_p_a_c_e_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
@@ -50,11 +70,20 @@ install: all
 	$(INSTALL) -m 0755 $(OBJDIR)libtest$(SOEXT).0.0 $(DESTDIR)$(LIBDIR)/libtest$(SOEXT).0.0
 	$(LN) -s -- libtest$(SOEXT).0.0 $(DESTDIR)$(LIBDIR)/libtest$(SOEXT).0
 	$(LN) -s -- libtest$(SOEXT).0.0 $(DESTDIR)$(LIBDIR)/libtest$(SOEXT)
+	$(MKDIR) $(DESTDIR)$(LIBDIR)
+	$(INSTALL) -m 0644 $(OBJDIR)libs\ p\ a\ c\ e.a $(DESTDIR)$(LIBDIR)/libs\ p\ a\ c\ e.a
+	$(INSTALL) -m 0755 $(OBJDIR)libs\ p\ a\ c\ e$(SOEXT).0.0 $(DESTDIR)$(LIBDIR)/libs\ p\ a\ c\ e$(SOEXT).0.0
+	$(LN) -s -- libs\ p\ a\ c\ e$(SOEXT).0.0 $(DESTDIR)$(LIBDIR)/libs\ p\ a\ c\ e$(SOEXT).0
+	$(LN) -s -- libs\ p\ a\ c\ e$(SOEXT).0.0 $(DESTDIR)$(LIBDIR)/libs\ p\ a\ c\ e$(SOEXT)
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest.a
 	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest$(SOEXT).0.0
 	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest$(SOEXT).0
 	$(RM) -- $(DESTDIR)$(LIBDIR)/libtest$(SOEXT)
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libs\ p\ a\ c\ e.a
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libs\ p\ a\ c\ e$(SOEXT).0.0
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libs\ p\ a\ c\ e$(SOEXT).0
+	$(RM) -- $(DESTDIR)$(LIBDIR)/libs\ p\ a\ c\ e$(SOEXT)
 
 .PHONY: all clean distclean install uninstall
