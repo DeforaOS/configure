@@ -415,18 +415,37 @@ static int _variables_targets_library(Makefile * makefile, char const * target)
 	if(soname == NULL)
 		return 1;
 	if(configure_can_library_static(makefile->configure))
+	{
 		/* generate a static library */
-		_makefile_print(makefile, "%s%s%s", " $(OBJDIR)", target, ".a");
+		_makefile_print(makefile, "%s", " $(OBJDIR)", target, ".a");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "%s", ".a");
+	}
 	if((os = configure_get_os(makefile->configure)) == HO_MACOSX)
-		_makefile_print(makefile, "%s%s%s%s%s%s%s", " $(OBJDIR)",
-				soname, " $(OBJDIR)", target,
-				".0$(SOEXT) $(OBJDIR)", target, "$(SOEXT)");
+	{
+		_makefile_print(makefile, "%s", " $(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, " $(OBJDIR)");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "%s", ".0$(SOEXT) $(OBJDIR)");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "$(SOEXT)");
+	}
 	else if(os == HO_WIN32)
-		_makefile_print(makefile, "%s%s", " $(OBJDIR)", soname);
+	{
+		_makefile_print(makefile, "%s", " $(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+	}
 	else
-		_makefile_print(makefile, "%s%s%s%s%s%s%s", " $(OBJDIR)",
-				soname, ".0 $(OBJDIR)", soname, " $(OBJDIR)",
-				target, "$(SOEXT)");
+	{
+		_makefile_print(makefile, "%s", " $(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, ".0 $(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, " $(OBJDIR)");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "%s", "$(SOEXT)");
+	}
 	string_delete(soname);
 	return 0;
 }
@@ -1338,13 +1357,17 @@ static int _target_library(Makefile * makefile, String const * target)
 		soname = string_new_append(target, "$(SOEXT)", ".0", NULL);
 	if(soname == NULL)
 		return 1;
-	if(os == HO_MACOSX)
-		_makefile_print(makefile, "%s%s", "\n$(OBJDIR)", soname);
-	else if(os == HO_WIN32)
-		_makefile_print(makefile, "%s%s", "\n$(OBJDIR)", soname);
+	if(os == HO_MACOSX || os == HO_WIN32)
+	{
+		_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+	}
 	else
-		_makefile_print(makefile, "%s%s%s", "\n$(OBJDIR)", soname,
-				".0");
+	{
+		_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "%s", ".0");
+	}
 	_makefile_print(makefile, ": $(");
 	_makefile_print_escape_variable(makefile, target);
 	_makefile_print(makefile, "%s", "_OBJS)");
@@ -1353,18 +1376,26 @@ static int _target_library(Makefile * makefile, String const * target)
 		return error_print(PROGNAME);
 	_makefile_print(makefile, "\n");
 	/* build the shared library */
-	_makefile_print(makefile, "%s%s%s", "\t$(CCSHARED) -o $(OBJDIR)", soname,
-			(os != HO_MACOSX && os != HO_WIN32) ? ".0" : "");
+	_makefile_print(makefile, "%s", "\t$(CCSHARED) -o $(OBJDIR)");
+	_makefile_print_escape(makefile, soname);
+	_makefile_print(makefile, "%s", (os != HO_MACOSX && os != HO_WIN32)
+			? ".0" : "");
 	if((p = _makefile_get_config(makefile, target, "install")) != NULL)
 	{
 		/* soname is not available on MacOS X */
 		if(os == HO_MACOSX)
-			_makefile_print(makefile, "%s%s%s%s%s",
-					" -install_name ", p, "/", target,
-					".0$(SOEXT)");
+		{
+			_makefile_print(makefile, "%s", " -install_name ");
+			_makefile_print_escape(makefile, p);
+			_makefile_print(makefile, "/");
+			_makefile_print_escape(makefile, target);
+			_makefile_print(makefile, ".0$(SOEXT)");
+		}
 		else if(os != HO_WIN32)
-			_makefile_print(makefile, "%s%s", " -Wl,-soname,",
-					soname);
+		{
+			_makefile_print(makefile, "%s", " -Wl,-soname,");
+			_makefile_print_escape(makefile, soname);
+		}
 	}
 	_makefile_print(makefile, "%s", " $(");
 	_makefile_print_escape_variable(makefile, target);
@@ -1382,25 +1413,48 @@ static int _target_library(Makefile * makefile, String const * target)
 	_makefile_print(makefile, "\n");
 	if(os == HO_MACOSX)
 	{
-		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target,
-				".0$(SOEXT): $(OBJDIR)", soname, "\n");
-		_makefile_print(makefile, "%s%s%s%s%s\n", "\t$(LN) -s -- ",
-				soname, " $(OBJDIR)", target, ".0$(SOEXT)");
-		_makefile_print(makefile, "%s%s%s%s\n", "\n$(OBJDIR)", target,
-				"$(SOEXT): $(OBJDIR)", soname);
-		_makefile_print(makefile, "%s%s%s%s%s", "\t$(LN) -s -- ",
-				soname, " $(OBJDIR)", target, "$(SOEXT)\n");
+		_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "%s", ".0$(SOEXT): $(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "\n");
+		_makefile_print(makefile, "%s", "\t$(LN) -s -- ");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, " $(OBJDIR)");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "%s", ".0$(SOEXT)\n");
+		_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "%s", "$(SOEXT): $(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "\n");
+		_makefile_print(makefile, "%s", "\t$(LN) -s -- ");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "%s", " $(OBJDIR)");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "%s", "$(SOEXT)\n");
 	}
 	else if(os != HO_WIN32)
 	{
-		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", soname,
-				": $(OBJDIR)", soname, ".0\n");
-		_makefile_print(makefile, "%s%s%s%s\n", "\t$(LN) -s -- ",
-				soname, ".0 $(OBJDIR)", soname);
-		_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target,
-				"$(SOEXT): $(OBJDIR)", soname, ".0\n");
-		_makefile_print(makefile, "%s%s%s%s%s", "\t$(LN) -s -- ", soname,
-				".0 $(OBJDIR)", target, "$(SOEXT)\n");
+		_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "%s", ": $(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "%s", ".0\n");
+		_makefile_print(makefile, "%s", "\t$(LN) -s -- ");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "%s", ".0 $(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "%s", "\n\n$(OBJDIR)");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "%s", "$(SOEXT): $(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "%s", ".0\n");
+		_makefile_print(makefile, "%s", "\t$(LN) -s -- ");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "%s", ".0 $(OBJDIR)");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "%s", "$(SOEXT)\n");
 	}
 	string_delete(soname);
 	return 0;
@@ -1412,8 +1466,11 @@ static int _target_library_static(Makefile * makefile, String const * target)
 	String * q;
 	size_t len;
 
-	_makefile_print(makefile, "%s%s%s%s%s", "\n$(OBJDIR)", target,
-			".a: $(", target, "_OBJS)");
+	_makefile_print(makefile, "%s", "\n$(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s", ".a: $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_OBJS)");
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
 		return error_print(PROGNAME);
@@ -1431,8 +1488,9 @@ static int _target_library_static(Makefile * makefile, String const * target)
 	if((p = _makefile_get_config(makefile, q, "ldflags")) != NULL)
 		_binary_ldflags(makefile, p);
 	free(q);
-	_makefile_print(makefile, "%s%s%s",
-			"\n\t$(RANLIB) $(OBJDIR)", target, ".a\n");
+	_makefile_print(makefile, "%s", "\n\t$(RANLIB) $(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s", ".a\n");
 	return 0;
 }
 
@@ -2501,10 +2559,17 @@ static int _install_target_library(Makefile * makefile, String const * target)
 		return 0;
 	_makefile_mkdir(makefile, path);
 	if(configure_can_library_static(makefile->configure))
+	{
 		/* install the static library */
-		_makefile_print(makefile, "%s%s%s%s/%s%s",
-				"\t$(INSTALL) -m 0644 $(OBJDIR)", target,
-				".a $(DESTDIR)", path, target, ".a\n");
+		_makefile_print(makefile, "%s",
+				"\t$(INSTALL) -m 0644 $(OBJDIR)");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, ".a $(DESTDIR)");
+		_makefile_print_escape(makefile, path);
+		_makefile_print(makefile, "/");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, ".a\n");
+	}
 	os = configure_get_os(makefile->configure);
 	if((p = _makefile_get_config(makefile, target, "soname")) != NULL)
 		soname = string_new(p);
@@ -2521,30 +2586,64 @@ static int _install_target_library(Makefile * makefile, String const * target)
 	/* install the shared library */
 	if(os == HO_MACOSX)
 	{
-		_makefile_print(makefile, "%s%s%s%s/%s%s",
-				"\t$(INSTALL) -m 0755 $(OBJDIR)", soname,
-				" $(DESTDIR)", path, soname, "\n");
-		_makefile_print(makefile, "%s%s%s%s/%s%s", "\t$(LN) -s -- ",
-				soname, " $(DESTDIR)", path, target,
-				".0$(SOEXT)\n");
-		_makefile_print(makefile, "%s%s%s%s/%s%s", "\t$(LN) -s -- ",
-				soname, " $(DESTDIR)", path, target,
-				"$(SOEXT)\n");
+		_makefile_print(makefile, "%s",
+				"\t$(INSTALL) -m 0755 $(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "%s", " $(DESTDIR)");
+		_makefile_print_escape(makefile, path);
+		_makefile_print(makefile, "/");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "\n");
+		_makefile_print(makefile, "%s", "\t$(LN) -s -- ");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, " $(DESTDIR)");
+		_makefile_print_escape(makefile, path);
+		_makefile_print(makefile, "/");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, ".0$(SOEXT)\n");
+		_makefile_print(makefile, "%s", "\t$(LN) -s -- ");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "%s", " $(DESTDIR)");
+		_makefile_print_escape(makefile, path);
+		_makefile_print(makefile, "/");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "$(SOEXT)\n");
 	}
 	else if(os == HO_WIN32)
-		_makefile_print(makefile, "%s%s%s%s%s%s%s",
-				"\t$(INSTALL) -m 0755 $(OBJDIR)", soname,
-				" $(DESTDIR)", path, "/", soname, "\n");
+	{
+		_makefile_print(makefile, "%s",
+				"\t$(INSTALL) -m 0755 $(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "%s", " $(DESTDIR)");
+		_makefile_print_escape(makefile, path);
+		_makefile_print(makefile, "/");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "\n");
+	}
 	else
 	{
-		_makefile_print(makefile, "%s%s%s%s/%s%s",
-				"\t$(INSTALL) -m 0755 $(OBJDIR)", soname,
-				".0 $(DESTDIR)", path, soname, ".0\n");
-		_makefile_print(makefile, "%s%s%s%s/%s%s", "\t$(LN) -s -- ",
-				soname, ".0 $(DESTDIR)", path, soname, "\n");
-		_makefile_print(makefile, "%s%s%s%s/%s%s", "\t$(LN) -s -- ",
-				soname, ".0 $(DESTDIR)", path, target,
-				"$(SOEXT)\n");
+		_makefile_print(makefile, "%s",
+				"\t$(INSTALL) -m 0755 $(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, ".0 $(DESTDIR)");
+		_makefile_print_escape(makefile, path);
+		_makefile_print(makefile, "/");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, ".0\n");
+		_makefile_print(makefile, "%s", "\t$(LN) -s -- ");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, ".0 $(DESTDIR)");
+		_makefile_print_escape(makefile, path);
+		_makefile_print(makefile, "/");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "\n");
+		_makefile_print(makefile, "%s", "\t$(LN) -s -- ");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, ".0 $(DESTDIR)");
+		_makefile_print_escape(makefile, path);
+		_makefile_print(makefile, "/");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "%s", "$(SOEXT)\n");
 	}
 	string_delete(soname);
 	return 0;
@@ -3004,14 +3103,18 @@ static int _uninstall_target_library(Makefile * makefile, String const * target,
 {
 	String * soname;
 	String const * p;
-	const String format[] = "\t%s%s/%s%s%s%s";
-	const String rm_destdir[] = "$(RM) -- $(DESTDIR)";
+	const String rm_destdir[] = "\t$(RM) -- $(DESTDIR)";
 	HostOS os;
 
 	if(configure_can_library_static(makefile->configure))
+	{
 		/* uninstall the static library */
-		_makefile_print(makefile, format, rm_destdir, path, target,
-				".a\n", "", "");
+		_makefile_print(makefile, "%s", rm_destdir);
+		_makefile_print_escape(makefile, path);
+		_makefile_print(makefile, "/");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "%s", ".a\n");
+	}
 	os = configure_get_os(makefile->configure);
 	if((p = _makefile_get_config(makefile, target, "soname")) != NULL)
 		soname = string_new(p);
@@ -3028,20 +3131,35 @@ static int _uninstall_target_library(Makefile * makefile, String const * target,
 	/* uninstall the shared library */
 	if(os == HO_MACOSX)
 	{
-		_makefile_print(makefile, format, rm_destdir, path, soname,
-				"\n", "", "");
-		_makefile_print(makefile, format, rm_destdir, path, target,
-				".0", "$(SOEXT)", "\n");
+		_makefile_print(makefile, "%s", rm_destdir);
+		_makefile_print_escape(makefile, path);
+		_makefile_print(makefile, "/");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "\n");
+		_makefile_print(makefile, "%s", rm_destdir);
+		_makefile_print_escape(makefile, path);
+		_makefile_print(makefile, "/");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, ".0$(SOEXT)\n");
 	}
 	else if(os != HO_WIN32)
 	{
-		_makefile_print(makefile, format, rm_destdir, path, soname,
-				".0\n", "", "");
-		_makefile_print(makefile, format, rm_destdir, path, soname,
-				"\n", "", "");
+		_makefile_print(makefile, "%s", rm_destdir);
+		_makefile_print_escape(makefile, path);
+		_makefile_print(makefile, "/");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "%s", ".0\n");
+		_makefile_print(makefile, "%s", rm_destdir);
+		_makefile_print_escape(makefile, path);
+		_makefile_print(makefile, "/");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, "\n");
 	}
-	_makefile_print(makefile, format, rm_destdir, path, target, "$(SOEXT)",
-			"\n", "");
+	_makefile_print(makefile, "%s", rm_destdir);
+	_makefile_print_escape(makefile, path);
+	_makefile_print(makefile, "/");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "$(SOEXT)\n");
 	string_delete(soname);
 	return 0;
 }
