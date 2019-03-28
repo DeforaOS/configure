@@ -200,7 +200,7 @@
 				<title>Writing scripts</title>
 				<para>
 					It is naturally possible to write scripts for integration with &package;.
-					<!-- FIXME complete this section -->
+					<!-- TODO complete this section -->
 				</para>
 			</refsect3>
 		</refsect2>
