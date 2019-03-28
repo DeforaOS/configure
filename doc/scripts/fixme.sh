@@ -66,7 +66,7 @@ _fixme()
 				asm|S)
 					callback="_fixme_asm"
 					;;
-				c|h|js)
+				c|cc|cpp|cxx|h|js)
 					callback="_fixme_c"
 					;;
 				conf|sh)
