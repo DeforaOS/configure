@@ -46,6 +46,8 @@ install: all
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 subst.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/subst.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
+	$(INSTALL) -m 0644 template.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/template.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
 	$(INSTALL) -m 0644 xmllint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/xmllint.sh
 
 uninstall:
@@ -65,6 +67,7 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/pylint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/shlint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/subst.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/template.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/xmllint.sh
 
 .PHONY: all clean distclean install uninstall

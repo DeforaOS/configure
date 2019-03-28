@@ -75,6 +75,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/doc/scripts/pylint.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/shlint.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/subst.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/template.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/xmllint.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/project.conf \
 		$(PACKAGE)-$(VERSION)/src/common.c \
