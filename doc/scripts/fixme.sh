@@ -72,6 +72,9 @@ _fixme()
 				conf|sh)
 					callback="_fixme_sh"
 					;;
+				htm|html|xml)
+					callback="_fixme_xml"
+					;;
 			esac
 			[ -n "$callback" ] || continue
 			($callback "$filename") 2>&1
@@ -119,6 +122,19 @@ _fixme_sh()
 	$GREP -nH "$comment.*\\(TODO\\|XXX\\)" "$filename"
 	#failures
 	$GREP -nH "$comment.*FIXME" "$filename" && ret=2
+	return $ret
+}
+
+_fixme_xml()
+{
+	ret=0
+	filename="$1"
+
+	#XXX limited to a single line
+	#warnings
+	$GREP -nH '<!--.*\(TODO\|XXX\)' "$filename"
+	#failures
+	$GREP -nH '<!--.*FIXME' "$filename" && ret=2
 	return $ret
 }
 
