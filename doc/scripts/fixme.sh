@@ -74,7 +74,7 @@ _fixme()
 					;;
 			esac
 			[ -n "$callback" ] || continue
-			$callback "$filename" 2>&1
+			($callback "$filename") 2>&1
 			if [ $? -ne 0 ]; then
 				echo "$PROGNAME: $filename: FAIL" 1>&2
 				ret=2
@@ -86,31 +86,31 @@ _fixme()
 
 _fixme_asm()
 {
-	retc=0
+	ret=0
 	filename="$1"
 
 	#warnings
 	$GREP -nH '/\*.*\(TODO\|XXX\)' "$filename"
 	#failures
-	$GREP -nH '/\*.*FIXME' "$filename" && retc=2
-	return $retc
+	$GREP -nH '/\*.*FIXME' "$filename" && ret=2
+	return $ret
 }
 
 _fixme_c()
 {
-	retc=0
+	ret=0
 	filename="$1"
 
 	#warnings
 	$GREP -nH '/\(/\|\*\).*\(TODO\|XXX\)' "$filename"
 	#failures
-	$GREP -nH '/\(/\|\*\).*FIXME' "$filename" && retc=2
-	return $retc
+	$GREP -nH '/\(/\|\*\).*FIXME' "$filename" && ret=2
+	return $ret
 }
 
 _fixme_sh()
 {
-	retsh=0
+	ret=0
 	filename="$1"
 	#XXX avoid matching the regexp
 	comment="#"
@@ -118,8 +118,8 @@ _fixme_sh()
 	#warnings
 	$GREP -nH "$comment.*\\(TODO\\|XXX\\)" "$filename"
 	#failures
-	$GREP -nH "$comment.*FIXME" "$filename" && retsh=2
-	return $retsh
+	$GREP -nH "$comment.*FIXME" "$filename" && ret=2
+	return $ret
 }
 
 
