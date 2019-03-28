@@ -59,14 +59,17 @@ _fixme()
 		[ -d "../$subdir" ] || continue
 		for filename in $($FIND "../$subdir" -type f | $SORT); do
 			callback=
-			case "$filename" in
-				*.asm|*.S)
+			ext=${filename##*/}
+			ext=${ext%.in}
+			ext=${ext##*.}
+			case "$ext" in
+				asm|S)
 					callback="_fixme_asm"
 					;;
-				*.c|*.h|*.js)
+				c|h|js)
 					callback="_fixme_c"
 					;;
-				*.conf|*.sh)
+				conf|sh)
 					callback="_fixme_sh"
 					;;
 			esac
