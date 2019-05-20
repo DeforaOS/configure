@@ -32,6 +32,7 @@ DATE="date"
 DEBUG="_debug"
 FIND="find"
 GREP="grep"
+MKDIR="mkdir -p"
 SORT="sort -n"
 TR="tr"
 
@@ -40,7 +41,7 @@ TR="tr"
 #fixme
 _fixme()
 {
-	ret=0
+	res=0
 
 	$DATE
 	echo
@@ -80,40 +81,40 @@ _fixme()
 			($callback "$filename") 2>&1
 			if [ $? -ne 0 ]; then
 				echo "$PROGNAME: $filename: FAIL" 1>&2
-				ret=2
+				res=2
 			fi
 		done
 	done
-	return $ret
+	return $res
 }
 
 _fixme_asm()
 {
-	ret=0
+	res=0
 	filename="$1"
 
 	#warnings
 	$GREP -nH '/\*.*\(TODO\|XXX\)' "$filename"
 	#failures
-	$GREP -nH '/\*.*FIXME' "$filename" && ret=2
-	return $ret
+	$GREP -nH '/\*.*FIXME' "$filename" && res=2
+	return $res
 }
 
 _fixme_c()
 {
-	ret=0
+	res=0
 	filename="$1"
 
 	#warnings
 	$GREP -nH '/\(/\|\*\).*\(TODO\|XXX\)' "$filename"
 	#failures
-	$GREP -nH '/\(/\|\*\).*FIXME' "$filename" && ret=2
-	return $ret
+	$GREP -nH '/\(/\|\*\).*FIXME' "$filename" && res=2
+	return $res
 }
 
 _fixme_sh()
 {
-	ret=0
+	res=0
 	filename="$1"
 	#XXX avoid matching the regexp
 	comment="#"
@@ -121,21 +122,21 @@ _fixme_sh()
 	#warnings
 	$GREP -nH "$comment.*\\(TODO\\|XXX\\)" "$filename"
 	#failures
-	$GREP -nH "$comment.*FIXME" "$filename" && ret=2
-	return $ret
+	$GREP -nH "$comment.*FIXME" "$filename" && res=2
+	return $res
 }
 
 _fixme_xml()
 {
-	ret=0
+	res=0
 	filename="$1"
 
 	#XXX limited to a single line
 	#warnings
 	$GREP -nH '<!--.*\(TODO\|XXX\)' "$filename"
 	#failures
-	$GREP -nH '<!--.*FIXME' "$filename" && ret=2
-	return $ret
+	$GREP -nH '<!--.*FIXME' "$filename" && res=2
+	return $res
 }
 
 
@@ -188,9 +189,15 @@ fi
 [ $clean -ne 0 ] && exit 0
 
 exec 3>&1
+ret=0
 while [ $# -gt 0 ]; do
 	target="$1"
+	dirname="${target%/*}"
 	shift
 
-	_fixme > "$target"					|| exit 2
+	if [ -n "$dirname" -a "$dirname" != "$target" ]; then
+		$MKDIR -- "$dirname"				|| ret=$?
+	fi
+	_fixme > "$target"					|| ret=$?
 done
+exit $ret
