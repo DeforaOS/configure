@@ -63,8 +63,9 @@
 			<title>File format</title>
 			<para>
 				A definition file is organized in sections, each containing a number of
-				variables. Section names are written on their own line, between brackets (eg
-				"[section]"). Variables are given on their own line too, like this:
+				variables. Section names are written on their own line, between square
+				brackets (e.g. "[section]"). Variables are given on their own line too, like
+				this:
 				<blockquote>
 					<computeroutput>
 						variable=value
