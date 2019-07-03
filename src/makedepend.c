@@ -47,7 +47,7 @@ static int _usage(void)
 /* main */
 int main(int argc, char * argv[])
 {
-	/* FIXME implement */
+	/* TODO implement */
 	int o;
 
 	while((o = getopt(argc, argv, "")) != -1)
