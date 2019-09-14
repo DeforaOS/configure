@@ -95,6 +95,8 @@ dist:
 		$(PACKAGE)-$(VERSION)/tools/Makefile \
 		$(PACKAGE)-$(VERSION)/tools/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/Makefile \
+		$(PACKAGE)-$(VERSION)/tests/template.md.in \
+		$(PACKAGE)-$(VERSION)/tests/test.db \
 		$(PACKAGE)-$(VERSION)/tests/tests.sh \
 		$(PACKAGE)-$(VERSION)/tests/binary/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/binary/Makefile.Darwin \
