@@ -807,12 +807,10 @@ static char * _pkgconfig_parse_substitute(PkgList * vars, char const * value)
 	size_t j;
 	size_t k;
 
-	for(i = 0;; i++)
+	for(i = 0; value[i] != '\0'; i++)
 	{
 		if(value[i] != '$' || value[i + 1] != '{')
 		{
-			if(value[i] == '\0')
-				break;
 			/* XXX not efficient */
 			if(_string_append_length(&ret, &value[i], 1) != 0)
 			{
