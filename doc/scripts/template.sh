@@ -180,7 +180,7 @@ while [ $# -gt 0 ]; do
 				;;
 			*)
 				_error "$target: Unknown type"
-				return 2
+				exit 2
 				;;
 		esac
 		exit $?
