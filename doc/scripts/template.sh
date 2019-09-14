@@ -25,8 +25,9 @@
 
 
 #variables
-CONFIGSH="${0%/template.sh}/../config.sh"
+CONFIGSH="${0%/template.sh}/../../config.sh"
 PREFIX="/usr/local"
+DATABASEDIR="../data"
 PROGNAME="template.sh"
 #executables
 DEBUG="_debug"
@@ -52,16 +53,22 @@ _template()
 	target="$1"
 
 	ext="${target##*.}"
-	subject="${target##* - }"
+	subject="${target##*-}"
 	subject="${subject%%.*}"
-	database="../data/$subject.db"
+	database="$DATABASEDIR/$subject.db"
+	if [ "$subject" = "$target" -o "$subject" = "${target%%.*}" ]; then
+		_error "$target: No subject found for target"
+		return $?
+	fi
 	if [ ! -f "$database" ]; then
 		_error "$subject: No database found for subject"
+		return $?
 	fi
-	source="${target%% - *}.$ext.in"
+	source="${target%%-*}.$ext.in"
 	[ -f "$source" ] || source="${source#$OBJDIR}"
 	if [ ! -f "$source" ]; then
 		_error "$source: Could not find source"
+		return $?
 	fi
 	case "$ext" in
 		html|md|rst|txt)
