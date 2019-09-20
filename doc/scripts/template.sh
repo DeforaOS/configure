@@ -64,7 +64,7 @@ _template()
 		_error "$subject: No database found for subject"
 		return $?
 	fi
-	source="${target%%-*}.$ext.in"
+	source="${target%-*}.$ext.in"
 	[ -f "$source" ] || source="${source#$OBJDIR}"
 	if [ ! -f "$source" ]; then
 		_error "$source: Could not find source"
