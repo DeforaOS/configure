@@ -183,7 +183,7 @@ while [ $# -gt 0 ]; do
 				tmpfile="${source%.*}.rst"
 				$DEBUG $RM -- "$tmpfile"
 				;;
-			rst)
+			md|rst|txt)
 				;;
 			*)
 				_error "$target: Unknown type"
