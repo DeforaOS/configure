@@ -1,5 +1,5 @@
 #define PACKAGE "configure"
-#define VERSION "0.3.1"
+#define VERSION "0.4.0"
 
 #ifndef PREFIX
 # define PREFIX "/usr/local"
