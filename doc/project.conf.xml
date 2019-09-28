@@ -177,6 +177,10 @@
 							markup language for technical documentation, based on either SGML or XML
 							(see docbook.sh)</para></listitem>
 					<listitem><para><ulink
+						url="https://gcc.gnu.org/onlinedocs/gcc/Gcov.html">GCOV</ulink>: code
+							coverage analysis and profiling tool, part of the GNU Compiler Collection
+							suite (see coverage.sh)</para></listitem>
+					<listitem><para><ulink
 								url="http://www.gnu.org/software/gettext/">Gettext</ulink>:
 							internationalization (i18n) and localization (l10n) framework, notably
 							allowing software to be easily translated to other languages (see
