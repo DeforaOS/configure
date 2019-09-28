@@ -177,23 +177,25 @@ static int _variables_package(Makefile * makefile,
 		String const * directory);
 static int _variables_print(Makefile * makefile,
 	       	char const * input, char const * output);
-static int _variables_dist(Makefile * makefile);
+static int _variables_dist(Makefile * makefile, char * done);
 static int _variables_targets(Makefile * makefile);
 static int _variables_targets_library(Makefile * makefile, char const * target);
-static int _variables_executables(Makefile * makefile);
+static int _variables_executables(Makefile * makefile, char * done);
 static int _variables_includes(Makefile * makefile);
 static int _variables_subdirs(Makefile * makefile);
 static int _write_variables(Makefile * makefile)
 {
 	int ret = 0;
 	String const * directory;
+	char done[TT_LAST]; /* FIXME even better if'd be variable by variable */
 
+	memset(&done, 0, sizeof(done));
 	directory = _makefile_get_config(makefile, NULL, "directory");
 	ret |= _variables_package(makefile, directory);
 	ret |= _variables_print(makefile, "subdirs", "SUBDIRS");
-	ret |= _variables_dist(makefile);
+	ret |= _variables_dist(makefile, done);
 	ret |= _variables_targets(makefile);
-	ret |= _variables_executables(makefile);
+	ret |= _variables_executables(makefile, done);
 	ret |= _variables_includes(makefile);
 	ret |= _variables_subdirs(makefile);
 	_makefile_print(makefile, "\n");
@@ -264,7 +266,7 @@ static int _variables_print(Makefile * makefile,
 	return 0;
 }
 
-static int _variables_dist(Makefile * makefile)
+static int _variables_dist(Makefile * makefile, char * done)
 {
 	String const * p;
 	String * dist;
@@ -285,14 +287,10 @@ static int _variables_dist(Makefile * makefile)
 		dist[i] = '\0';
 		if(_makefile_get_config(makefile, dist, "install") != NULL)
 		{
-			/* FIXME may still need to be output */
-			if(_makefile_get_config(makefile, NULL, "targets")
-					== NULL)
-			{
-				_makefile_output_path(makefile, "objdir");
-				_makefile_output_path(makefile, "prefix");
-				_makefile_output_path(makefile, "destdir");
-			}
+			_makefile_output_path(makefile, "objdir");
+			_makefile_output_path(makefile, "prefix");
+			_makefile_output_path(makefile, "destdir");
+			done[TT_SCRIPT] = 1;
 			_makefile_output_program(makefile, "mkdir", 0);
 			_makefile_output_program(makefile, "install", 0);
 			_makefile_output_program(makefile, "rm", 0);
@@ -452,9 +450,8 @@ static int _variables_targets_library(Makefile * makefile, char const * target)
 
 static void _executables_variables(Makefile * makefile,
 	       	String const * target, char * done);
-static int _variables_executables(Makefile * makefile)
+static int _variables_executables(Makefile * makefile, char * done)
 {
-	char done[TT_LAST]; /* FIXME even better if'd be variable by variable */
 	String const * targets;
 	String const * includes;
 	String const * package;
@@ -463,7 +460,6 @@ static int _variables_executables(Makefile * makefile)
 	size_t i;
 	char c;
 
-	memset(&done, 0, sizeof(done));
 	targets = _makefile_get_config(makefile, NULL, "targets");
 	includes = _makefile_get_config(makefile, NULL, "includes");
 	package = _makefile_get_config(makefile, NULL, "package");
@@ -552,6 +548,7 @@ static void _executables_variables(Makefile * makefile, String const * target,
 			break;
 		case TT_SCRIPT:
 			_variables_script(makefile, done);
+			done[TT_SCRIPT] = 1;
 			break;
 		case TT_UNKNOWN:
 			break;
