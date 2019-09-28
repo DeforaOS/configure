@@ -1,6 +1,9 @@
 PACKAGE	= configure
 VERSION	= 0.4.0
 SUBDIRS	= data doc src tools tests
+OBJDIR	=
+PREFIX	= /usr/local
+DESTDIR	=
 MKDIR	= mkdir -m 0755 -p
 INSTALL	= install
 RM	= rm -f
