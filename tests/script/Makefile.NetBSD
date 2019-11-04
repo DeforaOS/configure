@@ -33,7 +33,7 @@ clean:
 	./s\ c\ r\ i\ p\ t.sh -c -P "$(PREFIX)" -- "$(OBJDIR)s p a c e s 2"
 
 distclean: clean
-	$(RM) -- $(TARGETS)
+	$(RM) -- $(OBJDIR)test $(OBJDIR)disabled $(OBJDIR)s\ p\ a\ c\ e\ s\ 2
 
 install: all
 	./script.sh -P "$(DESTDIR)/somewhere/else/again" -i -- "$(OBJDIR)test"

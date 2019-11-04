@@ -25,7 +25,7 @@ $(OBJDIR)xinstall:
 clean:
 
 distclean: clean
-	$(RM) -- $(TARGETS)
+	$(RM) -- $(OBJDIR)s\ p\ a\ c\ e\ s\ 2 $(OBJDIR)target $(OBJDIR)xinstall
 
 install: all
 	$(MKDIR) $(DESTDIR)$(PREFIX)
