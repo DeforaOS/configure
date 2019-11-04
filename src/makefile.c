@@ -2275,13 +2275,13 @@ static int _write_distclean(Makefile * makefile)
 			continue;
 		c = targets[i];
 		targets[i] = '\0';
-		phony = _makefile_is_phony(makefile, targets);
-		cnt++;
+		if(_makefile_is_phony(makefile, targets))
+			phony = 1;
+		else
+			cnt++;
 		if(c == '\0')
 			break;
 		targets[i] = c;
-		if(phony)
-			break;
 		targets += i + 1;
 		i = 0;
 	}
