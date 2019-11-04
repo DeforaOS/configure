@@ -2246,6 +2246,13 @@ static int _clean_targets(Makefile * makefile)
 static int _write_distclean(Makefile * makefile)
 {
 	String const * subdirs;
+	String const * p;
+	String * targets;
+	String * q;
+	size_t cnt;
+	size_t i;
+	char c;
+	int phony = 0;
 
 	/* only depend on the "clean" target if we do not have subfolders */
 	if((subdirs = _makefile_get_config(makefile, NULL, "subdirs")) == NULL)
@@ -2256,9 +2263,56 @@ static int _write_distclean(Makefile * makefile)
 		_makefile_subdirs(makefile, "distclean");
 		_clean_targets(makefile);
 	}
+	/* XXX do not erase phony targets */
+	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
+		return 0;
+	if((targets = string_new(p)) == NULL)
+		return 1;
+	q = targets;
+	for(i = 0, cnt = 0;; i++)
+	{
+		if(targets[i] != ',' && targets[i] != '\0')
+			continue;
+		c = targets[i];
+		targets[i] = '\0';
+		phony = _makefile_is_phony(makefile, targets);
+		cnt++;
+		if(c == '\0')
+			break;
+		targets[i] = c;
+		if(phony)
+			break;
+		targets += i + 1;
+		i = 0;
+	}
 	/* FIXME do not erase targets that need be distributed */
-	if(_makefile_get_config(makefile, NULL, "targets") != NULL)
+	if(!phony)
 		_makefile_remove(makefile, 0, "$(TARGETS)", NULL);
+	else if(cnt > 0)
+	{
+		targets = q;
+		for(i = 0, cnt = 0;; i++)
+		{
+			if(targets[i] != ',' && targets[i] != '\0')
+				continue;
+			c = targets[i];
+			targets[i] = '\0';
+			if(!_makefile_is_phony(makefile, targets))
+			{
+				if(cnt++ == 0)
+					_makefile_print(makefile, "\t$(RM) --");
+				_makefile_print(makefile, "%s", " $(OBJDIR)");
+				_makefile_print_escape(makefile, targets);
+			}
+			if(c == '\0')
+				break;
+			targets[i] = c;
+			targets += i + 1;
+			i = 0;
+		}
+		_makefile_print(makefile, "\n");
+	}
+	string_delete(q);
 	return 0;
 }
 
