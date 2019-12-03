@@ -939,7 +939,10 @@ static int _targets_all(Makefile * makefile)
 		depends[i++] = "subdirs";
 	if(_makefile_get_config(makefile, NULL, "targets") != NULL)
 		depends[i++] = "$(TARGETS)";
-	_makefile_target(makefile, "all", depends[0], depends[1], NULL);
+	if(_makefile_get_config(makefile, "all", "type") != NULL)
+		_targets_target(makefile, "all");
+	else
+		_makefile_target(makefile, "all", depends[0], depends[1], NULL);
 	return 0;
 }
 
