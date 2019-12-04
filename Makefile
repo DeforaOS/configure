@@ -1,5 +1,6 @@
 PACKAGE	= configure
 VERSION	= 0.4.1
+VENDOR	= Devel
 SUBDIRS	= data doc src tools tests
 OBJDIR	=
 PREFIX	= /usr/local
