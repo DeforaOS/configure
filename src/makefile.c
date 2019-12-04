@@ -207,6 +207,7 @@ static int _variables_package(Makefile * makefile,
 {
 	String const * package;
 	String const * version;
+	String const * vendor;
 	String const * p;
 
 	if((package = _makefile_get_config(makefile, NULL, "package")) == NULL)
@@ -223,8 +224,11 @@ static int _variables_package(Makefile * makefile,
 	}
 	if(_makefile_is_flag_set(makefile, PREFS_v))
 		printf(" %s\n", version);
+	if((vendor = _makefile_get_config(makefile, NULL, "vendor")) == NULL)
+		vendor = "DeforaOS";
 	_makefile_output_variable(makefile, "PACKAGE", package);
 	_makefile_output_variable(makefile, "VERSION", version);
+	_makefile_output_variable(makefile, "VENDOR", vendor);
 	if((p = _makefile_get_config(makefile, NULL, "config")) != NULL)
 		return settings(makefile->configure, directory, package,
 				version);
