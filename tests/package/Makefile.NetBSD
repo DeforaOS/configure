@@ -1,5 +1,6 @@
 PACKAGE	= test
 VERSION	= 0.0.0
+VENDOR	= DeforaOS
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
