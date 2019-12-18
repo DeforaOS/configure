@@ -146,7 +146,7 @@ static int _do_h(Configure * configure, FILE * fp,
 		String const * package, String const * version,
 		String const * vendor)
 {
-	char const * p;
+	String const * p;
 
 	/* XXX may require escaping */
 	fprintf(fp, "%s%s%s%s%s%s",
@@ -170,7 +170,7 @@ static int _do_sh(Configure * configure, FILE * fp,
 		String const * package, String const * version,
 		String const * vendor)
 {
-	char const * p;
+	String const * p;
 
 	/* XXX may require escaping */
 	fprintf(fp, "%s%s%s%s%s%s",
