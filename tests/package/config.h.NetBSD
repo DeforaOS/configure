@@ -1,5 +1,6 @@
 #define PACKAGE "test"
 #define VERSION "0.0.0"
+#define VENDOR "DeforaOS"
 
 #ifndef PREFIX
 # define PREFIX "/usr/local"
