@@ -231,7 +231,7 @@ static int _variables_package(Makefile * makefile,
 	_makefile_output_variable(makefile, "VENDOR", vendor);
 	if((p = _makefile_get_config(makefile, NULL, "config")) != NULL)
 		return settings(makefile->configure, directory, package,
-				version);
+				version, vendor);
 	return 0;
 }
 

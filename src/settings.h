@@ -37,6 +37,7 @@
 
 /* functions */
 int settings(Configure * configure, String const * directory,
-		String const * package, String const * version);
+		String const * package, String const * version,
+		String const * vendor);
 
 #endif /* !CONFIGURE_SETTINGS_H */

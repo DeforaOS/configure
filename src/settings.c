@@ -54,10 +54,11 @@ String * sSettingsType[ST_COUNT] =
 /* settings */
 static int _settings_do(Configure * configure, String const * directory,
 		String const * package, String const * version,
-		String const * extension);
+		String const * vendor, String const * extension);
 
 int settings(Configure * configure, String const * directory,
-		String const * package, String const * version)
+		String const * package, String const * version,
+		String const * vendor)
 {
 	int ret = 0;
 	String const * p;
@@ -77,7 +78,8 @@ int settings(Configure * configure, String const * directory,
 			continue;
 		c = r[i];
 		r[i] = '\0';
-		ret |= _settings_do(configure, directory, package, version, r);
+		ret |= _settings_do(configure, directory, package, version,
+				vendor, r);
 		if(c == '\0')
 			break;
 		r+=i+1;
@@ -88,12 +90,14 @@ int settings(Configure * configure, String const * directory,
 }
 
 static int _do_h(Configure * configure, FILE * fp,
-		String const * package, String const * version);
+		String const * package, String const * version,
+		String const * vendor);
 static int _do_sh(Configure * configure, FILE * fp,
-		String const * package, String const * version);
+		String const * package, String const * version,
+		String const * vendor);
 static int _settings_do(Configure * configure, String const * directory,
 		String const * package, String const * version,
-		String const * extension)
+		String const * vendor, String const * extension)
 {
 	int ret = 0;
 	int i;
@@ -128,10 +132,10 @@ static int _settings_do(Configure * configure, String const * directory,
 	switch(i)
 	{
 		case ST_H:
-			ret |= _do_h(configure, fp, package, version);
+			ret |= _do_h(configure, fp, package, version, vendor);
 			break;
 		case ST_SH:
-			ret |= _do_sh(configure, fp, package, version);
+			ret |= _do_sh(configure, fp, package, version, vendor);
 			break;
 	}
 	fclose(fp);
@@ -139,12 +143,17 @@ static int _settings_do(Configure * configure, String const * directory,
 }
 
 static int _do_h(Configure * configure, FILE * fp,
-		String const * package, String const * version)
+		String const * package, String const * version,
+		String const * vendor)
 {
 	char const * p;
 
-	fprintf(fp, "%s%s%s%s%s%s", "#define PACKAGE \"", package, "\"\n",
+	/* XXX may require escaping */
+	fprintf(fp, "%s%s%s%s%s%s",
+			"#define PACKAGE \"", package, "\"\n",
 			"#define VERSION \"", version, "\"\n");
+	if(vendor != NULL)
+		fprintf(fp, "%s%s%s", "#define VENDOR \"", vendor, "\"\n");
 	if((p = configure_get_path(configure, "prefix")) != NULL)
 		fprintf(fp, "%s%s%s", "\n#ifndef PREFIX\n\
 # define PREFIX \"", p, "\"\n#endif\n");
@@ -158,12 +167,16 @@ static int _do_h(Configure * configure, FILE * fp,
 }
 
 static int _do_sh(Configure * configure, FILE * fp,
-		String const * package, String const * version)
+		String const * package, String const * version,
+		String const * vendor)
 {
 	char const * p;
 
-	fprintf(fp, "%s%s%s%s%s%s", "PACKAGE=\"", package, "\"\n",
+	/* XXX may require escaping */
+	fprintf(fp, "%s%s%s%s%s%s",
+			"PACKAGE=\"", package, "\"\n",
 			"VERSION=\"", version, "\"\n");
+	fprintf(fp, "%s%s%s", "VENDOR=\"", vendor, "\"\n");
 	if((p = configure_get_path(configure, "prefix")) != NULL)
 		fprintf(fp, "%s%s%s", "\nPREFIX=\"", p, "\"\n");
 	if((p = configure_get_path(configure, "libdir")) != NULL)
