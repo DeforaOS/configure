@@ -84,6 +84,7 @@ static int _makefile_print(Makefile * makefile, char const * format, ...);
 static int _makefile_print_escape(Makefile * makefile, char const * str);
 static int _makefile_print_escape_variable(Makefile * makefile,
 		char const * str);
+static int _makefile_print_target(Makefile * makefile, String const * target);
 static int _makefile_remove(Makefile * makefile, int recursive, ...);
 static int _makefile_subdirs(Makefile * makefile, char const * target);
 static int _makefile_target(Makefile * makefile, char const * target, ...);
@@ -179,7 +180,6 @@ static int _variables_print(Makefile * makefile,
 	       	char const * input, char const * output);
 static int _variables_dist(Makefile * makefile, char * done);
 static int _variables_targets(Makefile * makefile);
-static int _variables_targets_library(Makefile * makefile, char const * target);
 static int _variables_executables(Makefile * makefile, char * done);
 static int _variables_includes(Makefile * makefile);
 static int _variables_subdirs(Makefile * makefile);
@@ -317,8 +317,6 @@ static int _variables_targets(Makefile * makefile)
 	String * q;
 	size_t i;
 	char c;
-	String const * type;
-	int phony;
 
 	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
 		return 0;
@@ -332,62 +330,8 @@ static int _variables_targets(Makefile * makefile)
 			continue;
 		c = prints[i];
 		prints[i] = '\0';
-		if((type = _makefile_get_config(makefile, prints, "type"))
-			       	== NULL)
-			_makefile_print(makefile, " %s", prints);
-		else if(_makefile_is_enabled(makefile, prints) != 0)
-			switch(enum_string(TT_LAST, sTargetType, type))
-			{
-				case TT_BINARY:
-					_makefile_print(makefile, "%s",
-							" $(OBJDIR)");
-					_makefile_print_escape(makefile,
-							prints);
-					_makefile_print(makefile, "%s",
-							"$(EXEEXT)");
-					break;
-				case TT_COMMAND:
-					phony = _makefile_is_phony(makefile,
-							prints);
-					_makefile_print(makefile, " %s", phony
-							? "" : "$(OBJDIR)");
-					_makefile_print_escape(makefile,
-							prints);
-					break;
-				case TT_LIBRARY:
-					ret |= _variables_targets_library(
-							makefile, prints);
-					break;
-				case TT_LIBTOOL:
-					_makefile_print(makefile, "%s",
-							" $(OBJDIR)");
-					_makefile_print_escape(makefile,
-							prints);
-					_makefile_print(makefile, "%s", ".la");
-					break;
-				case TT_OBJECT:
-				case TT_UNKNOWN:
-					_makefile_print(makefile, " $(OBJDIR)");
-					_makefile_print_escape(makefile,
-							prints);
-					break;
-				case TT_SCRIPT:
-					phony = _makefile_is_phony(makefile,
-							prints);
-					_makefile_print(makefile, " %s", phony
-							? "" : "$(OBJDIR)");
-					_makefile_print_escape(makefile,
-							prints);
-					break;
-				case TT_PLUGIN:
-					_makefile_print(makefile, "%s",
-							" $(OBJDIR)");
-					_makefile_print_escape(makefile,
-							prints);
-					_makefile_print(makefile, "%s",
-							"$(SOEXT)");
-					break;
-			}
+		_makefile_print(makefile, " ");
+		_makefile_print_target(makefile, prints);
 		if(c == '\0')
 			break;
 		prints += i + 1;
@@ -396,60 +340,6 @@ static int _variables_targets(Makefile * makefile)
 	_makefile_print(makefile, "\n");
 	string_delete(q);
 	return ret;
-}
-
-static int _variables_targets_library(Makefile * makefile, char const * target)
-{
-	String * soname;
-	String const * p;
-	HostOS os;
-
-	if((p = _makefile_get_config(makefile, target, "soname")) != NULL)
-		soname = string_new(p);
-	else if(configure_get_os(makefile->configure) == HO_MACOSX)
-		/* versioning is different on MacOS X */
-		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
-	else if(configure_get_os(makefile->configure) == HO_WIN32)
-		/* and on Windows */
-		soname = string_new_append(target, "$(SOEXT)", NULL);
-	else
-		soname = string_new_append(target, "$(SOEXT)", ".0", NULL);
-	if(soname == NULL)
-		return 1;
-	if(configure_can_library_static(makefile->configure))
-	{
-		/* generate a static library */
-		_makefile_print(makefile, "%s", " $(OBJDIR)", target, ".a");
-		_makefile_print_escape(makefile, target);
-		_makefile_print(makefile, "%s", ".a");
-	}
-	if((os = configure_get_os(makefile->configure)) == HO_MACOSX)
-	{
-		_makefile_print(makefile, "%s", " $(OBJDIR)");
-		_makefile_print_escape(makefile, soname);
-		_makefile_print(makefile, " $(OBJDIR)");
-		_makefile_print_escape(makefile, target);
-		_makefile_print(makefile, "%s", ".0$(SOEXT) $(OBJDIR)");
-		_makefile_print_escape(makefile, target);
-		_makefile_print(makefile, "$(SOEXT)");
-	}
-	else if(os == HO_WIN32)
-	{
-		_makefile_print(makefile, "%s", " $(OBJDIR)");
-		_makefile_print_escape(makefile, soname);
-	}
-	else
-	{
-		_makefile_print(makefile, "%s", " $(OBJDIR)");
-		_makefile_print_escape(makefile, soname);
-		_makefile_print(makefile, ".0 $(OBJDIR)");
-		_makefile_print_escape(makefile, soname);
-		_makefile_print(makefile, " $(OBJDIR)");
-		_makefile_print_escape(makefile, target);
-		_makefile_print(makefile, "%s", "$(SOEXT)");
-	}
-	string_delete(soname);
-	return 0;
 }
 
 static void _executables_variables(Makefile * makefile,
@@ -3510,6 +3400,118 @@ static int _makefile_print_escape_variable(Makefile * makefile,
 		if(fputc(c, makefile->fp) == EOF)
 			return -1;
 	}
+	return 0;
+}
+
+
+/* makefile_print_target */
+static int _print_target_library(Makefile * makefile, String const * target);
+
+static int _makefile_print_target(Makefile * makefile, String const * target)
+{
+	int ret = 0;
+	String const * type;
+	int phony;
+
+	if((type = _makefile_get_config(makefile, target, "type")) == NULL)
+	{
+		_makefile_print(makefile, "%s", target);
+		return 0;
+	}
+	switch(enum_string(TT_LAST, sTargetType, type))
+	{
+		case TT_BINARY:
+			_makefile_print(makefile, "%s", "$(OBJDIR)");
+			_makefile_print_escape(makefile, target);
+			_makefile_print(makefile, "%s", "$(EXEEXT)");
+			break;
+		case TT_COMMAND:
+			phony = _makefile_is_phony(makefile, target);
+			_makefile_print(makefile, "%s",
+					phony ? "" : "$(OBJDIR)");
+			_makefile_print_escape(makefile, target);
+			break;
+		case TT_LIBRARY:
+			ret |= _print_target_library(makefile, target);
+			break;
+		case TT_LIBTOOL:
+			_makefile_print(makefile, "%s", "$(OBJDIR)");
+			_makefile_print_escape(makefile, target);
+			_makefile_print(makefile, "%s", ".la");
+			break;
+		case TT_OBJECT:
+		case TT_UNKNOWN:
+			_makefile_print(makefile, "$(OBJDIR)");
+			_makefile_print_escape(makefile, target);
+			break;
+		case TT_SCRIPT:
+			phony = _makefile_is_phony(makefile, target);
+			_makefile_print(makefile, "%s",
+					phony ? "" : "$(OBJDIR)");
+			_makefile_print_escape(makefile, target);
+			break;
+		case TT_PLUGIN:
+			_makefile_print(makefile, "%s", "$(OBJDIR)");
+			_makefile_print_escape(makefile, target);
+			_makefile_print(makefile, "%s", "$(SOEXT)");
+			break;
+	}
+	return ret;
+}
+
+static int _print_target_library(Makefile * makefile, String const * target)
+{
+	String * soname;
+	String const * p;
+	String const * sep = "";
+	HostOS os;
+
+	if((p = _makefile_get_config(makefile, target, "soname")) != NULL)
+		soname = string_new(p);
+	else if(configure_get_os(makefile->configure) == HO_MACOSX)
+		/* versioning is different on MacOS X */
+		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
+	else if(configure_get_os(makefile->configure) == HO_WIN32)
+		/* and on Windows */
+		soname = string_new_append(target, "$(SOEXT)", NULL);
+	else
+		soname = string_new_append(target, "$(SOEXT)", ".0", NULL);
+	if(soname == NULL)
+		return 1;
+	if(configure_can_library_static(makefile->configure))
+	{
+		/* generate a static library */
+		_makefile_print(makefile, "%s", "$(OBJDIR)", target, ".a");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "%s", ".a");
+		sep = " ";
+	}
+	if((os = configure_get_os(makefile->configure)) == HO_MACOSX)
+	{
+		_makefile_print(makefile, "%s%s", sep, "$(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, " $(OBJDIR)");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "%s", ".0$(SOEXT) $(OBJDIR)");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "$(SOEXT)");
+	}
+	else if(os == HO_WIN32)
+	{
+		_makefile_print(makefile, "%s%s", sep, "$(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+	}
+	else
+	{
+		_makefile_print(makefile, "%s%s", sep, "$(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, ".0 $(OBJDIR)");
+		_makefile_print_escape(makefile, soname);
+		_makefile_print(makefile, " $(OBJDIR)");
+		_makefile_print_escape(makefile, target);
+		_makefile_print(makefile, "%s", "$(SOEXT)");
+	}
+	string_delete(soname);
 	return 0;
 }
 
