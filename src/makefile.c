@@ -1063,7 +1063,7 @@ static int _target_flags(Makefile * makefile, String const * target)
 					_flags_asmpp(makefile, target);
 					if(done[OT_ASM_SOURCE])
 						break;
-					/* fallback */
+					/* fallthrough */
 				case OT_ASM_SOURCE:
 					done[OT_ASM_SOURCE] = 1;
 					_flags_asm(makefile, target);
@@ -1074,14 +1074,14 @@ static int _target_flags(Makefile * makefile, String const * target)
 					break;
 				case OT_OBJC_SOURCE:
 					done[OT_C_SOURCE] = 1;
-					/* fallback */
+					/* fallthrough */
 				case OT_C_SOURCE:
 					done[OT_OBJC_SOURCE] = 1;
 					_flags_c(makefile, target);
 					break;
 				case OT_OBJCXX_SOURCE:
 					done[OT_CXX_SOURCE] = 1;
-					/* fallback */
+					/* fallthrough */
 				case OT_CXX_SOURCE:
 					done[OT_OBJCXX_SOURCE] = 1;
 					_flags_cxx(makefile, target);
