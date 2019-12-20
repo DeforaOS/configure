@@ -129,6 +129,8 @@
 					<listitem><para><varname>phony</varname>: determines if the target defined
 							should always be built, regardless of the presence of a file of a same
 							name (possible values: 0, 1)</para></listitem>
+					<listitem><para><varname>enabled</varname>: set to 0 to not build this
+						target by default</para></listitem>
 				</itemizedlist>
 			</para>
 		</refsect2>
