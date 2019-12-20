@@ -11,7 +11,7 @@ MKDIR	= mkdir -m 0755 -p
 INSTALL	= install
 
 
-all: $(OBJDIR)test$(EXEEXT) $(OBJDIR)test2$(EXEEXT) $(OBJDIR)test3$(EXEEXT) $(OBJDIR)test4$(EXEEXT) $(OBJDIR)test\ 5$(EXEEXT)
+all: $(OBJDIR)test$(EXEEXT) $(OBJDIR)test2$(EXEEXT) $(OBJDIR)test3$(EXEEXT) $(OBJDIR)test\ 5$(EXEEXT)
 
 test_OBJS = $(OBJDIR)test.o $(OBJDIR)main.o
 test_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)

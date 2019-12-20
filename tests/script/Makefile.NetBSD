@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)test phony s\ p\ a\ c\ e\ s $(OBJDIR)s\ p\ a\ c\ e\ s\ 2
+TARGETS	= $(OBJDIR)test $(OBJDIR)disabled phony s\ p\ a\ c\ e\ s $(OBJDIR)s\ p\ a\ c\ e\ s\ 2
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -8,7 +8,7 @@ MKDIR	= mkdir -m 0755 -p
 INSTALL	= install
 
 
-all: $(TARGETS)
+all: $(OBJDIR)test phony s\ p\ a\ c\ e\ s $(OBJDIR)s\ p\ a\ c\ e\ s\ 2
 
 $(OBJDIR)test:
 	./script.sh -P "/somewhere/else" -- "$(OBJDIR)test"
