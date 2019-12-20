@@ -827,15 +827,70 @@ static int _write_targets(Makefile * makefile)
 static int _targets_all(Makefile * makefile)
 {
 	char const * depends[] = { NULL, NULL };
-	size_t i = 0;
+	size_t j = 0;
+	String const * subdirs;
+	String const * p;
+	String * targets;
+	String * q;
+	size_t i;
+	char c;
+	int enabled = 1;
 
 	if(_makefile_get_config(makefile, "all", "type") != NULL)
 		return _targets_target(makefile, "all");
-	if(_makefile_get_config(makefile, NULL, "subdirs") != NULL)
-		depends[i++] = "subdirs";
-	if(_makefile_get_config(makefile, NULL, "targets") != NULL)
-		depends[i++] = "$(TARGETS)";
-	_makefile_target(makefile, "all", depends[0], depends[1], NULL);
+	if((subdirs = _makefile_get_config(makefile, NULL, "subdirs")) != NULL)
+		depends[j++] = "subdirs";
+	if((p = _makefile_get_config(makefile, NULL, "targets")) != NULL
+			&& string_length(p) > 0)
+		depends[j++] = "$(TARGETS)";
+	if(p == NULL || string_length(p) == 0)
+	{
+		_makefile_target(makefile, "all", depends[0], depends[1], NULL);
+		return 0;
+	}
+	if((targets = string_new(p)) == NULL)
+		return 1;
+	q = targets;
+	for(i = 0;; i++)
+	{
+		if(targets[i] != ',' && targets[i] != '\0')
+			continue;
+		c = targets[i];
+		targets[i] = '\0';
+		if(_makefile_is_enabled(makefile, targets) == 0)
+			enabled = 0;
+		if(c == '\0')
+			break;
+		targets[i] = c;
+		targets += i + 1;
+		i = 0;
+	}
+	if(enabled > 0)
+		_makefile_target(makefile, "all", depends[0], depends[1], NULL);
+	else
+	{
+		_makefile_print(makefile, "\nall:%s",
+				(subdirs != NULL) ? " subdirs" : "");
+		targets = q;
+		for(i = 0;; i++)
+		{
+			if(targets[i] != ',' && targets[i] != '\0')
+				continue;
+			c = targets[i];
+			targets[i] = '\0';
+			if(_makefile_is_enabled(makefile, targets))
+			{
+				_makefile_print(makefile, " ");
+				_makefile_print_target(makefile, targets);
+			}
+			if(c == '\0')
+				break;
+			targets += i + 1;
+			i = 0;
+		}
+		_makefile_print(makefile, "\n");
+	}
+	string_delete(q);
 	return 0;
 }
 
