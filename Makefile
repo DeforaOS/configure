@@ -174,6 +174,8 @@ install: all
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
 	$(INSTALL) -m 0644 CHANGES $(DESTDIR)$(PREFIX)/share/doc/configure/CHANGES
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
+	$(INSTALL) -m 0644 COPYING $(DESTDIR)$(PREFIX)/share/doc/configure/COPYING
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
 	$(INSTALL) -m 0644 INSTALL.md $(DESTDIR)$(PREFIX)/share/doc/configure/INSTALL.md
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure
 	$(INSTALL) -m 0644 README.md $(DESTDIR)$(PREFIX)/share/doc/configure/README.md
@@ -186,6 +188,7 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/AUTHORS
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/BUGS
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/CHANGES
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/COPYING
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/INSTALL.md
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/README.md
 
