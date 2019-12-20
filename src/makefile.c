@@ -829,14 +829,13 @@ static int _targets_all(Makefile * makefile)
 	char const * depends[] = { NULL, NULL };
 	size_t i = 0;
 
+	if(_makefile_get_config(makefile, "all", "type") != NULL)
+		return _targets_target(makefile, "all");
 	if(_makefile_get_config(makefile, NULL, "subdirs") != NULL)
 		depends[i++] = "subdirs";
 	if(_makefile_get_config(makefile, NULL, "targets") != NULL)
 		depends[i++] = "$(TARGETS)";
-	if(_makefile_get_config(makefile, "all", "type") != NULL)
-		_targets_target(makefile, "all");
-	else
-		_makefile_target(makefile, "all", depends[0], depends[1], NULL);
+	_makefile_target(makefile, "all", depends[0], depends[1], NULL);
 	return 0;
 }
 
