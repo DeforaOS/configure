@@ -1167,6 +1167,11 @@ static void _flags_asm(Makefile * makefile, String const * target)
 	if((p = _makefile_get_config(makefile, target, "asflags")) != NULL)
 		_makefile_print(makefile, " %s", p);
 	_makefile_print(makefile, "\n");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
+	if((p = _makefile_get_config(makefile, target, "ldflags")) != NULL)
+		_binary_ldflags(makefile, p);
+	_makefile_print(makefile, "\n");
 }
 
 static void _flags_asmpp(Makefile * makefile, String const * target)
