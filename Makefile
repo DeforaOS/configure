@@ -101,9 +101,6 @@ dist:
 		$(PACKAGE)-$(VERSION)/tools/Makefile \
 		$(PACKAGE)-$(VERSION)/tools/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/Makefile \
-		$(PACKAGE)-$(VERSION)/tests/template.md.in \
-		$(PACKAGE)-$(VERSION)/tests/test.db \
-		$(PACKAGE)-$(VERSION)/tests/tests.sh \
 		$(PACKAGE)-$(VERSION)/tests/binary/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/binary/Makefile.Darwin \
 		$(PACKAGE)-$(VERSION)/tests/binary/Makefile.DeforaOS \
@@ -136,6 +133,9 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/plugin/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/script/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/script/Makefile.NetBSD \
+		$(PACKAGE)-$(VERSION)/tests/template.md.in \
+		$(PACKAGE)-$(VERSION)/tests/test.db \
+		$(PACKAGE)-$(VERSION)/tests/tests.sh \
 		$(PACKAGE)-$(VERSION)/tests/verilog/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/verilog/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/project.conf \
