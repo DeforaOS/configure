@@ -51,13 +51,11 @@ install: all
 		if [ -n "$(OBJDIR)" ]; then \
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/" install; \
 		else $(MAKE) install; fi) || exit; done
-	../../doc/scripts/gtkdoc.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)gtkdoc/html.stamp"
 
 uninstall:
 	@for i in $(SUBDIRS); do (cd "$$i" && \
 		if [ -n "$(OBJDIR)" ]; then \
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/" uninstall; \
 		else $(MAKE) uninstall; fi) || exit; done
-	../../doc/scripts/gtkdoc.sh -P "$(DESTDIR)$(PREFIX)" -u -- "gtkdoc/html.stamp"
 
 .PHONY: all subdirs clean distclean install uninstall
