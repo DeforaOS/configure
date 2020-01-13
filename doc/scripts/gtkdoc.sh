@@ -187,7 +187,7 @@ while [ $# -gt 0 ]; do
 					--tmpl-dir="tmpl")
 			;;
 		gtkdoc/*.types)
-			output="doc/gtkdoc"			|| exit 2
+			output="$PWD/gtkdoc"			|| exit 2
 			if [ -n "$OBJDIR" ]; then
 				output="${OBJDIR}gtkdoc"
 				$DEBUG $MKDIR -- "$output"	|| exit 2
