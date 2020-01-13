@@ -1,3 +1,4 @@
+SUBDIRS	= gtkdoc
 TARGETS	= $(OBJDIR)clint.log $(OBJDIR)coverage.log $(OBJDIR)fixme.log $(OBJDIR)htmllint.log $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)template-test.md $(OBJDIR)tests.log $(OBJDIR)xmllint.log
 OBJDIR	=
 PREFIX	= /usr/local
@@ -8,7 +9,14 @@ MKDIR	= mkdir -m 0755 -p
 INSTALL	= install
 
 
-all: $(OBJDIR)clint.log $(OBJDIR)htmllint.log $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)template-test.md $(OBJDIR)tests.log $(OBJDIR)xmllint.log
+all: subdirs $(OBJDIR)clint.log $(OBJDIR)htmllint.log $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)template-test.md $(OBJDIR)tests.log $(OBJDIR)xmllint.log
+
+subdirs:
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		([ -d "$(OBJDIR)$$i" ] || $(MKDIR) -- "$(OBJDIR)$$i") && \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/"; \
+		else $(MAKE); fi) || exit; done
 
 $(OBJDIR)clint.log: ../doc/scripts/clint.sh
 	../doc/scripts/clint.sh -P "$(PREFIX)" -- "$(OBJDIR)clint.log"
@@ -41,6 +49,10 @@ $(OBJDIR)xmllint.log: ../doc/scripts/xmllint.sh
 	../doc/scripts/xmllint.sh -P "$(PREFIX)" -- "$(OBJDIR)xmllint.log"
 
 clean:
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/" clean; \
+		else $(MAKE) clean; fi) || exit; done
 	../doc/scripts/clint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)clint.log"
 	../doc/scripts/coverage.sh -c -P "$(PREFIX)" -- "$(OBJDIR)coverage.log"
 	../doc/scripts/fixme.sh -c -P "$(PREFIX)" -- "$(OBJDIR)fixme.log"
@@ -52,11 +64,33 @@ clean:
 	./tests.sh -c -P "$(PREFIX)" -- "$(OBJDIR)tests.log"
 	../doc/scripts/xmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)xmllint.log"
 
-distclean: clean
+distclean:
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/" distclean; \
+		else $(MAKE) distclean; fi) || exit; done
+	../doc/scripts/clint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)clint.log"
+	../doc/scripts/coverage.sh -c -P "$(PREFIX)" -- "$(OBJDIR)coverage.log"
+	../doc/scripts/fixme.sh -c -P "$(PREFIX)" -- "$(OBJDIR)fixme.log"
+	../doc/scripts/htmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)htmllint.log"
+	../doc/scripts/phplint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)phplint.log"
+	../doc/scripts/pylint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)pylint.log"
+	../doc/scripts/shlint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)shlint.log"
+	../doc/scripts/template.sh -c -P "$(PREFIX)" -O DATABASEDIR=. -- "$(OBJDIR)template-test.md"
+	./tests.sh -c -P "$(PREFIX)" -- "$(OBJDIR)tests.log"
+	../doc/scripts/xmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)xmllint.log"
 	$(RM) -- $(TARGETS)
 
 install: all
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/" install; \
+		else $(MAKE) install; fi) || exit; done
 
 uninstall:
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/" uninstall; \
+		else $(MAKE) uninstall; fi) || exit; done
 
-.PHONY: all clean distclean install uninstall
+.PHONY: all subdirs clean distclean install uninstall

@@ -108,6 +108,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/binary/Makefile.Windows \
 		$(PACKAGE)-$(VERSION)/tests/command/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/command/Makefile.NetBSD \
+		$(PACKAGE)-$(VERSION)/tests/config.sh \
 		$(PACKAGE)-$(VERSION)/tests/include/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/include/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/java/project.conf \
@@ -139,6 +140,14 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/verilog/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/verilog/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/project.conf \
+		$(PACKAGE)-$(VERSION)/tests/gtkdoc/Makefile \
+		$(PACKAGE)-$(VERSION)/tests/gtkdoc/gtkdoc/xml/gtkdocentities.ent \
+		$(PACKAGE)-$(VERSION)/tests/gtkdoc/project.conf \
+		$(PACKAGE)-$(VERSION)/tests/gtkdoc/gtkdoc/Makefile \
+		$(PACKAGE)-$(VERSION)/tests/gtkdoc/gtkdoc/example.types \
+		$(PACKAGE)-$(VERSION)/tests/gtkdoc/gtkdoc/example-docs.xml \
+		$(PACKAGE)-$(VERSION)/tests/gtkdoc/gtkdoc/example-sections.txt \
+		$(PACKAGE)-$(VERSION)/tests/gtkdoc/gtkdoc/project.conf \
 		$(PACKAGE)-$(VERSION)/Makefile \
 		$(PACKAGE)-$(VERSION)/AUTHORS \
 		$(PACKAGE)-$(VERSION)/BUGS \
