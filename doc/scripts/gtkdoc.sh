@@ -208,7 +208,7 @@ while [ $# -gt 0 ]; do
 		_error "$target: Could not create documentation"
 		install=0
 	fi
-	$TOUCH "$target"
+	$TOUCH "${OBJDIR}$target"
 
 	#install
 	if [ "$install" -eq 1 ]; then
