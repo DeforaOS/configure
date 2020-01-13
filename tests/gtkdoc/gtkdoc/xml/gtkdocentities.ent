@@ -1,0 +1,4 @@
+<!ENTITY package_name "example">
+<!ENTITY package_string "example project">
+<!ENTITY server "www.example.com">
+<!ENTITY title "Example project">
