@@ -38,6 +38,7 @@ GTKDOC_SCAN="gtkdoc-scan"
 INSTALL="install -m 0644"
 MKDIR="mkdir -m 0755 -p"
 RM="rm -f"
+RMDIR="rmdir"
 TOUCH="touch"
 
 [ -f "../config.sh" ] && . "../config.sh"
@@ -171,6 +172,9 @@ while [ $# -gt 0 ]; do
 			file="${i##*/}"
 			$DEBUG $RM -- "$instdir/$MODULE/$file"	|| exit 2
 		done
+		if [ -d "$instdir/$MODULE" ]; then
+			$DEBUG $RMDIR -- "$instdir/$MODULE"	|| exit 2
+		fi
 		continue
 	fi
 
