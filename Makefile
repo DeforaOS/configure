@@ -127,6 +127,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/object/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/package/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/package/Makefile.NetBSD \
+		$(PACKAGE)-$(VERSION)/tests/package/config.ent.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/package/config.h.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/package/config.sh.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/plugin/project.conf \
