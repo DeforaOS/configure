@@ -58,6 +58,11 @@ _test()
 		res=$?
 		$RM -- "$subdir/Makefile"
 	fi
+	if [ $res -eq 0 -a -f "$subdir/config.ent" ]; then
+		$DIFF -- "$subdir/config.ent.$system" "$subdir/config.ent" 2>&1
+		res=$?
+		$RM -- "$subdir/config.ent"
+	fi
 	if [ $res -eq 0 -a -f "$subdir/config.h" ]; then
 		$DIFF -- "$subdir/config.h.$system" "$subdir/config.h" 2>&1
 		res=$?
