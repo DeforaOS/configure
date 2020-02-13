@@ -1,5 +1,5 @@
 SUBDIRS	= gtkdoc
-TARGETS	= $(OBJDIR)gtkdoc/html.stamp $(OBJDIR)gtkdoc/tmpl.stamp $(OBJDIR)gtkdoc/xml.stamp
+TARGETS	= $(OBJDIR)gtkdoc/example.types $(OBJDIR)gtkdoc/html.stamp $(OBJDIR)gtkdoc/tmpl.stamp $(OBJDIR)gtkdoc/xml.stamp
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -18,10 +18,13 @@ subdirs:
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/"; \
 		else $(MAKE); fi) || exit; done
 
+$(OBJDIR)gtkdoc/example.types: ../../doc/scripts/gtkdoc.sh ../config.sh
+	../../doc/scripts/gtkdoc.sh -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/example.types"
+
 $(OBJDIR)gtkdoc/html.stamp: ../../doc/scripts/gtkdoc.sh ../config.sh gtkdoc/example-docs.xml gtkdoc/xml/gtkdocentities.ent $(OBJDIR)gtkdoc/xml.stamp $(OBJDIR)gtkdoc/tmpl.stamp
 	../../doc/scripts/gtkdoc.sh -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/html.stamp"
 
-$(OBJDIR)gtkdoc/tmpl.stamp: ../../doc/scripts/gtkdoc.sh ../config.sh gtkdoc/example.types
+$(OBJDIR)gtkdoc/tmpl.stamp: ../../doc/scripts/gtkdoc.sh ../config.sh $(OBJDIR)gtkdoc/example.types
 	../../doc/scripts/gtkdoc.sh -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/tmpl.stamp"
 
 $(OBJDIR)gtkdoc/xml.stamp: ../../doc/scripts/gtkdoc.sh ../config.sh $(OBJDIR)gtkdoc/tmpl.stamp
@@ -32,6 +35,7 @@ clean:
 		if [ -n "$(OBJDIR)" ]; then \
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/" clean; \
 		else $(MAKE) clean; fi) || exit; done
+	../../doc/scripts/gtkdoc.sh -c -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/example.types"
 	../../doc/scripts/gtkdoc.sh -c -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/html.stamp"
 	../../doc/scripts/gtkdoc.sh -c -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/tmpl.stamp"
 	../../doc/scripts/gtkdoc.sh -c -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/xml.stamp"
@@ -41,6 +45,7 @@ distclean:
 		if [ -n "$(OBJDIR)" ]; then \
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/" distclean; \
 		else $(MAKE) distclean; fi) || exit; done
+	../../doc/scripts/gtkdoc.sh -c -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/example.types"
 	../../doc/scripts/gtkdoc.sh -c -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/html.stamp"
 	../../doc/scripts/gtkdoc.sh -c -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/tmpl.stamp"
 	../../doc/scripts/gtkdoc.sh -c -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/xml.stamp"

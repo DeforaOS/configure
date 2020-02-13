@@ -144,7 +144,6 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/gtkdoc/Makefile \
 		$(PACKAGE)-$(VERSION)/tests/gtkdoc/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/gtkdoc/gtkdoc/Makefile \
-		$(PACKAGE)-$(VERSION)/tests/gtkdoc/gtkdoc/example.types \
 		$(PACKAGE)-$(VERSION)/tests/gtkdoc/gtkdoc/example-docs.xml \
 		$(PACKAGE)-$(VERSION)/tests/gtkdoc/gtkdoc/example-sections.txt \
 		$(PACKAGE)-$(VERSION)/tests/gtkdoc/gtkdoc/xml/gtkdocentities.ent \
