@@ -184,11 +184,12 @@ while [ $# -gt 0 ]; do
 			output="${OBJDIR}gtkdoc/html"
 			$DEBUG $MKDIR -- "$output"		|| exit 2
 			driver="$MODULE-docs.xml"
-			xmlpath="$PWD/gtkdoc/xml"
+			oldpath="$PWD"
 			(cd "$output" &&
 				$DEBUG $GTKDOC_MKHTML \
-						--path "$xmlpath" \
-						"$MODULE" "../$driver")
+						--path "$oldpath/.." \
+						"$MODULE" \
+						"$oldpath/gtkdoc/$driver")
 			#detect when gtk-doc is not available
 			res=$?
 			if [ $res -eq 127 ]; then
