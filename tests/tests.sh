@@ -48,6 +48,7 @@ _test()
 	[ $# -eq 2 ]						|| return 2
 	system="$1"
 	subdir="$2"
+	config="ent h sh"
 
 	echo
 	echo "Testing: $system $subdir"
@@ -58,21 +59,14 @@ _test()
 		res=$?
 		$RM -- "$subdir/Makefile"
 	fi
-	if [ $res -eq 0 -a -f "$subdir/config.ent" ]; then
-		$DIFF -- "$subdir/config.ent.$system" "$subdir/config.ent" 2>&1
-		res=$?
-		$RM -- "$subdir/config.ent"
-	fi
-	if [ $res -eq 0 -a -f "$subdir/config.h" ]; then
-		$DIFF -- "$subdir/config.h.$system" "$subdir/config.h" 2>&1
-		res=$?
-		$RM -- "$subdir/config.h"
-	fi
-	if [ $res -eq 0 -a -f "$subdir/config.sh" ]; then
-		$DIFF -- "$subdir/config.sh.$system" "$subdir/config.sh" 2>&1
-		res=$?
-		$RM -- "$subdir/config.sh"
-	fi
+	for ext in $config; do
+		if [ $res -eq 0 -a -f "$subdir/config.$ext" ]; then
+			$DIFF -- "$subdir/config.$ext.$system" \
+				"$subdir/config.$ext" 2>&1
+			res=$?
+			$RM -- "$subdir/config.$ext"
+		fi
+	done
 	if [ $res -ne 0 ]; then
 		echo "$system $subdir: Failed with error code $res"
 		echo "$system $subdir: FAIL" 1>&2
