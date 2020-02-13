@@ -61,6 +61,22 @@ _error()
 }
 
 
+#gtkdoc_fixxref
+_gtkdoc_fixxref()
+{
+	module="$1"
+	moduledir="$2"
+	htmldir="$3"
+	outputdir="$4"
+
+	(cd "$outputdir" &&
+		$DEBUG $GTKDOC_FIXXREF \
+		--module="$module" \
+		--module-dir="$moduledir" \
+		--html-dir="$htmldir")	|| exit 2
+}
+
+
 #gtkdoc_mkdb
 _gtkdoc_mkdb()
 {
@@ -200,11 +216,7 @@ while [ $# -gt 0 ]; do
 				exit 2
 			fi
 			output="${OBJDIR}gtkdoc"
-			(cd "$output" &&
-				$DEBUG $GTKDOC_FIXXREF \
-					--module="$MODULE" \
-					--module-dir="html" \
-					--html-dir="$instdir")	|| exit 2
+			_gtkdoc_fixxref "$MODULE" "html" "$instdir" "$output"
 			;;
 		gtkdoc/tmpl.stamp)
 			output="tmpl"
