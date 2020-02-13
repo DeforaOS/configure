@@ -39,14 +39,15 @@
 /* types */
 typedef enum _SETTINGS_TYPE
 {
-	ST_H = 0,
+	ST_ENT = 0,
+	ST_H,
 	ST_SH
 } SettingsType;
 #define ST_LAST ST_SH
 #define ST_COUNT (ST_LAST + 1)
 String * sSettingsType[ST_COUNT] =
 {
-	"h", "sh"
+	"ent", "h", "sh"
 };
 
 
@@ -89,6 +90,9 @@ int settings(Configure * configure, String const * directory,
 	return ret;
 }
 
+static int _do_ent(Configure * configure, FILE * fp,
+		String const * package, String const * version,
+		String const * vendor);
 static int _do_h(Configure * configure, FILE * fp,
 		String const * package, String const * version,
 		String const * vendor);
@@ -131,6 +135,9 @@ static int _settings_do(Configure * configure, String const * directory,
 		return 1;
 	switch(i)
 	{
+		case ST_ENT:
+			ret |= _do_ent(configure, fp, package, version, vendor);
+			break;
 		case ST_H:
 			ret |= _do_h(configure, fp, package, version, vendor);
 			break;
@@ -140,6 +147,28 @@ static int _settings_do(Configure * configure, String const * directory,
 	}
 	fclose(fp);
 	return ret;
+}
+
+static int _do_ent(Configure * configure, FILE * fp,
+		String const * package, String const * version,
+		String const * vendor)
+{
+	String const * prefix;
+	String const * p;
+
+	/* XXX may require escaping */
+	fprintf(fp, "%s%s%s%s%s%s",
+			"<!ENTITY package \"", package, "\">\n",
+			"<!ENTITY version \"", version, "\">\n");
+	if(vendor != NULL)
+		fprintf(fp, "%s%s%s", "<!ENTITY vendor \"", vendor, "\">\n");
+	if((prefix = configure_get_path(configure, "prefix")) != NULL)
+		fprintf(fp, "%s%s%s", "<!ENTITY prefix \"", prefix, "\">\n");
+	if((p = configure_get_path(configure, "libdir")) != NULL)
+		fprintf(fp, "%s%s%s%s%s", "<!ENTITY libdir \"",
+				(p[0] == '/') ? "\"" : prefix,
+				(p[0] == '/') ? "" : "/", p, "\">\n");
+	return 0;
 }
 
 static int _do_h(Configure * configure, FILE * fp,
