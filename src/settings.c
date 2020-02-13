@@ -187,11 +187,9 @@ static int _do_h(Configure * configure, FILE * fp,
 		fprintf(fp, "%s%s%s", "\n#ifndef PREFIX\n\
 # define PREFIX \"", p, "\"\n#endif\n");
 	if((p = configure_get_path(configure, "libdir")) != NULL)
-	{
-		fprintf(fp, "%s", "\n#ifndef LIBDIR\n# define LIBDIR ");
-		fprintf(fp, "%s%s", p[0] == '/' ? "\"" : "PREFIX \"/", p);
-		fprintf(fp, "%s", "\"\n#endif\n");
-	}
+		fprintf(fp, "%s%s%s%s", "\n#ifndef LIBDIR\n# define LIBDIR ",
+				(p[0] == '/') ? "\"" : "PREFIX \"/", p,
+				"\"\n#endif\n");
 	return 0;
 }
 
@@ -209,7 +207,8 @@ static int _do_sh(Configure * configure, FILE * fp,
 	if((p = configure_get_path(configure, "prefix")) != NULL)
 		fprintf(fp, "%s%s%s", "\nPREFIX=\"", p, "\"\n");
 	if((p = configure_get_path(configure, "libdir")) != NULL)
-		fprintf(fp, "%s%s%s%s", "LIBDIR=\"", p[0] == '/' ? ""
-				: "${PREFIX}/", p, "\"\n");
+		fprintf(fp, "%s%s%s%s", "LIBDIR=\"",
+				(p[0] == '/') ? "" : "${PREFIX}/",
+				p, "\"\n");
 	return 0;
 }
