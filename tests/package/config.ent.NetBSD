@@ -1,0 +1,5 @@
+<!ENTITY package "test">
+<!ENTITY version "0.0.0">
+<!ENTITY vendor "DeforaOS">
+<!ENTITY prefix "/usr/local">
+<!ENTITY libdir "/usr/local/lib">
