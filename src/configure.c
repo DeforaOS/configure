@@ -481,7 +481,7 @@ static int _project_load(ConfigurePrefs * prefs, String const * directory,
 	String * path;
 	String const * subdirs = NULL;
 
-	if(directory == NULL || string_length(directory) == 0)
+	if(directory == NULL || string_get_length(directory) == 0)
 		path = string_new(PROJECT_CONF);
 	else
 		path = string_new_append(directory, "/", PROJECT_CONF, NULL);
@@ -543,7 +543,7 @@ static int _project_load_subdirs_subdir(ConfigurePrefs * prefs,
 	int ret;
 	String * p;
 
-	if(directory == NULL || string_length(directory) == 0)
+	if(directory == NULL || string_get_length(directory) == 0)
 		ret = _project_load(prefs, subdir, ca);
 	else if((p = string_new_append(directory, "/", subdir, NULL)) == NULL)
 		ret = error_print(PROGNAME);

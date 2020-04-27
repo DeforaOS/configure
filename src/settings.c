@@ -119,7 +119,7 @@ static int _settings_do(Configure * configure, String const * directory,
 	}
 	if(configure_is_flag_set(configure, PREFS_n))
 		return 0;
-	if(directory == NULL || string_length(directory) == 0)
+	if(directory == NULL || string_get_length(directory) == 0)
 		filename = string_new_append("config.", extension, NULL);
 	else
 		filename = string_new_append(directory, "/config.", extension,
