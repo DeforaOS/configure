@@ -107,7 +107,7 @@ int makefile(Configure * configure, String const * directory, configArray * ca,
 	String * filename;
 	int ret = 0;
 
-	if(directory == NULL || string_length(directory) == 0)
+	if(directory == NULL || string_get_length(directory) == 0)
 		filename = string_new(MAKEFILE);
 	else
 		filename = string_new_append(directory, "/", MAKEFILE, NULL);
@@ -841,9 +841,9 @@ static int _targets_all(Makefile * makefile)
 	if((subdirs = _makefile_get_config(makefile, NULL, "subdirs")) != NULL)
 		depends[j++] = "subdirs";
 	if((p = _makefile_get_config(makefile, NULL, "targets")) != NULL
-			&& string_length(p) > 0)
+			&& string_get_length(p) > 0)
 		depends[j++] = "$(TARGETS)";
-	if(p == NULL || string_length(p) == 0)
+	if(p == NULL || string_get_length(p) == 0)
 	{
 		_makefile_target(makefile, "all", depends[0], depends[1], NULL);
 		return 0;
@@ -1002,7 +1002,7 @@ static int _objs_source(Makefile * makefile, String * source, TargetType tt)
 				": no extension for source\n");
 		return 1;
 	}
-	len = string_length(source) - string_length(extension) - 1;
+	len = string_get_length(source) - string_get_length(extension) - 1;
 	source[len] = '\0';
 	switch(source_type(extension))
 	{
@@ -1087,7 +1087,7 @@ static int _target_flags(Makefile * makefile, String const * target)
 
 	memset(&done, 0, sizeof(done));
 	if((p = _makefile_get_config(makefile, target, "sources")) == NULL
-			|| string_length(p) == 0)
+			|| string_get_length(p) == 0)
 	{
 		if((p = _makefile_get_config(makefile, target, "type")) != NULL
 				&& string_compare(p, "binary") == 0)
@@ -1833,7 +1833,7 @@ static int _target_source(Makefile * makefile, String const * target,
 			tt = enum_string(TT_LAST, sTargetType, p);
 	if((extension = source_extension(source)) == NULL)
 		return 1;
-	len = string_length(source) - string_length(extension) - 1;
+	len = string_get_length(source) - string_get_length(extension) - 1;
 	source[len] = '\0';
 	switch((ot = source_type(extension)))
 	{
@@ -2345,7 +2345,7 @@ static int _dist_subdir(Makefile * makefile, Config * subdir)
 	String const * quote;
 
 	path = _makefile_get_config(makefile, NULL, "directory");
-	len = (path != NULL) ? string_length(path) : 0;
+	len = (path != NULL) ? string_get_length(path) : 0;
 	if((path = config_get(subdir, NULL, "directory")) == NULL)
 		path = "";
 	path = &path[len];
