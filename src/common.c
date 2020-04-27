@@ -67,7 +67,7 @@ unsigned int enum_string_short(unsigned int last, const String * strings[],
 
 	for(i = 0; i < last; i++)
 		if(string_compare_length(strings[i], str,
-					string_length(strings[i])) == 0)
+					string_get_length(strings[i])) == 0)
 			return i;
 	return last;
 }
@@ -78,7 +78,7 @@ String const * source_extension(String const * source)
 {
 	size_t len;
 
-	for(len = string_length(source); len > 0; len--)
+	for(len = string_get_length(source); len > 0; len--)
 		if(source[len - 1] == '.')
 			return &source[len];
 	return NULL;
