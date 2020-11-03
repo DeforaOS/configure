@@ -9,7 +9,7 @@ MKDIR	= mkdir -m 0755 -p
 INSTALL	= install
 
 
-all: subdirs $(OBJDIR)clint.log $(OBJDIR)htmllint.log $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)template-test.md $(OBJDIR)tests.log $(OBJDIR)xmllint.log
+all: subdirs $(OBJDIR)clint.log $(OBJDIR)htmllint.log $(OBJDIR)phplint.log $(OBJDIR)shlint.log $(OBJDIR)template-test.md $(OBJDIR)tests.log $(OBJDIR)xmllint.log
 
 subdirs:
 	@for i in $(SUBDIRS); do (cd "$$i" && \
