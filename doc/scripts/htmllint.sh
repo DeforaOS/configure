@@ -33,6 +33,7 @@ DATE="date"
 DEBUG="_debug"
 FIND="find"
 HTMLLINT="xmllint --html --nonet"
+MKDIR="mkdir -p"
 SORT="sort -n"
 TR="tr"
 
@@ -41,7 +42,7 @@ TR="tr"
 #htmllint
 _htmllint()
 {
-	ret=0
+	res=0
 
 	$DATE
 	echo
@@ -64,11 +65,11 @@ _htmllint()
 				echo "$filename:"
 			else
 				echo "$PROGNAME: $filename: FAIL" 1>&2
-				ret=2
+				res=2
 			fi
 		done
 	done
-	return $ret
+	return $res
 }
 
 
@@ -121,9 +122,15 @@ fi
 [ $clean -ne 0 ] && exit 0
 
 exec 3>&1
+ret=0
 while [ $# -gt 0 ]; do
 	target="$1"
+	dirname="${target%/*}"
 	shift
 
-	_htmllint > "$target"					|| exit 2
+	if [ -n "$dirname" -a "$dirname" != "$target" ]; then
+		$MKDIR -- "$dirname"				|| ret=$?
+	fi
+	_htmllint > "$target"					|| ret=$?
 done
+exit $ret

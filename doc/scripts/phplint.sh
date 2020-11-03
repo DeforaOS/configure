@@ -31,6 +31,7 @@ PROJECTCONF="../project.conf"
 DATE="date"
 DEBUG="_debug"
 FIND="find"
+MKDIR="mkdir -p"
 PHPLINT="php -l"
 SORT="sort -n"
 TR="tr"
@@ -40,8 +41,8 @@ TR="tr"
 #phplint
 _phplint()
 {
-	ret=0
-	subdirs="data doc src tests tools"
+	res=0
+	subdirs=
 
 	$DATE
 	echo
@@ -56,6 +57,10 @@ _phplint()
 				;;
 		esac
 	done < "$PROJECTCONF"
+	if [ ! -n "$subdirs" ]; then
+		_error "Could not locate directories to analyze"
+		return $?
+	fi
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
 		for filename in $($FIND "../$subdir" -type f -a -name '*.php' | $SORT); do
@@ -63,11 +68,11 @@ _phplint()
 			$DEBUG $PHPLINT -f "$filename" 2>&1
 			if [ $? -ne 0 ]; then
 				echo "$PROGNAME: $filename: FAIL" 1>&2
-				ret=2
+				res=2
 			fi
 		done
 	done
-	return $ret
+	return $res
 }
 
 
@@ -80,6 +85,14 @@ _debug()
 	#ignore errors when the command is not available
 	[ $res -eq 127 ]					&& return 0
 	return $res
+}
+
+
+#error
+_error()
+{
+	echo "$PROGNAME: $@" 1>&2
+	return 2
 }
 
 
@@ -120,9 +133,15 @@ fi
 [ $clean -ne 0 ] && exit 0
 
 exec 3>&1
+ret=0
 while [ $# -gt 0 ]; do
 	target="$1"
+	dirname="${target%/*}"
 	shift
 
-	_phplint > "$target"					|| exit 2
+	if [ -n "$dirname" -a "$dirname" != "$target" ]; then
+		$MKDIR -- "$dirname"				|| ret=$?
+	fi
+	_phplint > "$target"					|| ret=?
 done
+exit $ret

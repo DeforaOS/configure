@@ -42,6 +42,7 @@ TR="tr"
 _fixme()
 {
 	res=0
+	subdirs=
 
 	$DATE
 	echo
@@ -56,6 +57,10 @@ _fixme()
 				;;
 		esac
 	done < "$PROJECTCONF"
+	if [ ! -n "$subdirs" ]; then
+		_error "Could not locate directories to analyze"
+		return $?
+	fi
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
 		for filename in $($FIND "../$subdir" -type f | $SORT); do
@@ -149,6 +154,14 @@ _debug()
 	#ignore errors when the command is not available
 	[ $res -eq 127 ]					&& return 0
 	return $res
+}
+
+
+#error
+_error()
+{
+	echo "$PROGNAME: $@" 1>&2
+	return 2
 }
 
 
