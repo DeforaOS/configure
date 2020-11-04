@@ -100,6 +100,10 @@ _fixme_callback()
 			echo "_fixme_callback_sh"
 			return 0
 			;;
+		py)
+			echo "_fixme_callback_python"
+			return 0
+			;;
 		htm|html|xml|xsl)
 			echo "_fixme_callback_xml"
 			return 0
@@ -109,6 +113,10 @@ _fixme_callback()
 		"#!/bin/sh"|"#! /bin/sh"
 		|"#!/usr/bin/env bash"|"#! /usr/bin/env bash")
 			echo "_fixme_callback_sh"
+			return 0
+			;;
+		"#!/usr/bin/env python"*|"#! /usr/bin/env python"*)
+			echo "_fixme_callback_python"
 			return 0
 			;;
 		"<html"*|"<?xml"*)
@@ -140,6 +148,19 @@ _fixme_callback_c()
 	$GREP -nH "/\\(/\\|\\*\\).*$REGEXP_WARNING" "$filename"
 	#failures
 	$GREP -nH "/\\(/\\|\\*\\).*$REGEXP_ERROR" "$filename" && res=2
+	return $res
+}
+
+_fixme_callback_python()
+{
+	res=0
+	filename="$1"
+	comment="#"
+
+	#warnings
+	$GREP -nH "$comment.*$REGEXP_WARNING" "$filename"
+	#failures
+	$GREP -nH "$comment.*$REGEXP_ERROR" "$filename" && res=2
 	return $res
 }
 
