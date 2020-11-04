@@ -34,6 +34,7 @@ DATE="date"
 DEBUG="_debug"
 FIND="find"
 GREP="grep"
+HEAD="head"
 MKDIR="mkdir -p"
 SORT="sort -n"
 TR="tr"
@@ -66,24 +67,7 @@ _fixme()
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
 		for filename in $($FIND "../$subdir" -type f | $SORT); do
-			callback=
-			ext=${filename##*/}
-			ext=${ext%.in}
-			ext=${ext##*.}
-			case "$ext" in
-				asm|S)
-					callback="_fixme_asm"
-					;;
-				c|cc|cpp|cxx|h|js)
-					callback="_fixme_c"
-					;;
-				conf|sh)
-					callback="_fixme_sh"
-					;;
-				htm|html|xml)
-					callback="_fixme_xml"
-					;;
-			esac
+			callback=$(_fixme_callback "$filename")
 			[ -n "$callback" ] || continue
 			($callback "$filename") 2>&1
 			if [ $? -ne 0 ]; then
@@ -95,7 +79,47 @@ _fixme()
 	return $res
 }
 
-_fixme_asm()
+_fixme_callback()
+{
+	filename="$1"
+	ext=${filename##*/}
+	ext=${ext%.in}
+	ext=${ext##*.}
+	callback=
+
+	case "$ext" in
+		asm|S)
+			echo "_fixme_callback_asm"
+			return 0
+			;;
+		c|cc|cpp|cxx|h|js)
+			echo "_fixme_callback_c"
+			return 0
+			;;
+		conf|sh)
+			echo "_fixme_callback_sh"
+			return 0
+			;;
+		htm|html|xml|xsl)
+			echo "_fixme_callback_xml"
+			return 0
+			;;
+	esac
+	case $($HEAD -n 1 "$filename") in
+		"#!/bin/sh"|"#! /bin/sh"
+		|"#!/usr/bin/env bash"|"#! /usr/bin/env bash")
+			echo "_fixme_callback_sh"
+			return 0
+			;;
+		"<html"*|"<?xml"*)
+			echo "_fixme_callback_xml"
+			return 0
+			;;
+	esac
+	return 2
+}
+
+_fixme_callback_asm()
 {
 	res=0
 	filename="$1"
@@ -107,7 +131,7 @@ _fixme_asm()
 	return $res
 }
 
-_fixme_c()
+_fixme_callback_c()
 {
 	res=0
 	filename="$1"
@@ -119,7 +143,7 @@ _fixme_c()
 	return $res
 }
 
-_fixme_sh()
+_fixme_callback_sh()
 {
 	res=0
 	filename="$1"
@@ -132,7 +156,7 @@ _fixme_sh()
 	return $res
 }
 
-_fixme_xml()
+_fixme_callback_xml()
 {
 	res=0
 	filename="$1"
