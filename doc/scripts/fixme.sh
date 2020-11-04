@@ -27,6 +27,8 @@
 #variables
 PROGNAME="fixme.sh"
 PROJECTCONF="../project.conf"
+REGEXP_ERROR="FIXME"
+REGEXP_WARNING="\\(TODO\|XXX\\)"
 #executables
 DATE="date"
 DEBUG="_debug"
@@ -99,9 +101,9 @@ _fixme_asm()
 	filename="$1"
 
 	#warnings
-	$GREP -nH '/\*.*\(TODO\|XXX\)' "$filename"
+	$GREP -nH "/\\*.*$REGEXP_WARNING" "$filename"
 	#failures
-	$GREP -nH '/\*.*FIXME' "$filename" && res=2
+	$GREP -nH "/\\*.*$REGEXP_ERROR" "$filename" && res=2
 	return $res
 }
 
@@ -111,9 +113,9 @@ _fixme_c()
 	filename="$1"
 
 	#warnings
-	$GREP -nH '/\(/\|\*\).*\(TODO\|XXX\)' "$filename"
+	$GREP -nH "/\\(/\\|\\*\\).*$REGEXP_WARNING" "$filename"
 	#failures
-	$GREP -nH '/\(/\|\*\).*FIXME' "$filename" && res=2
+	$GREP -nH "/\\(/\\|\\*\\).*$REGEXP_ERROR" "$filename" && res=2
 	return $res
 }
 
@@ -121,13 +123,12 @@ _fixme_sh()
 {
 	res=0
 	filename="$1"
-	#XXX avoid matching the regexp
 	comment="#"
 
 	#warnings
-	$GREP -nH "$comment.*\\(TODO\\|XXX\\)" "$filename"
+	$GREP -nH "$comment.*$REGEXP_WARNING" "$filename"
 	#failures
-	$GREP -nH "$comment.*FIXME" "$filename" && res=2
+	$GREP -nH "$comment.*$REGEXP_ERROR" "$filename" && res=2
 	return $res
 }
 
@@ -138,9 +139,9 @@ _fixme_xml()
 
 	#XXX limited to a single line
 	#warnings
-	$GREP -nH '<!--.*\(TODO\|XXX\)' "$filename"
+	$GREP -nH "<!--.*$REGEXP_WARNING" "$filename"
 	#failures
-	$GREP -nH '<!--.*FIXME' "$filename" && res=2
+	$GREP -nH "<!--.*$REGEXP_ERROR" "$filename" && res=2
 	return $res
 }
 
