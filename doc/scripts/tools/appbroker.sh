@@ -25,10 +25,13 @@
 
 
 #variables
+CONFIGSH="${0%/appbroker.sh}/../config.sh"
 PROGNAME="appbroker.sh"
 #executables
 APPBROKER="AppBroker"
 DEBUG="_debug"
+
+[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
 #functions

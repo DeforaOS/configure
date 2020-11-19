@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2019 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2019-2020 Pierre Pronchery <khorben@defora.org>
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
@@ -25,7 +25,7 @@
 
 
 #variables
-CONFIGSH="${0%/template.sh}/../../config.sh"
+CONFIGSH="${0%/template.sh}/../config.sh"
 PREFIX="/usr/local"
 DATABASEDIR="../data"
 PROGNAME="template.sh"
@@ -34,6 +34,7 @@ DEBUG="_debug"
 INSTALL="install -m 0644"
 RM="rm -f"
 SED="sed"
+
 [ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 

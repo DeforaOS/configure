@@ -25,6 +25,7 @@
 
 
 #variables
+CONFIGSH="${0%/shlint.sh}/../config.sh"
 PROGNAME="shlint.sh"
 PROJECTCONF="../project.conf"
 #executables
@@ -35,6 +36,8 @@ MKDIR="mkdir -p"
 SHLINT="sh -n"
 SORT="sort -n"
 TR="tr"
+
+[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
 #functions

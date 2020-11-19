@@ -25,6 +25,7 @@
 
 
 #variables
+CONFIGSH="${0%/xmllint.sh}/../config.sh"
 DEVNULL="/dev/null"
 PROGNAME="xmllint.sh"
 PROJECTCONF="../project.conf"
@@ -36,6 +37,8 @@ MKDIR="mkdir -p"
 SORT="sort -n"
 TR="tr"
 XMLLINT="xmllint --nonet"
+
+[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
 #functions

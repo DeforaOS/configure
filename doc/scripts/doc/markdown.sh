@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2019 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2019-2020 Pierre Pronchery <khorben@defora.org>
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
@@ -36,6 +36,7 @@ MKDIR="mkdir -m 0755 -p"
 RM="rm -f"
 RST2HTML="rst2html5-2.7.py"
 RST2MAN="rst2man-2.7.py"
+
 [ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 

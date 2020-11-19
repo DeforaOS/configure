@@ -25,6 +25,7 @@
 
 
 #variables
+CONFIGSH="${0%/phplint.sh}/../config.sh"
 PROGNAME="phplint.sh"
 PROJECTCONF="../project.conf"
 #executables
@@ -35,6 +36,8 @@ MKDIR="mkdir -p"
 PHPLINT="php -l"
 SORT="sort -n"
 TR="tr"
+
+[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
 #functions

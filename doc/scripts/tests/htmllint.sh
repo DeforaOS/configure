@@ -25,6 +25,7 @@
 
 
 #variables
+CONFIGSH="${0%/htmllint.sh}/../config.sh"
 DEVNULL="/dev/null"
 PROGNAME="htmllint.sh"
 PROJECTCONF="../project.conf"
@@ -36,6 +37,8 @@ HTMLLINT="xmllint --html --nonet"
 MKDIR="mkdir -p"
 SORT="sort -n"
 TR="tr"
+
+[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
 #functions

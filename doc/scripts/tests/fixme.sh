@@ -25,6 +25,7 @@
 
 
 #variables
+CONFIGSH="${0%/fixme.sh}/../config.sh"
 PROGNAME="fixme.sh"
 PROJECTCONF="../project.conf"
 REGEXP_ERROR="FIXME"
@@ -38,6 +39,8 @@ HEAD="head"
 MKDIR="mkdir -p"
 SORT="sort -n"
 TR="tr"
+
+[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
 #functions
