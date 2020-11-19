@@ -1,7 +1,10 @@
-TARGETS	= $(OBJDIR)configure$(EXEEXT) $(OBJDIR)pkg-config$(EXEEXT)
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
+MKDIR	= mkdir -m 0755 -p
+INSTALL	= install
+RM	= rm -f
+TARGETS	= $(OBJDIR)configure$(EXEEXT) $(OBJDIR)pkg-config$(EXEEXT)
 BINDIR	= $(PREFIX)/bin
 SBINDIR	= $(PREFIX)/sbin
 CC	= cc
@@ -46,7 +49,10 @@ distclean: clean
 	$(RM) -- $(TARGETS)
 
 install: all
+	$(MKDIR) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m 0755 configure-update $(DESTDIR)$(BINDIR)/configure-update
 
 uninstall:
+	$(RM) -- $(DESTDIR)$(BINDIR)/configure-update
 
 .PHONY: all clean distclean install uninstall
