@@ -65,24 +65,24 @@ dist:
 		$(PACKAGE)-$(VERSION)/doc/project.conf.xml \
 		$(PACKAGE)-$(VERSION)/doc/project.conf \
 		$(PACKAGE)-$(VERSION)/doc/scripts/Makefile \
-		$(PACKAGE)-$(VERSION)/doc/scripts/appbroker.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/clint.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/coverage.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/docbook.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/fixme.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/gettext.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/gtkdoc.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/htmllint.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/manual.css.xml \
-		$(PACKAGE)-$(VERSION)/doc/scripts/markdown.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/phplint.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/pkgconfig.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/platform.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/pylint.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/shlint.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/subst.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/template.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/xmllint.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/data/pkgconfig.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/doc/docbook.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/doc/gtkdoc.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/doc/manual.css.xml \
+		$(PACKAGE)-$(VERSION)/doc/scripts/doc/markdown.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/po/gettext.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/tests/clint.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/tests/coverage.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/tests/fixme.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/tests/htmllint.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/tests/phplint.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/tests/pylint.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/tests/shlint.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/tests/xmllint.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/tools/appbroker.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/tools/platform.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/tools/subst.sh \
+		$(PACKAGE)-$(VERSION)/doc/scripts/tools/template.sh \
 		$(PACKAGE)-$(VERSION)/doc/scripts/project.conf \
 		$(PACKAGE)-$(VERSION)/src/common.c \
 		$(PACKAGE)-$(VERSION)/src/configure.c \

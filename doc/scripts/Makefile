@@ -13,61 +13,61 @@ clean:
 distclean: clean
 
 install: all
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 appbroker.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/appbroker.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 clint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/clint.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 coverage.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/coverage.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 docbook.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/docbook.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 fixme.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/fixme.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 gettext.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/gettext.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 gtkdoc.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/gtkdoc.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 htmllint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/htmllint.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 manual.css.xml $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/manual.css.xml
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 markdown.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/markdown.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 phplint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/phplint.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 pkgconfig.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/pkgconfig.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 platform.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/platform.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 pylint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/pylint.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 shlint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/shlint.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 subst.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/subst.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 template.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/template.sh
-	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts
-	$(INSTALL) -m 0644 xmllint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/xmllint.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/data
+	$(INSTALL) -m 0644 data/pkgconfig.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/data/pkgconfig.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/doc
+	$(INSTALL) -m 0644 doc/docbook.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/doc/docbook.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/doc
+	$(INSTALL) -m 0644 doc/gtkdoc.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/doc/gtkdoc.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/doc
+	$(INSTALL) -m 0644 doc/manual.css.xml $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/doc/manual.css.xml
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/doc
+	$(INSTALL) -m 0644 doc/markdown.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/doc/markdown.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/po
+	$(INSTALL) -m 0644 po/gettext.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/po/gettext.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests
+	$(INSTALL) -m 0644 tests/clint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/clint.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests
+	$(INSTALL) -m 0644 tests/coverage.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/coverage.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests
+	$(INSTALL) -m 0644 tests/fixme.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/fixme.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests
+	$(INSTALL) -m 0644 tests/htmllint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/htmllint.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests
+	$(INSTALL) -m 0644 tests/phplint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/phplint.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests
+	$(INSTALL) -m 0644 tests/pylint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/pylint.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests
+	$(INSTALL) -m 0644 tests/shlint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/shlint.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests
+	$(INSTALL) -m 0644 tests/xmllint.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/xmllint.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tools
+	$(INSTALL) -m 0644 tools/appbroker.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tools/appbroker.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tools
+	$(INSTALL) -m 0644 tools/platform.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tools/platform.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tools
+	$(INSTALL) -m 0644 tools/subst.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tools/subst.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tools
+	$(INSTALL) -m 0644 tools/template.sh $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tools/template.sh
 
 uninstall:
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/appbroker.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/clint.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/coverage.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/docbook.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/fixme.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/gettext.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/gtkdoc.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/htmllint.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/manual.css.xml
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/markdown.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/phplint.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/pkgconfig.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/platform.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/pylint.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/shlint.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/subst.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/template.sh
-	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/xmllint.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/data/pkgconfig.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/doc/docbook.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/doc/gtkdoc.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/doc/manual.css.xml
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/doc/markdown.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/po/gettext.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/clint.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/coverage.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/fixme.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/htmllint.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/phplint.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/pylint.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/shlint.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tests/xmllint.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tools/appbroker.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tools/platform.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tools/subst.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/doc/configure/scripts/tools/template.sh
 
 .PHONY: all clean distclean install uninstall
