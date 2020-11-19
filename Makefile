@@ -64,26 +64,6 @@ dist:
 		$(PACKAGE)-$(VERSION)/doc/project.conf.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/project.conf.xml \
 		$(PACKAGE)-$(VERSION)/doc/project.conf \
-		$(PACKAGE)-$(VERSION)/doc/scripts/Makefile \
-		$(PACKAGE)-$(VERSION)/doc/scripts/data/pkgconfig.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/doc/docbook.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/doc/gtkdoc.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/doc/manual.css.xml \
-		$(PACKAGE)-$(VERSION)/doc/scripts/doc/markdown.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/po/gettext.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/tests/clint.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/tests/coverage.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/tests/fixme.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/tests/htmllint.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/tests/phplint.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/tests/pylint.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/tests/shlint.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/tests/xmllint.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/tools/appbroker.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/tools/platform.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/tools/subst.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/tools/template.sh \
-		$(PACKAGE)-$(VERSION)/doc/scripts/project.conf \
 		$(PACKAGE)-$(VERSION)/src/common.c \
 		$(PACKAGE)-$(VERSION)/src/configure.c \
 		$(PACKAGE)-$(VERSION)/src/settings.c \
@@ -96,6 +76,27 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/makefile.h \
 		$(PACKAGE)-$(VERSION)/src/settings.h \
 		$(PACKAGE)-$(VERSION)/src/project.conf \
+		$(PACKAGE)-$(VERSION)/src/scripts/Makefile \
+		$(PACKAGE)-$(VERSION)/src/scripts/config.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/data/pkgconfig.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/doc/docbook.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/doc/gtkdoc.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/doc/manual.css.xml \
+		$(PACKAGE)-$(VERSION)/src/scripts/doc/markdown.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/po/gettext.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tests/clint.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tests/coverage.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tests/fixme.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tests/htmllint.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tests/phplint.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tests/pylint.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tests/shlint.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tests/xmllint.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tools/appbroker.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tools/platform.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tools/subst.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tools/template.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/project.conf \
 		$(PACKAGE)-$(VERSION)/tools/configure.c \
 		$(PACKAGE)-$(VERSION)/tools/pkg-config.c \
 		$(PACKAGE)-$(VERSION)/tools/Makefile \

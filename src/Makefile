@@ -1,3 +1,4 @@
+SUBDIRS	= scripts
 TARGETS	= $(OBJDIR)configure$(EXEEXT) $(OBJDIR)makedepend$(EXEEXT) $(OBJDIR)makefile.o
 OBJDIR	=
 PREFIX	= /usr/local
@@ -18,7 +19,14 @@ MKDIR	= mkdir -m 0755 -p
 INSTALL	= install
 
 
-all: $(TARGETS)
+all: subdirs $(TARGETS)
+
+subdirs:
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		([ -d "$(OBJDIR)$$i" ] || $(MKDIR) -- "$(OBJDIR)$$i") && \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/"; \
+		else $(MAKE); fi) || exit; done
 
 configure_OBJS = $(OBJDIR)common.o $(OBJDIR)configure.o $(OBJDIR)settings.o $(OBJDIR)main.o
 configure_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
@@ -56,16 +64,33 @@ $(OBJDIR)makefile.o: makefile.c configure.h settings.h ../config.h
 	$(CC) $(makefile.o_CFLAGS) -o $(OBJDIR)makefile.o -c makefile.c
 
 clean:
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/" clean; \
+		else $(MAKE) clean; fi) || exit; done
 	$(RM) -- $(configure_OBJS) $(makedepend_OBJS) $(makefile.o_OBJS)
 
-distclean: clean
+distclean:
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/" distclean; \
+		else $(MAKE) distclean; fi) || exit; done
+	$(RM) -- $(configure_OBJS) $(makedepend_OBJS) $(makefile.o_OBJS)
 	$(RM) -- $(TARGETS)
 
 install: all
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/" install; \
+		else $(MAKE) install; fi) || exit; done
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m 0755 $(OBJDIR)configure$(EXEEXT) $(DESTDIR)$(BINDIR)/configure$(EXEEXT)
 
 uninstall:
+	@for i in $(SUBDIRS); do (cd "$$i" && \
+		if [ -n "$(OBJDIR)" ]; then \
+		$(MAKE) OBJDIR="$(OBJDIR)$$i/" uninstall; \
+		else $(MAKE) uninstall; fi) || exit; done
 	$(RM) -- $(DESTDIR)$(BINDIR)/configure$(EXEEXT)
 
-.PHONY: all clean distclean install uninstall
+.PHONY: all subdirs clean distclean install uninstall
