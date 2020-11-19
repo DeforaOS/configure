@@ -1,0 +1,102 @@
+#!/bin/sh
+
+
+
+#variables
+DRYRUN=0
+PACKAGE="configure"
+PREFIX="/usr/local"
+LIBEXECDIR="$PREFIX/libexec"
+PROGNAME="configure-update"
+PROJECTCONF="project.conf"
+VERBOSE=1
+#executables
+CP="cp -f"
+DEBUG=
+FIND="find"
+
+
+#functions
+#configure_update
+_configure_update()
+{
+	target="$1"
+	scriptdir="$LIBEXECDIR/$PACKAGE/scripts"
+
+	if [ ! -f "$target/$PROJECTCONF" ]; then
+		_error ""
+		exit $?
+	fi
+	(cd "$scriptdir" && $DEBUG $FIND */ -name '*.sh') | while read script; do
+		[ -f "$target/$script" ] || continue
+		_info "Updating script $script"
+		if [ $DRYRUN -eq 0 ]; then
+			$DEBUG $CP "$scriptdir/$script" "$target/$script" \
+								|| return 2
+		fi
+	done
+}
+
+
+#debug
+_debug()
+{
+	echo "$@" 1>&3
+	"$@"
+}
+
+
+#error
+_error()
+{
+	echo "$PROGNAME: $@" 1>&2
+	return 2
+}
+
+
+#info
+_info()
+{
+	[ $VERBOSE -ge 1 ] && echo "$PROGNAME: $@"
+}
+
+
+#usage
+_usage()
+{
+	echo "Usage: $PROGNAME -nqv [target...]" 1>&2
+	return 1
+}
+
+
+#main
+while getopts "O:nqv" name; do
+	case $name in
+		O)
+			export "${OPTARG%%=*}"="${OPTARG#*=}"
+			;;
+		n)
+			DRYRUN=1
+			;;
+		q)
+			VERBOSE=0
+			;;
+		v)
+			VERBOSE=$((VERBOSE + 1))
+			;;
+		?)
+			_usage
+			exit $?
+			;;
+	esac
+done
+shift $(($OPTIND - 1))
+
+exec 3>&1
+if [ $# -eq 0 ]; then
+	_configure_update "."
+else
+	for target in "$@"; do
+		_configure_update "$target"
+	done
+fi
