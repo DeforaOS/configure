@@ -1,5 +1,5 @@
 SUBDIRS	= gtkdoc
-TARGETS	= $(OBJDIR)clint.log $(OBJDIR)coverage.log $(OBJDIR)fixme.log $(OBJDIR)htmllint.log $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)template-test.md $(OBJDIR)tests.log $(OBJDIR)xmllint.log
+TARGETS	= $(OBJDIR)clint.log $(OBJDIR)coverage.log $(OBJDIR)distcheck.log $(OBJDIR)fixme.log $(OBJDIR)htmllint.log $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)template-test.md $(OBJDIR)tests.log $(OBJDIR)xmllint.log
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -23,6 +23,9 @@ $(OBJDIR)clint.log: ../src/scripts/tests/clint.sh
 
 $(OBJDIR)coverage.log: ../src/scripts/tests/coverage.sh
 	../src/scripts/tests/coverage.sh -P "$(PREFIX)" -- "$(OBJDIR)coverage.log"
+
+$(OBJDIR)distcheck.log: ../src/scripts/tests/distcheck.sh
+	../src/scripts/tests/distcheck.sh -P "$(PREFIX)" -- "$(OBJDIR)distcheck.log"
 
 $(OBJDIR)fixme.log: ../src/scripts/tests/fixme.sh
 	../src/scripts/tests/fixme.sh -P "$(PREFIX)" -- "$(OBJDIR)fixme.log"
@@ -55,6 +58,7 @@ clean:
 		else $(MAKE) clean; fi) || exit; done
 	../src/scripts/tests/clint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)clint.log"
 	../src/scripts/tests/coverage.sh -c -P "$(PREFIX)" -- "$(OBJDIR)coverage.log"
+	../src/scripts/tests/distcheck.sh -c -P "$(PREFIX)" -- "$(OBJDIR)distcheck.log"
 	../src/scripts/tests/fixme.sh -c -P "$(PREFIX)" -- "$(OBJDIR)fixme.log"
 	../src/scripts/tests/htmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)htmllint.log"
 	../src/scripts/tests/phplint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)phplint.log"
@@ -71,6 +75,7 @@ distclean:
 		else $(MAKE) distclean; fi) || exit; done
 	../src/scripts/tests/clint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)clint.log"
 	../src/scripts/tests/coverage.sh -c -P "$(PREFIX)" -- "$(OBJDIR)coverage.log"
+	../src/scripts/tests/distcheck.sh -c -P "$(PREFIX)" -- "$(OBJDIR)distcheck.log"
 	../src/scripts/tests/fixme.sh -c -P "$(PREFIX)" -- "$(OBJDIR)fixme.log"
 	../src/scripts/tests/htmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)htmllint.log"
 	../src/scripts/tests/phplint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)phplint.log"

@@ -27,7 +27,7 @@ subdirs:
 		else $(MAKE); fi) || exit; done
 
 tests: all
-	cd tests && (if [ -n "$(OBJDIR)" ]; then $(MAKE) OBJDIR="$(OBJDIR)tests/" "$(OBJDIR)tests/clint.log" "$(OBJDIR)tests/coverage.log" "$(OBJDIR)tests/fixme.log" "$(OBJDIR)tests/htmllint.log" "$(OBJDIR)tests/phplint.log" "$(OBJDIR)tests/pylint.log" "$(OBJDIR)tests/shlint.log" "$(OBJDIR)tests/tests.log" "$(OBJDIR)tests/xmllint.log"; else $(MAKE) clint.log coverage.log fixme.log htmllint.log phplint.log pylint.log shlint.log tests.log xmllint.log; fi)
+	cd tests && (if [ -n "$(OBJDIR)" ]; then $(MAKE) OBJDIR="$(OBJDIR)tests/" "$(OBJDIR)tests/clint.log" "$(OBJDIR)tests/coverage.log" "$(OBJDIR)tests/distcheck.log" "$(OBJDIR)tests/fixme.log" "$(OBJDIR)tests/htmllint.log" "$(OBJDIR)tests/phplint.log" "$(OBJDIR)tests/pylint.log" "$(OBJDIR)tests/shlint.log" "$(OBJDIR)tests/tests.log" "$(OBJDIR)tests/xmllint.log"; else $(MAKE) clint.log coverage.log distcheck.log fixme.log htmllint.log phplint.log pylint.log shlint.log tests.log xmllint.log; fi)
 
 clean:
 	@for i in $(SUBDIRS); do (cd "$$i" && \
@@ -86,6 +86,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/scripts/po/gettext.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/clint.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/coverage.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tests/distcheck.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/fixme.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/htmllint.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/phplint.sh \

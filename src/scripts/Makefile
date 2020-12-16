@@ -30,6 +30,8 @@ install: all
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
 	$(INSTALL) -m 0644 tests/coverage.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/coverage.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
+	$(INSTALL) -m 0644 tests/distcheck.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/distcheck.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
 	$(INSTALL) -m 0644 tests/fixme.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/fixme.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
 	$(INSTALL) -m 0644 tests/htmllint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/htmllint.sh
@@ -59,6 +61,7 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/po/gettext.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/clint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/coverage.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/distcheck.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/fixme.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/htmllint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/phplint.sh
