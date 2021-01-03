@@ -14,43 +14,43 @@ distclean: clean
 
 install: all
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/data
-	$(INSTALL) -m 0644 data/pkgconfig.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/data/pkgconfig.sh
+	$(INSTALL) -m 0755 data/pkgconfig.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/data/pkgconfig.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/doc
-	$(INSTALL) -m 0644 doc/docbook.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/doc/docbook.sh
+	$(INSTALL) -m 0755 doc/docbook.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/doc/docbook.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/doc
-	$(INSTALL) -m 0644 doc/gtkdoc.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/doc/gtkdoc.sh
+	$(INSTALL) -m 0755 doc/gtkdoc.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/doc/gtkdoc.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/doc
 	$(INSTALL) -m 0644 doc/manual.css.xml $(DESTDIR)$(PREFIX)/libexec/configure/scripts/doc/manual.css.xml
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/doc
-	$(INSTALL) -m 0644 doc/markdown.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/doc/markdown.sh
+	$(INSTALL) -m 0755 doc/markdown.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/doc/markdown.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/po
-	$(INSTALL) -m 0644 po/gettext.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/po/gettext.sh
+	$(INSTALL) -m 0755 po/gettext.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/po/gettext.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
-	$(INSTALL) -m 0644 tests/clint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/clint.sh
+	$(INSTALL) -m 0755 tests/clint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/clint.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
-	$(INSTALL) -m 0644 tests/coverage.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/coverage.sh
+	$(INSTALL) -m 0755 tests/coverage.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/coverage.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
-	$(INSTALL) -m 0644 tests/distcheck.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/distcheck.sh
+	$(INSTALL) -m 0755 tests/distcheck.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/distcheck.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
-	$(INSTALL) -m 0644 tests/fixme.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/fixme.sh
+	$(INSTALL) -m 0755 tests/fixme.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/fixme.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
-	$(INSTALL) -m 0644 tests/htmllint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/htmllint.sh
+	$(INSTALL) -m 0755 tests/htmllint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/htmllint.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
-	$(INSTALL) -m 0644 tests/phplint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/phplint.sh
+	$(INSTALL) -m 0755 tests/phplint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/phplint.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
-	$(INSTALL) -m 0644 tests/pylint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/pylint.sh
+	$(INSTALL) -m 0755 tests/pylint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/pylint.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
-	$(INSTALL) -m 0644 tests/shlint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/shlint.sh
+	$(INSTALL) -m 0755 tests/shlint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/shlint.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
-	$(INSTALL) -m 0644 tests/xmllint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/xmllint.sh
+	$(INSTALL) -m 0755 tests/xmllint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/xmllint.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tools
-	$(INSTALL) -m 0644 tools/appbroker.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tools/appbroker.sh
+	$(INSTALL) -m 0755 tools/appbroker.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tools/appbroker.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tools
-	$(INSTALL) -m 0644 tools/platform.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tools/platform.sh
+	$(INSTALL) -m 0755 tools/platform.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tools/platform.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tools
-	$(INSTALL) -m 0644 tools/subst.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tools/subst.sh
+	$(INSTALL) -m 0755 tools/subst.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tools/subst.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tools
-	$(INSTALL) -m 0644 tools/template.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tools/template.sh
+	$(INSTALL) -m 0755 tools/template.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tools/template.sh
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/data/pkgconfig.sh
