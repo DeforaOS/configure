@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2014-2018 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2014-2021 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Devel configure */
 /* All rights reserved.
  *
@@ -92,7 +92,7 @@ static int _usage(void)
 		return configure_error(2, "%s", error_get(NULL));
 	fprintf(stderr, "%s%s%s%s%s%s%s%s%s%s%s%s%s",
 "Usage: " PROGNAME " [-nqSv][-b bindir][-d destdir][-i includedir][-l libdir]\n"
-"                 [-O system][-p prefix][-s sbindir][directory...]\n"
+"                 [-M mode][-O system][-p prefix][-s sbindir][directory...]\n"
 "  -n	Do not actually write Makefiles\n"
 "  -q	Quiet mode (default)\n"
 "  -v	Verbose mode\n"
@@ -139,7 +139,7 @@ int main(int argc, char * argv[])
 
 	memset(&prefs, 0, sizeof(prefs));
 	memset(&paths, 0, sizeof(paths));
-	while((o = getopt(argc, argv, "b:d:i:l:nO:p:qSs:v")) != -1)
+	while((o = getopt(argc, argv, "b:d:i:l:M:nO:p:qSs:v")) != -1)
 		switch(o)
 		{
 			case 'b':
@@ -153,6 +153,9 @@ int main(int argc, char * argv[])
 				break;
 			case 'l':
 				paths.libdir = optarg;
+				break;
+			case 'M':
+				prefs.mode = optarg;
 				break;
 			case 'n':
 				prefs.flags |= PREFS_n;

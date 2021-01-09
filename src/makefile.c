@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2006-2020 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2006-2021 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Devel configure */
 /* All rights reserved.
  *
@@ -60,6 +60,8 @@ typedef struct _Makefile
 /* accessors */
 static String const * _makefile_get_config(Makefile * makefile,
 		String const * section, String const * variable);
+static String const * _makefile_get_config_mode(Makefile * makefile,
+		String const * mode, String const * variable);
 static TargetType _makefile_get_type(Makefile * makefile,
 		String const * target);
 
@@ -157,12 +159,12 @@ static int _makefile_write(Makefile * makefile, configArray * ca,
 			|| _write_install(makefile) != 0
 			|| _write_uninstall(makefile) != 0)
 		return 1;
-	if(_makefile_get_config(makefile, NULL, "subdirs") != NULL)
+	if(_makefile_get_config_mode(makefile, NULL, "subdirs") != NULL)
 		depends[i++] = "subdirs";
 	depends[i++] = "clean";
 	depends[i++] = "distclean";
-	if(_makefile_get_config(makefile, NULL, "package") != NULL
-			&& _makefile_get_config(makefile, NULL,
+	if(_makefile_get_config_mode(makefile, NULL, "package") != NULL
+			&& _makefile_get_config_mode(makefile, NULL,
 				"version") != NULL)
 	{
 		depends[i++] = "dist";
@@ -190,7 +192,7 @@ static int _write_variables(Makefile * makefile)
 	char done[TT_LAST]; /* FIXME even better if'd be variable by variable */
 
 	memset(&done, 0, sizeof(done));
-	directory = _makefile_get_config(makefile, NULL, "directory");
+	directory = _makefile_get_config_mode(makefile, NULL, "directory");
 	ret |= _variables_package(makefile, directory);
 	ret |= _variables_print(makefile, "subdirs", "SUBDIRS");
 	ret |= _variables_dist(makefile, done);
@@ -210,11 +212,13 @@ static int _variables_package(Makefile * makefile,
 	String const * vendor;
 	String const * p;
 
-	if((package = _makefile_get_config(makefile, NULL, "package")) == NULL)
+	if((package = _makefile_get_config_mode(makefile, NULL, "package"))
+			== NULL)
 		return 0;
 	if(_makefile_is_flag_set(makefile, PREFS_v))
 		printf("%s%s", "Package: ", package);
-	if((version = _makefile_get_config(makefile, NULL, "version")) == NULL)
+	if((version = _makefile_get_config_mode(makefile, NULL, "version"))
+			== NULL)
 	{
 		if(_makefile_is_flag_set(makefile, PREFS_v))
 			fputc('\n', stdout);
@@ -224,12 +228,13 @@ static int _variables_package(Makefile * makefile,
 	}
 	if(_makefile_is_flag_set(makefile, PREFS_v))
 		printf(" %s\n", version);
-	if((vendor = _makefile_get_config(makefile, NULL, "vendor")) == NULL)
+	if((vendor = _makefile_get_config_mode(makefile, NULL, "vendor"))
+			== NULL)
 		vendor = "DeforaOS";
 	_makefile_output_variable(makefile, "PACKAGE", package);
 	_makefile_output_variable(makefile, "VERSION", version);
 	_makefile_output_variable(makefile, "VENDOR", vendor);
-	if((p = _makefile_get_config(makefile, NULL, "config")) != NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "config")) != NULL)
 		return settings(makefile->configure, directory, package,
 				version, vendor);
 	return 0;
@@ -244,7 +249,7 @@ static int _variables_print(Makefile * makefile,
 	unsigned long i;
 	char c;
 
-	if((p = _makefile_get_config(makefile, NULL, input)) == NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, input)) == NULL)
 		return 0;
 	if((prints = string_new(p)) == NULL)
 		return 1;
@@ -278,7 +283,7 @@ static int _variables_dist(Makefile * makefile, char * done)
 	size_t i;
 	char c;
 
-	if((p = _makefile_get_config(makefile, NULL, "dist")) == NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "dist")) == NULL)
 		return 0;
 	if((dist = string_new(p)) == NULL)
 		return 1;
@@ -318,7 +323,7 @@ static int _variables_targets(Makefile * makefile)
 	size_t i;
 	char c;
 
-	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "targets")) == NULL)
 		return 0;
 	if((prints = string_new(p)) == NULL)
 		return 1;
@@ -354,9 +359,9 @@ static int _variables_executables(Makefile * makefile, char * done)
 	size_t i;
 	char c;
 
-	targets = _makefile_get_config(makefile, NULL, "targets");
-	includes = _makefile_get_config(makefile, NULL, "includes");
-	package = _makefile_get_config(makefile, NULL, "package");
+	targets = _makefile_get_config_mode(makefile, NULL, "targets");
+	includes = _makefile_get_config_mode(makefile, NULL, "includes");
+	package = _makefile_get_config_mode(makefile, NULL, "package");
 	if(targets != NULL)
 	{
 		if((p = string_new(targets)) == NULL)
@@ -487,9 +492,9 @@ static void _targets_asflags(Makefile * makefile)
 	String const * asf;
 	String const * asff;
 
-	as = _makefile_get_config(makefile, NULL, "as");
-	asff = _makefile_get_config(makefile, NULL, "asflags_force");
-	asf = _makefile_get_config(makefile, NULL, "asflags");
+	as = _makefile_get_config_mode(makefile, NULL, "as");
+	asff = _makefile_get_config_mode(makefile, NULL, "asflags_force");
+	asf = _makefile_get_config_mode(makefile, NULL, "asflags");
 	if(as != NULL || asff != NULL || asf != NULL)
 	{
 		_makefile_output_variable(makefile, "AS", (as != NULL) ? as
@@ -510,11 +515,11 @@ static void _targets_cflags(Makefile * makefile)
 	String * p;
 	HostOS os;
 
-	cppf = _makefile_get_config(makefile, NULL, "cppflags_force");
-	cpp = _makefile_get_config(makefile, NULL, "cppflags");
-	cff = _makefile_get_config(makefile, NULL, "cflags_force");
-	cf = _makefile_get_config(makefile, NULL, "cflags");
-	cc = _makefile_get_config(makefile, NULL, "cc");
+	cppf = _makefile_get_config_mode(makefile, NULL, "cppflags_force");
+	cpp = _makefile_get_config_mode(makefile, NULL, "cppflags");
+	cff = _makefile_get_config_mode(makefile, NULL, "cflags_force");
+	cf = _makefile_get_config_mode(makefile, NULL, "cflags");
+	cc = _makefile_get_config_mode(makefile, NULL, "cc");
 	if(cppf == NULL && cpp == NULL && cff == NULL && cf == NULL
 			&& cc == NULL)
 		return;
@@ -540,9 +545,9 @@ static void _targets_cxxflags(Makefile * makefile)
 	String const * cxxff;
 	String const * cxxf;
 
-	cxx = _makefile_get_config(makefile, NULL, "cxx");
-	cxxff = _makefile_get_config(makefile, NULL, "cxxflags_force");
-	cxxf = _makefile_get_config(makefile, NULL, "cxxflags");
+	cxx = _makefile_get_config_mode(makefile, NULL, "cxx");
+	cxxff = _makefile_get_config_mode(makefile, NULL, "cxxflags_force");
+	cxxf = _makefile_get_config_mode(makefile, NULL, "cxxflags");
 	if(cxx != NULL || cxxff != NULL || cxxf != NULL)
 		_makefile_output_program(makefile, "cxx", 1);
 	if(cxxff != NULL)
@@ -572,13 +577,14 @@ static void _targets_ldflags(Makefile * makefile)
 {
 	String const * p;
 
-	if((p = _makefile_get_config(makefile, NULL, "ldflags_force")) != NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "ldflags_force"))
+			!= NULL)
 	{
 		_makefile_print(makefile, "%s", "LDFLAGSF=");
 		_binary_ldflags(makefile, p);
 		_makefile_print(makefile, "\n");
 	}
-	if((p = _makefile_get_config(makefile, NULL, "ldflags")) != NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "ldflags")) != NULL)
 	{
 		_makefile_print(makefile, "%s", "LDFLAGS\t=");
 		_binary_ldflags(makefile, p);
@@ -592,9 +598,9 @@ static void _targets_jflags(Makefile * makefile)
 	String const * jff;
 	String const * jf;
 
-	j = _makefile_get_config(makefile, NULL, "javac");
-	jff = _makefile_get_config(makefile, NULL, "jflags_force");
-	jf = _makefile_get_config(makefile, NULL, "jflags");
+	j = _makefile_get_config_mode(makefile, NULL, "javac");
+	jff = _makefile_get_config_mode(makefile, NULL, "jflags_force");
+	jf = _makefile_get_config_mode(makefile, NULL, "jflags");
 	if(j != NULL || jff != NULL || jf != NULL)
 		_makefile_output_program(makefile, "javac", 1);
 	if(jff != NULL)
@@ -609,9 +615,9 @@ static void _targets_vflags(Makefile * makefile)
 	String const * vff;
 	String const * vf;
 
-	v = _makefile_get_config(makefile, NULL, "verilog");
-	vff = _makefile_get_config(makefile, NULL, "vflags_force");
-	vf = _makefile_get_config(makefile, NULL, "vflags");
+	v = _makefile_get_config_mode(makefile, NULL, "verilog");
+	vff = _makefile_get_config_mode(makefile, NULL, "vflags_force");
+	vf = _makefile_get_config_mode(makefile, NULL, "vflags");
 	if(v != NULL || vff != NULL || vf != NULL)
 		_makefile_output_program(makefile, "verilog", 1);
 	if(vff != NULL)
@@ -706,7 +712,7 @@ static void _variables_library(Makefile * makefile, char * done)
 	}
 	if(configure_can_library_static(makefile->configure))
 		_variables_library_static(makefile);
-	if((p = _makefile_get_config(makefile, NULL, "ld")) == NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "ld")) == NULL)
 		_makefile_output_program(makefile, "ccshared", 0);
 	else
 		_makefile_output_variable(makefile, "CCSHARED", p);
@@ -717,12 +723,12 @@ static void _variables_library_static(Makefile * makefile)
 {
 	String const * p;
 
-	if((p = _makefile_get_config(makefile, NULL, "ar")) == NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "ar")) == NULL)
 		_makefile_output_program(makefile, "ar", 0);
 	else
 		_makefile_output_variable(makefile, "AR", p);
 	_makefile_output_variable(makefile, "ARFLAGS", "-rc");
-	if((p = _makefile_get_config(makefile, NULL, "ranlib")) == NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "ranlib")) == NULL)
 		_makefile_output_program(makefile, "ranlib", 0);
 	else
 		_makefile_output_variable(makefile, "RANLIB", p);
@@ -749,7 +755,7 @@ static int _variables_includes(Makefile * makefile)
 {
 	String const * includes;
 
-	if((includes = _makefile_get_config(makefile, NULL, "includes"))
+	if((includes = _makefile_get_config_mode(makefile, NULL, "includes"))
 			== NULL)
 		return 0;
 	if(makefile->fp == NULL)
@@ -765,21 +771,23 @@ static int _variables_subdirs(Makefile * makefile)
 	String * p;
 	String const * q;
 
-	if(_makefile_get_config(makefile, NULL, "subdirs") == NULL
-			|| _makefile_get_config(makefile, NULL, "package") != NULL
-			|| _makefile_get_config(makefile, NULL, "targets") != NULL
-			|| _makefile_get_config(makefile, NULL, "includes") != NULL)
+	if(_makefile_get_config_mode(makefile, NULL, "subdirs") == NULL
+			|| _makefile_get_config_mode(makefile, NULL,
+				"package") != NULL
+			|| _makefile_get_config_mode(makefile, NULL,
+				"targets") != NULL
+			|| _makefile_get_config_mode(makefile, NULL,
+				"includes") != NULL)
 		return 0;
 	for(i = 0; i < sizeof(sections) / sizeof(*sections); i++)
 	{
-		if((q = _makefile_get_config(makefile, NULL, sections[i]))
+		if((q = _makefile_get_config_mode(makefile, NULL, sections[i]))
 				== NULL)
 			continue;
 		if((p = strdup(q)) == NULL)
 			return -1;
 		for(q = strtok(p, ","); q != NULL; q = strtok(NULL, ","))
-			if(_makefile_get_config(makefile, q, "install")
-					!= NULL)
+			if(_makefile_get_config(makefile, q, "install") != NULL)
 				break;
 		free(p);
 		if(q != NULL)
@@ -803,7 +811,7 @@ static int _write_targets(Makefile * makefile)
 	if(_targets_all(makefile) != 0
 			|| _targets_subdirs(makefile) != 0)
 		return 1;
-	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -838,9 +846,10 @@ static int _targets_all(Makefile * makefile)
 
 	if(_makefile_get_config(makefile, "all", "type") != NULL)
 		return _targets_target(makefile, "all");
-	if((subdirs = _makefile_get_config(makefile, NULL, "subdirs")) != NULL)
+	if((subdirs = _makefile_get_config_mode(makefile, NULL, "subdirs"))
+			!= NULL)
 		depends[j++] = "subdirs";
-	if((p = _makefile_get_config(makefile, NULL, "targets")) != NULL
+	if((p = _makefile_get_config_mode(makefile, NULL, "targets")) != NULL
 			&& string_get_length(p) > 0)
 		depends[j++] = "$(TARGETS)";
 	if(p == NULL || string_get_length(p) == 0)
@@ -898,7 +907,8 @@ static int _targets_subdirs(Makefile * makefile)
 {
 	String const * subdirs;
 
-	if((subdirs = _makefile_get_config(makefile, NULL, "subdirs")) != NULL)
+	if((subdirs = _makefile_get_config_mode(makefile, NULL, "subdirs"))
+			!= NULL)
 	{
 		_makefile_target(makefile, "subdirs", NULL);
 		_makefile_subdirs(makefile, NULL);
@@ -1638,7 +1648,7 @@ static int _write_objects(Makefile * makefile)
 	size_t i;
 	int ret = 0;
 
-	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -1740,7 +1750,7 @@ static String * _script_path(Makefile * makefile, String const * script)
 	ssize_t i;
 	String * p = NULL;
 
-	if((directory = _makefile_get_config(makefile, NULL, "directory"))
+	if((directory = _makefile_get_config_mode(makefile, NULL, "directory"))
 			== NULL)
 	{
 		error_print(PROGNAME);
@@ -2113,7 +2123,7 @@ static int _clean_targets(Makefile * makefile);
 static int _write_clean(Makefile * makefile)
 {
 	_makefile_target(makefile, "clean", NULL);
-	if(_makefile_get_config(makefile, NULL, "subdirs") != NULL)
+	if(_makefile_get_config_mode(makefile, NULL, "subdirs") != NULL)
 		_makefile_subdirs(makefile, "clean");
 	return _clean_targets(makefile);
 }
@@ -2130,7 +2140,7 @@ static int _clean_targets(Makefile * makefile)
 	char c;
 	int phony;
 
-	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -2211,7 +2221,8 @@ static int _write_distclean(Makefile * makefile)
 	int phony = 0;
 
 	/* only depend on the "clean" target if we do not have subfolders */
-	if((subdirs = _makefile_get_config(makefile, NULL, "subdirs")) == NULL)
+	if((subdirs = _makefile_get_config_mode(makefile, NULL, "subdirs"))
+			== NULL)
 		_makefile_target(makefile, "distclean", "clean", NULL);
 	else
 	{
@@ -2220,7 +2231,7 @@ static int _write_distclean(Makefile * makefile)
 		_clean_targets(makefile);
 	}
 	/* XXX do not erase phony targets */
-	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -2280,8 +2291,8 @@ static int _write_dist(Makefile * makefile, configArray * ca, int from, int to)
 	Config * p;
 	int i;
 
-	package = _makefile_get_config(makefile, NULL, "package");
-	version = _makefile_get_config(makefile, NULL, "version");
+	package = _makefile_get_config_mode(makefile, NULL, "package");
+	version = _makefile_get_config_mode(makefile, NULL, "version");
 	if(package == NULL || version == NULL)
 		return 0;
 	_makefile_target(makefile, "dist", NULL);
@@ -2321,8 +2332,8 @@ static int _write_distcheck(Makefile * makefile)
 		"\tcd \"$(PACKAGE)-$(VERSION)\" && $(MAKE) dist\n";
 	const char posttarget[] = "\t$(RM) -r -- $(PACKAGE)-$(VERSION)\n";
 
-	package = _makefile_get_config(makefile, NULL, "package");
-	version = _makefile_get_config(makefile, NULL, "version");
+	package = _makefile_get_config_mode(makefile, NULL, "package");
+	version = _makefile_get_config_mode(makefile, NULL, "version");
 	if(package == NULL || version == NULL)
 		return 0;
 	_makefile_print(makefile, "%s%s%s", pretarget, target, posttarget);
@@ -2344,7 +2355,7 @@ static int _dist_subdir(Makefile * makefile, Config * subdir)
 	char c;
 	String const * quote;
 
-	path = _makefile_get_config(makefile, NULL, "directory");
+	path = _makefile_get_config_mode(makefile, NULL, "directory");
 	len = (path != NULL) ? string_get_length(path) : 0;
 	if((path = config_get(subdir, NULL, "directory")) == NULL)
 		path = "";
@@ -2428,7 +2439,7 @@ static int _write_install(Makefile * makefile)
 	int ret = 0;
 
 	_makefile_target(makefile, "install", "all", NULL);
-	if(_makefile_get_config(makefile, NULL, "subdirs") != NULL)
+	if(_makefile_get_config_mode(makefile, NULL, "subdirs") != NULL)
 		_makefile_subdirs(makefile, "install");
 	ret |= _install_targets(makefile);
 	ret |= _install_includes(makefile);
@@ -2446,7 +2457,7 @@ static int _install_targets(Makefile * makefile)
 	size_t i;
 	char c;
 
-	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "targets")) == NULL)
 		return 0;
 	if((targets = string_new(p)) == NULL)
 		return 1;
@@ -2747,7 +2758,7 @@ static int _install_includes(Makefile * makefile)
 	size_t i;
 	char c;
 
-	if((p = _makefile_get_config(makefile, NULL, "includes")) == NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "includes")) == NULL)
 		return 0;
 	if((includes = string_new(p)) == NULL)
 		return 1;
@@ -2819,7 +2830,7 @@ static int _install_dist(Makefile * makefile)
 	String const * d;
 	String const * mode;
 
-	if((p = _makefile_get_config(makefile, NULL, "dist")) == NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "dist")) == NULL)
 		return 0;
 	if((dist = string_new(p)) == NULL)
 		return 1;
@@ -2927,7 +2938,7 @@ static int _write_phony_targets(Makefile * makefile)
 	char c;
 	String const * type;
 
-	if((p = _makefile_get_config(makefile, NULL, "targets")) == NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "targets")) == NULL)
 		return 0;
 	if((prints = string_new(p)) == NULL)
 		return 1;
@@ -2974,9 +2985,9 @@ static int _write_uninstall(Makefile * makefile)
 	char c;
 
 	_makefile_target(makefile, "uninstall", NULL);
-	if(_makefile_get_config(makefile, NULL, "subdirs") != NULL)
+	if(_makefile_get_config_mode(makefile, NULL, "subdirs") != NULL)
 		_makefile_subdirs(makefile, "uninstall");
-	if((p = _makefile_get_config(makefile, NULL, "targets")) != NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "targets")) != NULL)
 	{
 		if((targets = string_new(p)) == NULL)
 			return 1;
@@ -2996,7 +3007,7 @@ static int _write_uninstall(Makefile * makefile)
 		}
 		string_delete(q);
 	}
-	if((p = _makefile_get_config(makefile, NULL, "includes")) != NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "includes")) != NULL)
 	{
 		if((includes = string_new(p)) == NULL)
 			return 1;
@@ -3015,7 +3026,7 @@ static int _write_uninstall(Makefile * makefile)
 		}
 		string_delete(q);
 	}
-	if((p = _makefile_get_config(makefile, NULL, "dist")) != NULL)
+	if((p = _makefile_get_config_mode(makefile, NULL, "dist")) != NULL)
 	{
 		if((dist = string_new(p)) == NULL)
 			return 1;
@@ -3228,6 +3239,14 @@ static String const * _makefile_get_config(Makefile * makefile,
 }
 
 
+/* makefile_get_config_mode */
+static String const * _makefile_get_config_mode(Makefile * makefile,
+		String const * mode, String const * variable)
+{
+	return configure_get_config_mode(makefile->configure, mode, variable);
+}
+
+
 /* makefile_get_type */
 static TargetType _makefile_get_type(Makefile * makefile,
 		String const * target)
@@ -3364,7 +3383,7 @@ static int _makefile_output_program(Makefile * makefile, String const * name,
 		return -1;
 	string_toupper(upper);
 	if(override)
-		value = _makefile_get_config(makefile, NULL, name);
+		value = _makefile_get_config_mode(makefile, NULL, name);
 	else
 		value = NULL;
 	if(value == NULL)
