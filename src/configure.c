@@ -72,6 +72,7 @@ struct _Configure
 
 	/* prefs */
 	String * prefs_os;
+	String * prefs_mode;
 };
 
 
@@ -161,6 +162,9 @@ Configure * configure_new(ConfigurePrefs * prefs)
 
 	if((configure = object_new(sizeof(*configure))) == NULL)
 		return NULL;
+	configure->config = NULL;
+	configure->prefs_mode = NULL;
+	configure->prefs_os = NULL;
 	if(prefs != NULL)
 	{
 		/* copy the strings */
@@ -173,8 +177,15 @@ Configure * configure_new(ConfigurePrefs * prefs)
 				return NULL;
 			}
 		}
-		else
-			configure->prefs_os = NULL;
+		if(prefs->mode != NULL && string_get_length(prefs->mode) > 0)
+		{
+			if((configure->prefs_mode = string_new(prefs->mode))
+					== NULL)
+			{
+				configure_delete(configure);
+				return NULL;
+			}
+		}
 		configure->prefs = *prefs;
 		configure->prefs.os = configure->prefs_os;
 	}
@@ -298,6 +309,8 @@ static int _new_load_config(Configure * configure)
 /* configure_delete */
 void configure_delete(Configure * configure)
 {
+	if(configure->prefs_mode != NULL)
+		string_delete(configure->prefs_mode);
 	if(configure->prefs_os != NULL)
 		string_delete(configure->prefs_os);
 	if(configure->config != NULL)
@@ -328,6 +341,25 @@ String const * configure_get_config(Configure * configure,
 }
 
 
+/* configure_get_config_mode */
+String const * configure_get_config_mode(Configure * configure,
+		String const * mode, String const * variable)
+{
+	String const * ret;
+	String * section;
+
+	if(mode == NULL || string_get_length(mode) == 0)
+		return configure_get_config(configure, NULL, variable);
+	if((section = string_new_append("mode::", mode, NULL)) == NULL)
+		return NULL;
+	ret = configure_get_config(configure, section, variable);
+	string_delete(section);
+	if(ret != NULL)
+		return ret;
+	return configure_get_config(configure, NULL, variable);
+}
+
+
 /* configure_get_exeext */
 String const * configure_get_extension(Configure * configure,
 		String const * extension)
@@ -335,6 +367,30 @@ String const * configure_get_extension(Configure * configure,
 	String const section[] = "extensions";
 
 	return config_get(configure->config, section, extension);
+}
+
+
+/* configure_get_mode */
+String const * configure_get_mode(Configure * configure)
+{
+	return configure->prefs.mode;
+}
+
+
+/* configure_get_mode_title */
+String const * configure_get_mode_title(Configure * configure,
+		String const * mode)
+{
+	String const * title;
+	String * section;
+
+	if(mode == NULL)
+		return NULL;
+	if((section = string_new_append("mode::", mode, NULL)) == NULL)
+		return NULL;
+	title = config_get(configure->config, section, "title");
+	string_delete(section);
+	return title;
 }
 
 
@@ -377,6 +433,21 @@ String const * configure_get_program(Configure * configure, String const * name)
 unsigned int configure_is_flag_set(Configure * configure, unsigned int flags)
 {
 	return (configure->prefs.flags & flags) ? 1 : 0;
+}
+
+
+/* configure_set_mode */
+int configure_set_mode(Configure * configure, String const * mode)
+{
+	String * m;
+
+	if(mode == NULL || string_get_length(mode) == 0)
+		m = NULL;
+	else if((m = string_new(mode)) == NULL)
+		return -1;
+	string_delete(configure->prefs_mode);
+	configure->prefs.mode = configure->prefs_mode = m;
+	return 0;
 }
 
 

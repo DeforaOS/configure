@@ -133,6 +133,7 @@ extern const struct ExtensionType * sExtensionType;
 typedef struct _ConfigurePrefs
 {
 	unsigned int flags;
+	String const * mode;
 	String const * os;
 } ConfigurePrefs;
 # define PREFS_n	0x1
@@ -151,8 +152,13 @@ int configure_can_library_static(Configure * configure);
 
 String const * configure_get_config(Configure * configure,
 		String const * section, String const * variable);
+String const * configure_get_config_mode(Configure * configure,
+		String const * mode, String const * variable);
 String const * configure_get_extension(Configure * configure,
 		String const * extension);
+String const * configure_get_mode(Configure * configure);
+String const * configure_get_mode_title(Configure * configure,
+		String const * mode);
 String const * configure_get_path(Configure * configure, String const * path);
 HostOS configure_get_os(Configure * configure);
 ConfigurePrefs const * configure_get_prefs(Configure * configure);
@@ -161,6 +167,7 @@ String const * configure_get_program(Configure * configure,
 
 unsigned int configure_is_flag_set(Configure * configure, unsigned int flags);
 
+int configure_set_mode(Configure * configure, String const * mode);
 int configure_set_path(Configure * configure, String const * path,
 		String const * value);
 
