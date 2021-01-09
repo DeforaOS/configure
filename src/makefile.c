@@ -192,7 +192,7 @@ static int _write_variables(Makefile * makefile)
 	char done[TT_LAST]; /* FIXME even better if'd be variable by variable */
 
 	memset(&done, 0, sizeof(done));
-	directory = _makefile_get_config_mode(makefile, NULL, "directory");
+	directory = _makefile_get_config(makefile, NULL, "_directory");
 	ret |= _variables_package(makefile, directory);
 	ret |= _variables_print(makefile, "subdirs", "SUBDIRS");
 	ret |= _variables_dist(makefile, done);
@@ -1750,7 +1750,7 @@ static String * _script_path(Makefile * makefile, String const * script)
 	ssize_t i;
 	String * p = NULL;
 
-	if((directory = _makefile_get_config_mode(makefile, NULL, "directory"))
+	if((directory = _makefile_get_config(makefile, NULL, "_directory"))
 			== NULL)
 	{
 		error_print(PROGNAME);
@@ -2355,9 +2355,9 @@ static int _dist_subdir(Makefile * makefile, Config * subdir)
 	char c;
 	String const * quote;
 
-	path = _makefile_get_config_mode(makefile, NULL, "directory");
+	path = _makefile_get_config(makefile, NULL, "_directory");
 	len = (path != NULL) ? string_get_length(path) : 0;
-	if((path = config_get(subdir, NULL, "directory")) == NULL)
+	if((path = config_get(subdir, NULL, "_directory")) == NULL)
 		path = "";
 	path = &path[len];
 	if(path[0] == '/')

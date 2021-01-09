@@ -482,11 +482,13 @@ int configure_error(int ret, char const * format, ...)
 
 /* configure_project */
 static int _project_do(Configure * configure, configArray * ca);
-static int _project_load(ConfigurePrefs * prefs, char const * directory,
+static int _project_load(Configure * configure, char const * directory,
 		configArray * ca);
-static int _project_load_subdirs(ConfigurePrefs * prefs, char const * directory,
+static String const * _project_load_config_mode(Config const * config,
+		String const * mode, String const * variable);
+static int _project_load_subdirs(Configure * configure, char const * directory,
 		configArray * ca, String const * subdirs);
-static int _project_load_subdirs_subdir(ConfigurePrefs * prefs,
+static int _project_load_subdirs_subdir(Configure * configure,
 		char const * directory, configArray * ca, char const * subdir);
 
 int configure_project(Configure * configure, String const * directory)
@@ -499,7 +501,7 @@ int configure_project(Configure * configure, String const * directory)
 
 	if((ca = configarray_new()) == NULL)
 		return error_print(PROGNAME);
-	if((ret = _project_load(&configure->prefs, directory, ca)) == 0)
+	if((ret = _project_load(configure, directory, ca)) == 0)
 	{
 		if(configure->prefs.flags & PREFS_n)
 			ret = _project_do(configure, ca);
@@ -534,11 +536,11 @@ static int _project_do(Configure * configure, configArray * ca)
 	for(i = 0; i < cnt; i++)
 	{
 		array_get_copy(ca, i, &configure->project);
-		di = config_get(configure->project, NULL, "directory");
+		di = config_get(configure->project, NULL, "_directory");
 		for(j = i; j < cnt; j++)
 		{
 			array_get_copy(ca, j, &cj);
-			if((dj = config_get(cj, NULL, "directory")) == NULL)
+			if((dj = config_get(cj, NULL, "_directory")) == NULL)
 				continue;
 			if(di != NULL && string_find(dj, di) == NULL)
 				break;
@@ -549,7 +551,7 @@ static int _project_do(Configure * configure, configArray * ca)
 	return (i == cnt) ? 0 : 1;
 }
 
-static int _project_load(ConfigurePrefs * prefs, String const * directory,
+static int _project_load(Configure * configure, String const * directory,
 		configArray * ca)
 {
 	int ret = 0;
@@ -568,23 +570,43 @@ static int _project_load(ConfigurePrefs * prefs, String const * directory,
 		string_delete(path);
 		return configure_error(1, "%s", error_get(NULL));
 	}
-	config_set(config, NULL, "directory", directory);
-	if(prefs->flags & PREFS_v)
+	config_set(config, NULL, "_directory", directory);
+	if(configure->prefs.flags & PREFS_v)
 		printf("%s%s%s", "Loading project file ", path, "\n");
 	if(config_load(config, path) != 0)
 		ret = error_print(PROGNAME);
 	else
 	{
 		array_append(ca, &config);
-		subdirs = config_get(config, NULL, "subdirs");
+		subdirs = _project_load_config_mode(config,
+				configure->prefs.mode, "subdirs");
 	}
 	string_delete(path);
 	if(subdirs == NULL)
 		return ret;
-	return _project_load_subdirs(prefs, directory, ca, subdirs);
+	return _project_load_subdirs(configure, directory, ca, subdirs);
 }
 
-static int _project_load_subdirs(ConfigurePrefs * prefs, char const * directory,
+static String const * _project_load_config_mode(Config const * config,
+		String const * mode, String const * variable)
+{
+	String const * ret;
+	String * section;
+
+	if(mode == NULL || string_get_length(mode) == 0)
+		mode = config_get(config, NULL, "mode");
+	if(mode == NULL || string_get_length(mode) == 0)
+		return config_get(config, NULL, variable);
+	if((section = string_new_append("mode::", mode, NULL)) == NULL)
+		return NULL;
+	ret = config_get(config, section, variable);
+	string_delete(section);
+	if(ret != NULL)
+		return ret;
+	return config_get(config, NULL, variable);
+}
+
+static int _project_load_subdirs(Configure * configure, char const * directory,
 		configArray * ca, String const * subdirs)
 {
 	int ret = 0;
@@ -602,7 +624,7 @@ static int _project_load_subdirs(ConfigurePrefs * prefs, char const * directory,
 			continue;
 		c = subdir[i];
 		subdir[i] = '\0';
-		ret = _project_load_subdirs_subdir(prefs, directory, ca,
+		ret = _project_load_subdirs_subdir(configure, directory, ca,
 				subdir);
 		if(c == '\0')
 			break;
@@ -613,19 +635,19 @@ static int _project_load_subdirs(ConfigurePrefs * prefs, char const * directory,
 	return ret;
 }
 
-static int _project_load_subdirs_subdir(ConfigurePrefs * prefs,
+static int _project_load_subdirs_subdir(Configure * configure,
 		char const * directory, configArray * ca, char const * subdir)
 {
 	int ret;
 	String * p;
 
 	if(directory == NULL || string_get_length(directory) == 0)
-		ret = _project_load(prefs, subdir, ca);
+		ret = _project_load(configure, subdir, ca);
 	else if((p = string_new_append(directory, "/", subdir, NULL)) == NULL)
 		ret = error_print(PROGNAME);
 	else
 	{
-		ret = _project_load(prefs, p, ca);
+		ret = _project_load(configure, p, ca);
 		string_delete(p);
 	}
 	return ret;
