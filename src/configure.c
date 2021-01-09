@@ -349,6 +349,8 @@ String const * configure_get_config_mode(Configure * configure,
 	String * section;
 
 	if(mode == NULL || string_get_length(mode) == 0)
+		mode = configure_get_mode(configure);
+	if(mode == NULL)
 		return configure_get_config(configure, NULL, variable);
 	if((section = string_new_append("mode::", mode, NULL)) == NULL)
 		return NULL;
@@ -373,7 +375,9 @@ String const * configure_get_extension(Configure * configure,
 /* configure_get_mode */
 String const * configure_get_mode(Configure * configure)
 {
-	return configure->prefs.mode;
+	if(configure->prefs.mode != NULL)
+		return configure->prefs.mode;
+	return configure_get_config(configure, NULL, "mode");
 }
 
 
