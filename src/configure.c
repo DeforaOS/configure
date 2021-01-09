@@ -61,7 +61,8 @@
 /* Configure */
 /* private */
 /* types */
-struct _Configure {
+struct _Configure
+{
 	ConfigurePrefs prefs;
 	Config * project;
 	HostArch arch;
