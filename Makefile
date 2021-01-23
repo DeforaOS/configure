@@ -101,7 +101,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/tools/configure.c \
 		$(PACKAGE)-$(VERSION)/tools/pkg-config.c \
 		$(PACKAGE)-$(VERSION)/tools/Makefile \
-		$(PACKAGE)-$(VERSION)/tools/configure-update \
+		$(PACKAGE)-$(VERSION)/tools/configure-update.in \
 		$(PACKAGE)-$(VERSION)/tools/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/Makefile \
 		$(PACKAGE)-$(VERSION)/tests/binary/project.conf \

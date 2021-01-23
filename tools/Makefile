@@ -1,10 +1,7 @@
+TARGETS	= $(OBJDIR)configure$(EXEEXT) $(OBJDIR)configure-update $(OBJDIR)pkg-config$(EXEEXT)
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
-MKDIR	= mkdir -m 0755 -p
-INSTALL	= install
-RM	= rm -f
-TARGETS	= $(OBJDIR)configure$(EXEEXT) $(OBJDIR)pkg-config$(EXEEXT)
 BINDIR	= $(PREFIX)/bin
 SBINDIR	= $(PREFIX)/sbin
 CC	= cc
@@ -29,6 +26,9 @@ configure_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs libSystem`
 $(OBJDIR)configure$(EXEEXT): $(configure_OBJS)
 	$(CC) -o $(OBJDIR)configure$(EXEEXT) $(configure_OBJS) $(configure_LDFLAGS)
 
+$(OBJDIR)configure-update: configure-update.in
+	../src/scripts/tools/subst.sh -P "$(PREFIX)" -- "$(OBJDIR)configure-update"
+
 pkg-config_OBJS = $(OBJDIR)pkg-config.o
 pkg-config_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 pkg-config_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
@@ -44,15 +44,15 @@ $(OBJDIR)pkg-config.o: pkg-config.c ../config.h
 
 clean:
 	$(RM) -- $(configure_OBJS) $(pkg-config_OBJS)
+	../src/scripts/tools/subst.sh -c -P "$(PREFIX)" -- "$(OBJDIR)configure-update"
 
 distclean: clean
 	$(RM) -- $(TARGETS)
 
 install: all
-	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 0755 configure-update $(DESTDIR)$(BINDIR)/configure-update
+	../src/scripts/tools/subst.sh -P "$(DESTDIR)$(BINDIR)" -i -- "$(OBJDIR)configure-update"
 
 uninstall:
-	$(RM) -- $(DESTDIR)$(BINDIR)/configure-update
+	../src/scripts/tools/subst.sh -P "$(DESTDIR)$(BINDIR)" -u -- "configure-update"
 
 .PHONY: all clean distclean install uninstall
