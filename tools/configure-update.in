@@ -25,6 +25,7 @@
 
 
 #variables
+DEVNULL="/dev/null"
 DRYRUN=0
 PACKAGE="configure"
 PREFIX="@PREFIX@"
@@ -33,6 +34,7 @@ PROGNAME="configure-update"
 PROJECTCONF="project.conf"
 VERBOSE=1
 #executables
+CMP="cmp"
 CP="cp -f"
 DEBUG=
 FIND="find"
@@ -50,7 +52,9 @@ _configure_update()
 		exit $?
 	fi
 	(cd "$scriptdir" && $DEBUG $FIND */ -name '*.sh') | while read script; do
-		[ -f "$target/$script" ] || continue
+		[ -f "$target/$script" ]			|| continue
+		$DEBUG $CMP "$scriptdir/$script" "$target/$script" > "$DEVNULL"
+		[ $? -ne 0 ]					|| continue
 		_info "Updating script $script"
 		if [ $DRYRUN -eq 0 ]; then
 			$DEBUG $CP "$scriptdir/$script" "$target/$script" \
