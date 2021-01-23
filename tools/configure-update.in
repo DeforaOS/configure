@@ -5,7 +5,7 @@
 #variables
 DRYRUN=0
 PACKAGE="configure"
-PREFIX="/usr/local"
+PREFIX="@PREFIX@"
 LIBEXECDIR="$PREFIX/libexec"
 PROGNAME="configure-update"
 PROJECTCONF="project.conf"
