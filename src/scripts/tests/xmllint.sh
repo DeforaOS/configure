@@ -36,7 +36,7 @@ FIND="find"
 MKDIR="mkdir -p"
 SORT="sort -n"
 TR="tr"
-XMLLINT="xmllint --nonet"
+XMLLINT="xmllint --nonet --xinclude"
 
 [ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
