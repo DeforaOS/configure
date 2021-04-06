@@ -107,10 +107,6 @@ _debug()
 {
 	echo "$@" 1>&3
 	"$@"
-	res=$?
-	#ignore errors when the command is not available
-	[ $res -eq 127 ]					&& return 0
-	return $res
 }
 
 
