@@ -33,7 +33,7 @@ DATE="date"
 DEBUG="_debug"
 FIND="find"
 MKDIR="mkdir -p"
-PYLINT="py-codestyle"
+PYLINT="flake8"
 SORT="sort -n"
 TR="tr"
 
