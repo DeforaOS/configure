@@ -31,11 +31,11 @@ PROGNAME="markdown.sh"
 #executables
 DEBUG="_debug"
 INSTALL="install -m 0644"
-MD2RST="m2r-2.7 --overwrite"
+MD2RST="m2r --overwrite"
 MKDIR="mkdir -m 0755 -p"
 RM="rm -f"
-RST2HTML="rst2html5-2.7.py"
-RST2MAN="rst2man-2.7.py"
+RST2HTML="rst2html5"
+RST2MAN="rst2man"
 
 [ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
