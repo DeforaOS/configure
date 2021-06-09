@@ -3,6 +3,9 @@
 /distcheck.log
 /fixme.log
 /htmllint.log
+/markdown.1
+/markdown.html
+/markdown.pdf
 /phplint.log
 /pylint.log
 /shlint.log
