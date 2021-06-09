@@ -1,5 +1,5 @@
 SUBDIRS	= gtkdoc
-TARGETS	= $(OBJDIR)clint.log $(OBJDIR)coverage.log $(OBJDIR)distcheck.log $(OBJDIR)fixme.log $(OBJDIR)htmllint.log $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)template-test.md $(OBJDIR)tests.log $(OBJDIR)xmllint.log
+TARGETS	= $(OBJDIR)clint.log $(OBJDIR)coverage.log $(OBJDIR)distcheck.log $(OBJDIR)fixme.log $(OBJDIR)htmllint.log $(OBJDIR)markdown.1 $(OBJDIR)markdown.html $(OBJDIR)markdown.pdf $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)template-test.md $(OBJDIR)tests.log $(OBJDIR)xmllint.log
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -33,6 +33,15 @@ $(OBJDIR)fixme.log: ../src/scripts/tests/fixme.sh
 $(OBJDIR)htmllint.log: ../src/scripts/tests/htmllint.sh
 	../src/scripts/tests/htmllint.sh -P "$(PREFIX)" -- "$(OBJDIR)htmllint.log"
 
+$(OBJDIR)markdown.1: ../src/scripts/doc/markdown.sh markdown.md
+	../src/scripts/doc/markdown.sh -P "$(PREFIX)" -- "$(OBJDIR)markdown.1"
+
+$(OBJDIR)markdown.html: ../src/scripts/doc/markdown.sh markdown.md
+	../src/scripts/doc/markdown.sh -P "$(PREFIX)" -- "$(OBJDIR)markdown.html"
+
+$(OBJDIR)markdown.pdf: ../src/scripts/doc/markdown.sh markdown.md
+	../src/scripts/doc/markdown.sh -P "$(PREFIX)" -- "$(OBJDIR)markdown.pdf"
+
 $(OBJDIR)phplint.log: ../src/scripts/tests/phplint.sh
 	../src/scripts/tests/phplint.sh -P "$(PREFIX)" -- "$(OBJDIR)phplint.log"
 
@@ -61,6 +70,9 @@ clean:
 	../src/scripts/tests/distcheck.sh -c -P "$(PREFIX)" -- "$(OBJDIR)distcheck.log"
 	../src/scripts/tests/fixme.sh -c -P "$(PREFIX)" -- "$(OBJDIR)fixme.log"
 	../src/scripts/tests/htmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)htmllint.log"
+	../src/scripts/doc/markdown.sh -c -P "$(PREFIX)" -- "$(OBJDIR)markdown.1"
+	../src/scripts/doc/markdown.sh -c -P "$(PREFIX)" -- "$(OBJDIR)markdown.html"
+	../src/scripts/doc/markdown.sh -c -P "$(PREFIX)" -- "$(OBJDIR)markdown.pdf"
 	../src/scripts/tests/phplint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)phplint.log"
 	../src/scripts/tests/pylint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)pylint.log"
 	../src/scripts/tests/shlint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)shlint.log"
@@ -78,6 +90,9 @@ distclean:
 	../src/scripts/tests/distcheck.sh -c -P "$(PREFIX)" -- "$(OBJDIR)distcheck.log"
 	../src/scripts/tests/fixme.sh -c -P "$(PREFIX)" -- "$(OBJDIR)fixme.log"
 	../src/scripts/tests/htmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)htmllint.log"
+	../src/scripts/doc/markdown.sh -c -P "$(PREFIX)" -- "$(OBJDIR)markdown.1"
+	../src/scripts/doc/markdown.sh -c -P "$(PREFIX)" -- "$(OBJDIR)markdown.html"
+	../src/scripts/doc/markdown.sh -c -P "$(PREFIX)" -- "$(OBJDIR)markdown.pdf"
 	../src/scripts/tests/phplint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)phplint.log"
 	../src/scripts/tests/pylint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)pylint.log"
 	../src/scripts/tests/shlint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)shlint.log"
