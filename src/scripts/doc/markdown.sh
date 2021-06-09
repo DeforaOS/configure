@@ -36,6 +36,7 @@ MKDIR="mkdir -m 0755 -p"
 RM="rm -f"
 RST2HTML="rst2html5"
 RST2MAN="rst2man"
+RST2PDF="rst2pdf"
 
 [ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
@@ -63,6 +64,11 @@ _markdown()
 		html)
 			$DEBUG $MD2RST "$source"		|| return 2
 			$DEBUG $RST2HTML "${target%.*}.rst" > "$target"
+			res=$?
+			;;
+		pdf)
+			$DEBUG $MD2RST "$source"		|| return 2
+			$DEBUG $RST2PDF "${target%.*}.rst" > "$target"
 			res=$?
 			;;
 		rst)
@@ -157,7 +163,7 @@ while [ $# -gt 0 ]; do
 	ext="${target##*.}"
 	ext="${ext##.}"
 	case "$ext" in
-		html)
+		html|pdf)
 			instdir="$DATADIR/doc/$ext/$PACKAGE"
 			source="${target#$OBJDIR}"
 			source="${source%.*}.md"
@@ -174,7 +180,7 @@ while [ $# -gt 0 ]; do
 	#clean
 	if [ "$clean" -ne 0 ]; then
 		case "$ext" in
-			html|1|2|3|4|5|6|7|8|9)
+			html|pdf|1|2|3|4|5|6|7|8|9)
 				tmpfile="${target#$OBJDIR}"
 				tmpfile="${source%.*}.rst"
 				$DEBUG $RM -- "$tmpfile"
