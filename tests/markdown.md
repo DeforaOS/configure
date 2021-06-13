@@ -17,7 +17,7 @@ Acknowledgments
 
 This test would be nothing without the following code:
 
-```sh
+```shell-session
 $ while true; do make || break; continue; done
 ```
 
