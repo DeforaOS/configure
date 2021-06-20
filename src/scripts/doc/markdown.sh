@@ -31,7 +31,7 @@ PROGNAME="markdown.sh"
 #executables
 DEBUG="_debug"
 INSTALL="install -m 0644"
-MD2RST="m2r --overwrite"
+MD2RST="m2r --dry-run"
 MKDIR="mkdir -m 0755 -p"
 RM="rm -f"
 RST2HTML="rst2html5"
@@ -62,25 +62,29 @@ _markdown()
 	ext="${ext##.}"
 	case "$ext" in
 		html)
-			$DEBUG $MD2RST "$source"		|| return 2
-			$DEBUG $RST2HTML "${target%.*}.rst" > "$target"
+			rst="${target%.*}.rst"
+			$DEBUG $MD2RST "$source" > "$rst"	|| return 2
+			$DEBUG $RST2HTML "$rst" > "$target"
 			res=$?
 			;;
 		pdf)
-			$DEBUG $MD2RST "$source"		|| return 2
+			rst="${target%.*}.rst"
+			$DEBUG $MD2RST "$source" > "$rst"	|| return 2
 			R2P="$RST2PDF"
 			[ -f "${source%.*}.style" ] &&
 				R2P="$R2P -s ${source%.*}.style"
-			$DEBUG $R2P "${target%.*}.rst" > "$target"
+			$DEBUG $R2P "$rst" > "$target"
 			res=$?
 			;;
 		rst)
-			$DEBUG $MD2RST "$source"		|| return 2
+			rst="${target%.*}.rst"
+			$DEBUG $MD2RST "$source" > "$rst"	|| return 2
 			res=$?
 			;;
 		1|2|3|4|5|6|7|8|9)
-			$DEBUG $MD2RST "$source"		|| return 2
-			$DEBUG $RST2MAN "${target%.*}.rst" > "$target"
+			rst="${target%.*}.rst"
+			$DEBUG $MD2RST "$source" > "$rst"	|| return 2
+			$DEBUG $RST2MAN "$rst" > "$target"
 			res=$?
 			;;
 		*)
