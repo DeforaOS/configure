@@ -1,5 +1,5 @@
 SUBDIRS	= gtkdoc
-TARGETS	= $(OBJDIR)clint.log $(OBJDIR)coverage.log $(OBJDIR)distcheck.log $(OBJDIR)fixme.log $(OBJDIR)htmllint.log $(OBJDIR)markdown.1 $(OBJDIR)markdown.html $(OBJDIR)markdown.pdf $(OBJDIR)markdown.rst $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)template-test.md $(OBJDIR)tests.log $(OBJDIR)xmllint.log
+TARGETS	= $(OBJDIR)clint.log $(OBJDIR)coverage.log $(OBJDIR)distcheck.log $(OBJDIR)fixme.log $(OBJDIR)htmllint.log $(OBJDIR)markdown.1 $(OBJDIR)markdown.html $(OBJDIR)markdown.pdf $(OBJDIR)markdown.rst $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)template-test.md $(OBJDIR)template-test.xml $(OBJDIR)tests.log $(OBJDIR)xmllint.log
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -9,7 +9,7 @@ MKDIR	= mkdir -m 0755 -p
 INSTALL	= install
 
 
-all: subdirs $(OBJDIR)template-test.md
+all: subdirs $(OBJDIR)template-test.md $(OBJDIR)template-test.xml
 
 subdirs:
 	@for i in $(SUBDIRS); do (cd "$$i" && \
@@ -57,6 +57,9 @@ $(OBJDIR)shlint.log: ../src/scripts/data/pkgconfig.sh ../src/scripts/doc/docbook
 $(OBJDIR)template-test.md: template.md.in test.db ../src/scripts/tools/template.sh ../config.sh
 	../src/scripts/tools/template.sh -P "$(PREFIX)" -O DATABASEDIR=. -- "$(OBJDIR)template-test.md"
 
+$(OBJDIR)template-test.xml: template.xml.in test.db ../src/scripts/tools/template.sh ../config.sh
+	../src/scripts/tools/template.sh -P "$(PREFIX)" -O DATABASEDIR=. -- "$(OBJDIR)template-test.xml"
+
 $(OBJDIR)tests.log: $(OBJDIR)../tools/configure$(EXEEXT) binary/project.conf binary/Makefile.Darwin binary/Makefile.DeforaOS binary/Makefile.NetBSD binary/Makefile.Windows command/project.conf command/Makefile.NetBSD include/project.conf include/Makefile.NetBSD java/project.conf java/Makefile.NetBSD library/project.conf library/Makefile.Darwin library/Makefile.Linux library/Makefile.NetBSD library/Makefile.Windows libtool/project.conf libtool/Makefile.Darwin libtool/Makefile.Linux libtool/Makefile.NetBSD libtool/Makefile.Windows mode/project.conf mode/Makefile.NetBSD object/project.conf object/Makefile.NetBSD package/project.conf package/Makefile.NetBSD package/config.ent.NetBSD package/config.h.NetBSD package/config.sh.NetBSD plugin/project.conf plugin/Makefile.Darwin plugin/Makefile.NetBSD script/project.conf script/Makefile.NetBSD verilog/project.conf verilog/Makefile.NetBSD tests.sh
 	./tests.sh -P "$(PREFIX)" -- "$(OBJDIR)tests.log"
 
@@ -81,6 +84,7 @@ clean:
 	../src/scripts/tests/pylint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)pylint.log"
 	../src/scripts/tests/shlint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)shlint.log"
 	../src/scripts/tools/template.sh -c -P "$(PREFIX)" -O DATABASEDIR=. -- "$(OBJDIR)template-test.md"
+	../src/scripts/tools/template.sh -c -P "$(PREFIX)" -O DATABASEDIR=. -- "$(OBJDIR)template-test.xml"
 	./tests.sh -c -P "$(PREFIX)" -- "$(OBJDIR)tests.log"
 	../src/scripts/tests/xmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)xmllint.log"
 
@@ -102,6 +106,7 @@ distclean:
 	../src/scripts/tests/pylint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)pylint.log"
 	../src/scripts/tests/shlint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)shlint.log"
 	../src/scripts/tools/template.sh -c -P "$(PREFIX)" -O DATABASEDIR=. -- "$(OBJDIR)template-test.md"
+	../src/scripts/tools/template.sh -c -P "$(PREFIX)" -O DATABASEDIR=. -- "$(OBJDIR)template-test.xml"
 	./tests.sh -c -P "$(PREFIX)" -- "$(OBJDIR)tests.log"
 	../src/scripts/tests/xmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)xmllint.log"
 	$(RM) -- $(TARGETS)

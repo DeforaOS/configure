@@ -143,6 +143,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/script/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/script/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/template.md.in \
+		$(PACKAGE)-$(VERSION)/tests/template.xml.in \
 		$(PACKAGE)-$(VERSION)/tests/test.db \
 		$(PACKAGE)-$(VERSION)/tests/tests.sh \
 		$(PACKAGE)-$(VERSION)/tests/verilog/project.conf \
