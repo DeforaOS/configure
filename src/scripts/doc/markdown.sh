@@ -188,8 +188,7 @@ while [ $# -gt 0 ]; do
 	if [ "$clean" -ne 0 ]; then
 		case "$ext" in
 			html|pdf|1|2|3|4|5|6|7|8|9)
-				tmpfile="${target#$OBJDIR}"
-				tmpfile="${source%.*}.rst"
+				tmpfile="${target%.*}.rst"
 				$DEBUG $RM -- "$tmpfile"
 				;;
 			rst)
