@@ -10,6 +10,15 @@ This test is meant to convert a Markdown file into:
  * an HTML page, or
  * a PDF.
 
+Ordered lists can be illustrated too:
+
+1. One
+1. Two
+1. Three
+
+And so can links like <https://www.defora.org/> or [with
+labels](https://www.defora.org/).
+
 ---
 
 Acknowledgments
