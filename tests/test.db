@@ -1,1 +1,1 @@
-SUBST=OK
+SUBST=OK successful & \1 USER=$USER '"><h1>XSS `echo $USER`

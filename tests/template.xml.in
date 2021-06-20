@@ -1,0 +1,3 @@
+<xml>
+	<test>This test is @@SUBST@@.</test>
+</xml>
