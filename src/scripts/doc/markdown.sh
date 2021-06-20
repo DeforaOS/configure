@@ -166,7 +166,7 @@ while [ $# -gt 0 ]; do
 	ext="${target##*.}"
 	ext="${ext##.}"
 	case "$ext" in
-		html|pdf)
+		html|pdf|rst)
 			instdir="$DATADIR/doc/$ext/$PACKAGE"
 			source="${target#$OBJDIR}"
 			source="${source%.*}.md"
