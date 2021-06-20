@@ -127,6 +127,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/libtool/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/libtool/Makefile.Windows \
 		$(PACKAGE)-$(VERSION)/tests/markdown.md \
+		$(PACKAGE)-$(VERSION)/tests/markdown.style \
 		$(PACKAGE)-$(VERSION)/tests/mode/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/mode/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/object/project.conf \
