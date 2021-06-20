@@ -6,9 +6,11 @@
 /markdown.1
 /markdown.html
 /markdown.pdf
+/markdown.rst
 /phplint.log
 /pylint.log
 /shlint.log
 /template-test.md
+/template-test.xml
 /tests.log
 /xmllint.log
