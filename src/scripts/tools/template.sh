@@ -72,15 +72,32 @@ _template()
 		return $?
 	fi
 	case "$ext" in
-		html|md|rst|txt)
+		html|sgml|xml)
 			options=
 			while read line; do
 				name="${line%%=*}"
 				value="${line#*=}"
-				#XXX escape
-				options="$options -e 's/@@$name@@/$value/'"
+				value="$(echo "$value" | $SED \
+					-e "s/[ $'\"\`\\\\]/\\\&/g" \
+					-e "s/&/\\\\\\&amp;/g" \
+					-e "s/\'/\\\\\\&apos;/g" \
+					-e "s/\"/\\\\\\&quot;/g" \
+					-e "s/</\\\\\\&lt;/g")"
+				options="$options -e \"s/@@$name@@/$value/g\""
 			done < "$database"
-			eval $SED $options -- "$source" > "$target"
+			eval $SED $options < "$source" > "$target"
+			res=$?
+			;;
+		md|rst|txt)
+			options=
+			while read line; do
+				name="${line%%=*}"
+				value="${line#*=}"
+				value="$(echo "$value" | $SED \
+					-e "s/[ $'\"\`\\\\]/\\\&/g")"
+				options="$options -e \"s/@@$name@@/$value/g\""
+			done < "$database"
+			eval $SED $options < "$source" > "$target"
 			res=$?
 			;;
 		*)
@@ -165,7 +182,7 @@ while [ $# -gt 0 ]; do
 	#determine the type
 	ext="${target##*.}"
 	case "$ext" in
-		html|md|rst|txt)
+		html|md|rst|sgml|txt|xml)
 			instdir="$DATADIR/doc/$ext/$PACKAGE"
 			source="${target#$OBJDIR}"
 			source="${source%.*}.md"
@@ -179,12 +196,7 @@ while [ $# -gt 0 ]; do
 	#clean
 	if [ "$clean" -ne 0 ]; then
 		case "$ext" in
-			html|1|2|3|4|5|6|7|8|9)
-				tmpfile="${target#$OBJDIR}"
-				tmpfile="${source%.*}.rst"
-				$DEBUG $RM -- "$tmpfile"
-				;;
-			md|rst|txt)
+			html|md|rst|sgml|txt|xml)
 				;;
 			*)
 				_error "$target: Unknown type"
