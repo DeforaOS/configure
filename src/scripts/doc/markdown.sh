@@ -68,7 +68,10 @@ _markdown()
 			;;
 		pdf)
 			$DEBUG $MD2RST "$source"		|| return 2
-			$DEBUG $RST2PDF "${target%.*}.rst" > "$target"
+			R2P="$RST2PDF"
+			[ -f "${source%.*}.style" ] &&
+				R2P="$R2P -s ${source%.*}.style"
+			$DEBUG $R2P "${target%.*}.rst" > "$target"
 			res=$?
 			;;
 		rst)
