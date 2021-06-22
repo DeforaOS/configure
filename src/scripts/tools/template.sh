@@ -55,9 +55,9 @@ _template()
 
 	ext="${target##*.}"
 	subject="${target##*-}"
-	subject="${subject%%.*}"
+	subject="${subject%.*}"
 	database="$DATABASEDIR/$subject.db"
-	if [ "$subject" = "$target" -o "$subject" = "${target%%.*}" ]; then
+	if [ "$subject" = "$target" -o "$subject" = "${target%.*}" ]; then
 		_error "$target: No subject found for target"
 		return $?
 	fi
