@@ -94,7 +94,7 @@ _template()
 				name="${line%%=*}"
 				value="${line#*=}"
 				value="$(echo "$value" | $SED \
-					-e "s/[ $'\"\`\\\\]/\\\&/g")"
+					-e "s/[ $'\"\`\\\\/]/\\\&/g")"
 				options="$options -e \"s/@@$name@@/$value/g\""
 			done < "$database"
 			eval $SED $options < "$source" > "$target"
