@@ -31,6 +31,7 @@ PROJECTCONF="../project.conf"
 #executables
 DATE="date"
 DEBUG="_debug"
+ECHO="/bin/echo"
 FIND="find"
 MKDIR="mkdir -p"
 PYLINT="flake8"
@@ -65,17 +66,22 @@ _pylint()
 	fi
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
-		for filename in $($FIND "../$subdir" -type f -a -name '*.py' | $SORT); do
+		while read filename; do
+			[ -n "$filename" ] || continue
 			echo
-			echo "Testing: $filename"
+			$ECHO -n "$filename:"
 			$DEBUG $PYLINT -- "$filename" 2>&1
 			if [ $? -eq 0 ]; then
+				echo " OK"
 				echo "$PROGNAME: $filename: OK" 1>&2
 			else
 				#XXX ignore errors
+				echo "FAIL"
 				echo "$PROGNAME: $filename: FAIL" 1>&2
 			fi
-		done
+		done << EOF
+$($FIND "../$subdir" -type f -a -iname '*.py' | $SORT)
+EOF
 	done
 	return $res
 }
