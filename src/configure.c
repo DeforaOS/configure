@@ -141,6 +141,7 @@ const struct ExtensionType _sExtensionType[] =
 	{ "cpp",	OT_CXX_SOURCE		},
 	{ "cxx",	OT_CXX_SOURCE		},
 	{ "c++",	OT_CXX_SOURCE		},
+	{ "go",		OT_GOLANG_SOURCE	},
 	{ "java",	OT_JAVA_SOURCE		},
 	{ "m",		OT_OBJC_SOURCE		},
 	{ "mm",		OT_OBJCXX_SOURCE	},
