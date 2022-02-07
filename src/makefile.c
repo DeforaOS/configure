@@ -460,6 +460,7 @@ static void _targets_asflags(Makefile * makefile);
 static void _targets_cflags(Makefile * makefile);
 static void _targets_cxxflags(Makefile * makefile);
 static void _targets_exeext(Makefile * makefile);
+static void _targets_goflags(Makefile * makefile);
 static void _targets_ldflags(Makefile * makefile);
 static void _targets_jflags(Makefile * makefile);
 static void _targets_vflags(Makefile * makefile);
@@ -480,6 +481,7 @@ static void _variables_binary(Makefile * makefile, char * done)
 		_targets_cflags(makefile);
 		_targets_cxxflags(makefile);
 		_targets_ldflags(makefile);
+		_targets_goflags(makefile);
 		_targets_jflags(makefile);
 		_targets_vflags(makefile);
 		_targets_exeext(makefile);
@@ -515,6 +517,7 @@ static void _targets_cflags(Makefile * makefile)
 	String * p;
 	HostOS os;
 
+	/* TODO: only output when the targets are relevant */
 	cppf = _makefile_get_config_mode(makefile, NULL, "cppflags_force");
 	cpp = _makefile_get_config_mode(makefile, NULL, "cppflags");
 	cff = _makefile_get_config_mode(makefile, NULL, "cflags_force");
@@ -571,6 +574,56 @@ static void _targets_cxxflags(Makefile * makefile)
 static void _targets_exeext(Makefile * makefile)
 {
 	_makefile_output_extension(makefile, "exe");
+}
+
+static void _targets_goflags(Makefile * makefile)
+{
+	String const * p;
+	String * targets;
+	String * q;
+	size_t i;
+	char c;
+	String const * go = NULL;
+	String const * gof;
+	String const * goff;
+
+	/* TODO: simplify the detection for Go targets */
+	if((p = _makefile_get_config_mode(makefile, NULL, "targets")) == NULL)
+		return;
+	if((targets = string_new(p)) == NULL)
+		/* FIXME report the error */
+		return;
+	q = targets;
+	for(i = 0;; i++)
+	{
+		if(targets[i] != ',' && targets[i] != '\0')
+			continue;
+		c = targets[i];
+		targets[i] = '\0';
+		if((p = _makefile_get_config(makefile, targets, "sources"))
+				!= NULL
+				/* XXX only checks the last source */
+				&& (p = source_extension(p)) != NULL
+				&& source_type(p) == OT_GOLANG_SOURCE)
+		{
+			if((go = _makefile_get_config_mode(makefile, NULL,
+							"go")) == NULL)
+				go = "go";
+		}
+		if(c == '\0')
+			break;
+		targets += i + 1;
+		i = 0;
+	}
+	string_delete(q);
+	goff = _makefile_get_config_mode(makefile, NULL, "goflags_force");
+	gof = _makefile_get_config_mode(makefile, NULL, "goflags");
+	if(go != NULL || goff != NULL || gof != NULL)
+	{
+		_makefile_output_program(makefile, "go", 1);
+		_makefile_output_variable(makefile, "GOFLAGSF", goff);
+		_makefile_output_variable(makefile, "GOFLAGS", gof);
+	}
 }
 
 static void _targets_ldflags(Makefile * makefile)
@@ -707,6 +760,7 @@ static void _variables_library(Makefile * makefile, char * done)
 		_targets_cflags(makefile);
 		_targets_cxxflags(makefile);
 		_targets_ldflags(makefile);
+		_targets_goflags(makefile);
 		_targets_vflags(makefile);
 		_targets_exeext(makefile);
 	}
@@ -1027,6 +1081,8 @@ static int _objs_source(Makefile * makefile, String * source, TargetType tt)
 			_makefile_print(makefile, "%s",
 					(tt == TT_LIBTOOL) ? ".lo" : ".o");
 			break;
+		case OT_GOLANG_SOURCE:
+			break;
 		case OT_JAVA_SOURCE:
 			_makefile_print(makefile, "%s", " $(OBJDIR)");
 			_makefile_print_escape(makefile, source);
@@ -1054,6 +1110,8 @@ static int _objs_source(Makefile * makefile, String * source, TargetType tt)
 	return ret;
 }
 
+static int _target_binary_cc(Makefile * makefile, String const * target);
+static int _target_binary_golang(Makefile * makefile, String const * target);
 static int _target_flags(Makefile * makefile, String const * target);
 static int _target_binary(Makefile * makefile, String const * target)
 {
@@ -1064,6 +1122,19 @@ static int _target_binary(Makefile * makefile, String const * target)
 	if(_target_flags(makefile, target) != 0)
 		return 1;
 	_makefile_print(makefile, "\n");
+	if((p = _makefile_get_config(makefile, target, "sources")) != NULL
+			/* XXX only checks the last source */
+			&& (p = source_extension(p)) != NULL
+			&& source_type(p) == OT_GOLANG_SOURCE)
+		return _target_binary_golang(makefile, target);
+	else
+		return _target_binary_cc(makefile, target);
+}
+
+static int _target_binary_cc(Makefile * makefile, String const * target)
+{
+	String const * p;
+
 	/* output the binary target */
 	_makefile_print(makefile, "%s", "$(OBJDIR)");
 	_makefile_print_escape(makefile, target);
@@ -1085,10 +1156,34 @@ static int _target_binary(Makefile * makefile, String const * target)
 	return 0;
 }
 
+static int _target_binary_golang(Makefile * makefile, String const * target)
+{
+	String const * sources;
+
+	/* output the binary target */
+	_makefile_print(makefile, "%s", "$(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s", "$(EXEEXT):");
+	if((sources = _makefile_get_config(makefile, target, "sources")) != NULL)
+		_makefile_expand(makefile, sources);
+	_makefile_print(makefile, "%s", "\n");
+	/* build the binary */
+	_makefile_print(makefile, "%s", "\t$(GO) build $(");
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_GOFLAGS) -o $(OBJDIR)");
+	_makefile_print_escape(makefile, target);
+	_makefile_print(makefile, "%s", "$(EXEEXT)");
+	if(sources != NULL)
+		_makefile_expand(makefile, sources);
+	_makefile_print(makefile, "%s", "\n");
+	return 0;
+}
+
 static void _flags_asm(Makefile * makefile, String const * target);
 static void _flags_asmpp(Makefile * makefile, String const * target);
 static void _flags_c(Makefile * makefile, String const * target);
 static void _flags_cxx(Makefile * makefile, String const * target);
+static void _flags_golang(Makefile * makefile, String const * target);
 static void _flags_java(Makefile * makefile, String const * target);
 static void _flags_verilog(Makefile * makefile, String const * target);
 static int _target_flags(Makefile * makefile, String const * target)
@@ -1155,6 +1250,9 @@ static int _target_flags(Makefile * makefile, String const * target)
 					/* fallthrough */
 				case OT_CXX_SOURCE:
 					_flags_cxx(makefile, target);
+					break;
+				case OT_GOLANG_SOURCE:
+					_flags_golang(makefile, target);
 					break;
 				case OT_VERILOG_SOURCE:
 					done[OT_VERILOG_SOURCE] = 1;
@@ -1240,6 +1338,17 @@ static void _flags_cxx(Makefile * makefile, String const * target)
 	_makefile_print(makefile, "%s", "_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)");
 	if((p = _makefile_get_config(makefile, target, "ldflags")) != NULL)
 		_binary_ldflags(makefile, p);
+	_makefile_print(makefile, "\n");
+}
+
+static void _flags_golang(Makefile * makefile, String const * target)
+{
+	String const * p;
+
+	_makefile_print_escape_variable(makefile, target);
+	_makefile_print(makefile, "%s", "_GOFLAGS = $(GOFLAGSF) $(GOFLAGS)");
+	if((p = _makefile_get_config(makefile, target, "goflags")) != NULL)
+		_makefile_print(makefile, " %s", p);
 	_makefile_print(makefile, "\n");
 }
 
@@ -1569,6 +1678,14 @@ static int _target_object(Makefile * makefile, String const * target)
 					" $(CXXFLAGS)");
 			if((p = _makefile_get_config(makefile, target,
 							"cxxflags")) != NULL)
+				_makefile_print(makefile, " %s", p);
+			_makefile_print(makefile, "\n");
+			break;
+		case OT_GOLANG_SOURCE:
+			_makefile_print(makefile, "\n%s%s", target, "_GOFLAGS ="
+					" $(GOFLAGSF) $(GOFLAGS)");
+			if((p = _makefile_get_config(makefile, target,
+							"goflags")) != NULL)
 				_makefile_print(makefile, " %s", p);
 			_makefile_print(makefile, "\n");
 			break;
@@ -2023,6 +2140,8 @@ static int _target_source(Makefile * makefile, String const * target,
 			_makefile_print(makefile, "%s", " -c ");
 			_makefile_print_escape(makefile, source);
 			_makefile_print(makefile, ".%s\n", extension);
+			break;
+		case OT_GOLANG_SOURCE:
 			break;
 		case OT_JAVA_SOURCE:
 			_makefile_print(makefile, "%s", "\n$(OBJDIR)");
