@@ -96,17 +96,17 @@ extern const String * sTargetType[TT_COUNT];
 
 typedef enum _ObjectType
 {
-	OT_C_SOURCE = 0,
-	OT_CXX_SOURCE,
+	OT_UNKNOWN = 0,
 	OT_ASM_SOURCE,
 	OT_ASMPP_SOURCE,
+	OT_C_SOURCE,
+	OT_CXX_SOURCE,
 	OT_JAVA_SOURCE,
 	OT_OBJC_SOURCE,
 	OT_OBJCXX_SOURCE,
-	OT_VERILOG_SOURCE,
-	OT_UNKNOWN
+	OT_VERILOG_SOURCE
 } ObjectType;
-# define OT_LAST	OT_UNKNOWN
+# define OT_LAST	OT_VERILOG_SOURCE
 # define OT_COUNT	(OT_LAST + 1)
 struct ExtensionType
 {
