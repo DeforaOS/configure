@@ -3310,12 +3310,13 @@ static int _makefile_is_phony(Makefile * makefile, char const * target)
 /* makefile_expand */
 static int _makefile_expand(Makefile * makefile, char const * field)
 {
-	int res;
+	int res = 0;
 	char c;
 
 	if(field == NULL)
 		return -1;
-	res = _makefile_print(makefile, " ");
+	if(field[0] != '\0')
+		res = _makefile_print(makefile, " ");
 	while((c = *(field++)) != '\0')
 	{
 		if(c == ' ' || c == '\t')
