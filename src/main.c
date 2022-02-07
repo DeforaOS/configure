@@ -34,8 +34,8 @@
 #include "configure.h"
 #include "../config.h"
 
-#ifndef PROGNAME
-# define PROGNAME PACKAGE
+#ifndef PROGNAME_CONFIGURE
+# define PROGNAME_CONFIGURE PACKAGE
 #endif
 
 
@@ -91,7 +91,7 @@ static int _usage(void)
 	if((configure = configure_new(NULL)) == NULL)
 		return configure_error(2, "%s", error_get(NULL));
 	fprintf(stderr, "%s%s%s%s%s%s%s%s%s%s%s%s%s",
-"Usage: " PROGNAME " [-nqSv][-b bindir][-d destdir][-i includedir][-l libdir]\n"
+"Usage: " PROGNAME_CONFIGURE " [-nqSv][-b bindir][-d destdir][-i includedir][-l libdir]\n"
 "                 [-M mode][-O system][-p prefix][-s sbindir][directory...]\n"
 "  -n	Do not actually write Makefiles\n"
 "  -q	Quiet mode (default)\n"

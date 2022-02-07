@@ -42,8 +42,8 @@
 #include "configure.h"
 #include "../config.h"
 
-#ifndef PROGNAME
-# define PROGNAME PACKAGE
+#ifndef PROGNAME_CONFIGURE
+# define PROGNAME_CONFIGURE PACKAGE
 #endif
 
 
@@ -222,7 +222,7 @@ static int _variables_package(Makefile * makefile,
 	{
 		if(_makefile_is_flag_set(makefile, PREFS_v))
 			fputc('\n', stdout);
-		fprintf(stderr, "%s%s%s", PROGNAME ": ", directory,
+		fprintf(stderr, "%s%s%s", PROGNAME_CONFIGURE ": ", directory,
 				": \"package\" needs \"version\"\n");
 		return 1;
 	}
@@ -932,7 +932,7 @@ static int _targets_target(Makefile * makefile, String const * target)
 
 	if((type = _makefile_get_config(makefile, target, "type")) == NULL)
 	{
-		fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
+		fprintf(stderr, "%s%s%s", PROGNAME_CONFIGURE ": ", target,
 				": no type defined for target\n");
 		return 1;
 	}
@@ -954,8 +954,8 @@ static int _targets_target(Makefile * makefile, String const * target)
 		case TT_SCRIPT:
 			return _target_script(makefile, target);
 		case TT_UNKNOWN:
-			fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
-					": unknown type for target\n");
+			fprintf(stderr, "%s%s%s", PROGNAME_CONFIGURE ": ",
+					target, ": unknown type for target\n");
 			return 1;
 	}
 	return 0;
@@ -1008,7 +1008,7 @@ static int _objs_source(Makefile * makefile, String * source, TargetType tt)
 
 	if((extension = source_extension(source)) == NULL)
 	{
-		fprintf(stderr, "%s%s%s", PROGNAME ": ", source,
+		fprintf(stderr, "%s%s%s", PROGNAME_CONFIGURE ": ", source,
 				": no extension for source\n");
 		return 1;
 	}
@@ -1039,7 +1039,8 @@ static int _objs_source(Makefile * makefile, String * source, TargetType tt)
 			break;
 		case OT_UNKNOWN:
 			ret = 1;
-			fprintf(stderr, "%s%s%s", PROGNAME ": ", source,
+			fprintf(stderr, "%s%s%s", PROGNAME_CONFIGURE ": ",
+					source,
 					": unknown extension for source\n");
 			break;
 	}
@@ -1065,7 +1066,7 @@ static int _target_binary(Makefile * makefile, String const * target)
 	_makefile_print(makefile, "%s", "_OBJS)");
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
-		return error_print(PROGNAME);
+		return error_print(PROGNAME_CONFIGURE);
 	_makefile_print(makefile, "\n");
 	/* build the binary */
 	_makefile_print(makefile, "%s", "\t$(CC) -o $(OBJDIR)");
@@ -1274,9 +1275,9 @@ static int _target_command(Makefile * makefile, String const * target)
 	_makefile_print(makefile, ":");
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
-		return error_print(PROGNAME);
+		return error_print(PROGNAME_CONFIGURE);
 	if((p = _makefile_get_config(makefile, target, "command")) == NULL)
-		return error_print(PROGNAME);
+		return error_print(PROGNAME_CONFIGURE);
 	if(_makefile_is_flag_set(makefile, PREFS_S))
 		_command_security(makefile, target, p);
 	_makefile_print(makefile, "\n\t%s\n", p);
@@ -1288,8 +1289,9 @@ static void _command_security(Makefile * makefile, String const * target,
 {
 	(void) makefile;
 
-	error_set_print(PROGNAME, 0, "%s: %s%s%s", target, "Command \"",
-			command, "\" is executed while compiling");
+	error_set_print(PROGNAME_CONFIGURE, 0, "%s: %s%s%s", target,
+			"Command \"", command,
+			"\" is executed while compiling");
 }
 
 static int _target_library(Makefile * makefile, String const * target)
@@ -1336,7 +1338,7 @@ static int _target_library(Makefile * makefile, String const * target)
 	_makefile_print(makefile, "%s", "_OBJS)");
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
-		return error_print(PROGNAME);
+		return error_print(PROGNAME_CONFIGURE);
 	_makefile_print(makefile, "\n");
 	/* build the shared library */
 	_makefile_print(makefile, "%s", "\t$(CCSHARED) -o $(OBJDIR)");
@@ -1436,7 +1438,7 @@ static int _target_library_static(Makefile * makefile, String const * target)
 	_makefile_print(makefile, "%s", "_OBJS)");
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
-		return error_print(PROGNAME);
+		return error_print(PROGNAME_CONFIGURE);
 	_makefile_print(makefile, "\n");
 	/* build the static library */
 	_makefile_print(makefile, "%s", "\t$(AR) $(ARFLAGS) $(OBJDIR)");
@@ -1491,13 +1493,13 @@ static int _target_object(Makefile * makefile, String const * target)
 
 	if((p = _makefile_get_config(makefile, target, "sources")) == NULL)
 	{
-		fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
+		fprintf(stderr, "%s%s%s", PROGNAME_CONFIGURE ": ", target,
 				": No sources for target\n");
 		return 1;
 	}
 	if(strchr(p, ',') != NULL)
 	{
-		fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
+		fprintf(stderr, "%s%s%s", PROGNAME_CONFIGURE ": ", target,
 				": An object can have only one source file\n");
 		return 1;
 	}
@@ -1595,7 +1597,8 @@ static int _target_object(Makefile * makefile, String const * target)
 			_makefile_print(makefile, "\n");
 			break;
 		case OT_UNKNOWN:
-			fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
+			fprintf(stderr, "%s%s%s", PROGNAME_CONFIGURE ": ",
+					target,
 					": Unknown source type for object\n");
 			return 1;
 	}
@@ -1618,7 +1621,7 @@ static int _target_plugin(Makefile * makefile, String const * target)
 	_makefile_print(makefile, "%s", "_OBJS)");
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
-		return error_print(PROGNAME);
+		return error_print(PROGNAME_CONFIGURE);
 	_makefile_print(makefile, "\n");
 	/* build the plug-in */
 	_makefile_print(makefile, "%s", "\t$(CCSHARED) -o $(OBJDIR)");
@@ -1629,7 +1632,7 @@ static int _target_plugin(Makefile * makefile, String const * target)
 	_makefile_print_escape_variable(makefile, target);
 	_makefile_print(makefile, "%s", "_LDFLAGS)");
 	if((q = string_new_append(target, "$(SOEXT)", NULL)) == NULL)
-		return error_print(PROGNAME);
+		return error_print(PROGNAME_CONFIGURE);
 	if((p = _makefile_get_config(makefile, q, "ldflags")) != NULL)
 		_binary_ldflags(makefile, p);
 	string_delete(q);
@@ -1685,7 +1688,7 @@ static int _target_script(Makefile * makefile,
 
 	if((script = _makefile_get_config(makefile, target, "script")) == NULL)
 	{
-		fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
+		fprintf(stderr, "%s%s%s", PROGNAME_CONFIGURE ": ", target,
 				": No script for target\n");
 		return 1;
 	}
@@ -1718,17 +1721,17 @@ static void _script_check(Makefile * makefile, String const * target,
 
 	if((path = _script_path(makefile, script)) == NULL)
 	{
-		error_print(PROGNAME);
+		error_print(PROGNAME_CONFIGURE);
 		return;
 	}
 	/* XXX make it clear these are warnings */
 	if(access(path, R_OK) != 0)
-		error_set_print(PROGNAME, 0, "%s: %s%s%s%s%s", target, "The \"",
-				path, "\" script is not readable (",
+		error_set_print(PROGNAME_CONFIGURE, 0, "%s: %s%s%s%s%s", target,
+				"The \"", path, "\" script is not readable (",
 				strerror(errno), ")");
 	else if(access(path, R_OK | X_OK) != 0)
-		error_set_print(PROGNAME, 0, "%s: %s%s%s%s%s", target, "The \"",
-				path, "\" script is not executable (",
+		error_set_print(PROGNAME_CONFIGURE, 0, "%s: %s%s%s%s%s", target,
+				"The \"", path, "\" script is not executable (",
 				strerror(errno), ")");
 	string_delete(path);
 }
@@ -1739,7 +1742,7 @@ static int _script_depends(Makefile * makefile, String const * target)
 
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
-		return error_print(PROGNAME);
+		return error_print(PROGNAME_CONFIGURE);
 	return 0;
 }
 
@@ -1753,7 +1756,7 @@ static String * _script_path(Makefile * makefile, String const * script)
 	if((directory = _makefile_get_config(makefile, NULL, "_directory"))
 			== NULL)
 	{
-		error_print(PROGNAME);
+		error_print(PROGNAME_CONFIGURE);
 		return NULL;
 	}
 	/* XXX truncate scripts at the first space (to allow arguments) */
@@ -1761,7 +1764,7 @@ static String * _script_path(Makefile * makefile, String const * script)
 	{
 		if((p = string_new_length(script, i)) == NULL)
 		{
-			error_print(PROGNAME);
+			error_print(PROGNAME_CONFIGURE);
 			return NULL;
 		}
 		script = p;
@@ -1783,11 +1786,11 @@ static void _script_security(Makefile * makefile, String const * target,
 
 	if((path = _script_path(makefile, script)) == NULL)
 	{
-		error_print(PROGNAME);
+		error_print(PROGNAME_CONFIGURE);
 		return;
 	}
-	error_set_print(PROGNAME, 0, "%s: %s%s%s", target, "The \"", path,
-			"\" script is executed while compiling");
+	error_set_print(PROGNAME_CONFIGURE, 0, "%s: %s%s%s", target, "The \"",
+			path, "\" script is executed while compiling");
 	string_delete(path);
 }
 
@@ -2084,7 +2087,8 @@ static int _target_source(Makefile * makefile, String const * target,
 			_makefile_print(makefile, "%s%s\n", ".", extension);
 			break;
 		case OT_UNKNOWN:
-			fprintf(stderr, "%s%s%s", PROGNAME ": ", target,
+			fprintf(stderr, "%s%s%s", PROGNAME_CONFIGURE ": ",
+					target,
 					": Unknown source type for object\n");
 			ret = 1;
 			break;
@@ -2100,7 +2104,7 @@ static int _source_depends(Makefile * makefile,
 
 	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
 			&& _makefile_expand(makefile, p) != 0)
-		return error_print(PROGNAME);
+		return error_print(PROGNAME_CONFIGURE);
 	return 0;
 }
 
@@ -2865,23 +2869,23 @@ static int _dist_check(Makefile * makefile, char const * target,
 
 	m = strtol(mode, &p, 8);
 	if(mode[0] == '\0' || *p != '\0')
-		return error_set_print(PROGNAME, 1, "%s: %s%s%s", target,
-				"Invalid permissions \"", mode, "\"");
+		return error_set_print(PROGNAME_CONFIGURE, 1, "%s: %s%s%s",
+				target, "Invalid permissions \"", mode, "\"");
 	if(_makefile_is_flag_set(makefile, PREFS_S) && (m & S_ISUID))
-		error_set_print(PROGNAME, 0, "%s: %s", target,
+		error_set_print(PROGNAME_CONFIGURE, 0, "%s: %s", target,
 				"Installed as a SUID file");
 	if(_makefile_is_flag_set(makefile, PREFS_S) && (m & S_ISUID))
-		error_set_print(PROGNAME, 0, "%s: %s", target,
+		error_set_print(PROGNAME_CONFIGURE, 0, "%s: %s", target,
 				"Installed as a SGID file");
 	if(_makefile_is_flag_set(makefile, PREFS_S)
 			&& (m & (S_IXUSR | S_IXGRP | S_IXOTH)))
-		error_set_print(PROGNAME, 0, "%s: %s", target,
+		error_set_print(PROGNAME_CONFIGURE, 0, "%s: %s", target,
 				"Installed as an executable file");
 	if(_makefile_is_flag_set(makefile, PREFS_S) && (m & S_IWGRP))
-		error_set_print(PROGNAME, 0, "%s: %s", target,
+		error_set_print(PROGNAME_CONFIGURE, 0, "%s: %s", target,
 				"Installed as a group-writable file");
 	if(_makefile_is_flag_set(makefile, PREFS_S) && (m & S_IWOTH))
-		error_set_print(PROGNAME, 0, "%s: %s", target,
+		error_set_print(PROGNAME_CONFIGURE, 0, "%s: %s", target,
 				"Installed as a writable file");
 	return 0;
 }

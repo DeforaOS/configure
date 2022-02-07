@@ -43,8 +43,8 @@
 #include "configure.h"
 #include "../config.h"
 
-#ifndef PROGNAME
-# define PROGNAME PACKAGE
+#ifndef PROGNAME_CONFIGURE
+# define PROGNAME_CONFIGURE PACKAGE
 #endif
 
 #ifndef PREFIX
@@ -471,7 +471,7 @@ int configure_error(int ret, char const * format, ...)
 {
 	va_list ap;
 
-	fputs(PROGNAME ": ", stderr);
+	fputs(PROGNAME_CONFIGURE ": ", stderr);
 	va_start(ap, format);
 	vfprintf(stderr, format, ap);
 	fputc('\n', stderr);
@@ -500,7 +500,7 @@ int configure_project(Configure * configure, String const * directory)
 	Config * p;
 
 	if((ca = configarray_new()) == NULL)
-		return error_print(PROGNAME);
+		return error_print(PROGNAME_CONFIGURE);
 	if((ret = _project_load(configure, directory, ca)) == 0)
 	{
 		if(configure->prefs.flags & PREFS_n)
@@ -574,7 +574,7 @@ static int _project_load(Configure * configure, String const * directory,
 	if(configure->prefs.flags & PREFS_v)
 		printf("%s%s%s", "Loading project file ", path, "\n");
 	if(config_load(config, path) != 0)
-		ret = error_print(PROGNAME);
+		ret = error_print(PROGNAME_CONFIGURE);
 	else
 	{
 		array_append(ca, &config);
@@ -644,7 +644,7 @@ static int _project_load_subdirs_subdir(Configure * configure,
 	if(directory == NULL || string_get_length(directory) == 0)
 		ret = _project_load(configure, subdir, ca);
 	else if((p = string_new_append(directory, "/", subdir, NULL)) == NULL)
-		ret = error_print(PROGNAME);
+		ret = error_print(PROGNAME_CONFIGURE);
 	else
 	{
 		ret = _project_load(configure, p, ca);
@@ -659,7 +659,7 @@ int configure_warning(int ret, char const * format, ...)
 {
 	va_list ap;
 
-	fputs(PROGNAME ": warning: ", stderr);
+	fputs(PROGNAME_CONFIGURE ": warning: ", stderr);
 	va_start(ap, format);
 	vfprintf(stderr, format, ap);
 	fputc('\n', stderr);
