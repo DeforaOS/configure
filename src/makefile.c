@@ -1128,34 +1128,32 @@ static int _target_flags(Makefile * makefile, String const * target)
 		}
 		type = source_type(extension);
 		if(!done[type])
+		{
+			if(type != OT_UNKNOWN)
+				done[type] = 1;
 			switch(type)
 			{
 				case OT_ASMPP_SOURCE:
-					done[OT_ASMPP_SOURCE] = 1;
 					_flags_asmpp(makefile, target);
 					if(done[OT_ASM_SOURCE])
 						break;
 					/* fallthrough */
 				case OT_ASM_SOURCE:
-					done[OT_ASM_SOURCE] = 1;
 					_flags_asm(makefile, target);
 					break;
 				case OT_JAVA_SOURCE:
-					done[OT_JAVA_SOURCE] = 1;
 					_flags_java(makefile, target);
 					break;
 				case OT_OBJC_SOURCE:
 					done[OT_C_SOURCE] = 1;
 					/* fallthrough */
 				case OT_C_SOURCE:
-					done[OT_OBJC_SOURCE] = 1;
 					_flags_c(makefile, target);
 					break;
 				case OT_OBJCXX_SOURCE:
 					done[OT_CXX_SOURCE] = 1;
 					/* fallthrough */
 				case OT_CXX_SOURCE:
-					done[OT_OBJCXX_SOURCE] = 1;
 					_flags_cxx(makefile, target);
 					break;
 				case OT_VERILOG_SOURCE:
@@ -1165,7 +1163,7 @@ static int _target_flags(Makefile * makefile, String const * target)
 				case OT_UNKNOWN:
 					break;
 			}
-		done[type] = 1;
+		}
 		if(c == '\0')
 			break;
 		sources += i + 1;
