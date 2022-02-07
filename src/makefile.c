@@ -1041,7 +1041,13 @@ static int _objs_source(Makefile * makefile, String * source, TargetType tt)
 			ret = 1;
 			fprintf(stderr, "%s%s%s", PROGNAME_CONFIGURE ": ",
 					source,
-					": unknown extension for source\n");
+					": Unknown extension for source\n");
+			break;
+		default:
+			ret = 2;
+			fprintf(stderr, "%s%s%s", PROGNAME_CONFIGURE ": ",
+					source,
+					": Unsupported extension for source\n");
 			break;
 	}
 	source[len] = '.';
@@ -2090,6 +2096,13 @@ static int _target_source(Makefile * makefile, String const * target,
 			fprintf(stderr, "%s%s%s", PROGNAME_CONFIGURE ": ",
 					target,
 					": Unknown source type for object\n");
+			ret = 1;
+			break;
+		default:
+			fprintf(stderr, "%s%s%s", PROGNAME_CONFIGURE ": ",
+					target,
+					": Unsupported source type for"
+					" object\n");
 			ret = 1;
 			break;
 	}
