@@ -93,6 +93,7 @@ _tests()
 	_test "NetBSD" "binary"					|| ret=2
 	_test "NetBSD" "command"				|| ret=2
 	_test "NetBSD" "include"				|| ret=2
+	_test "NetBSD" "golang"					|| ret=2
 	_test "NetBSD" "java"					|| ret=2
 	_test "NetBSD" "library"				|| ret=2
 	_test "NetBSD" "libtool"				|| ret=2

@@ -1,0 +1,41 @@
+TARGETS	= $(OBJDIR)main$(EXEEXT) $(OBJDIR)app$(EXEEXT)
+OBJDIR	=
+PREFIX	= /usr/local
+DESTDIR	=
+BINDIR	= $(PREFIX)/bin
+SBINDIR	= $(PREFIX)/sbin
+GO	= go
+GOFLAGSF=
+GOFLAGS	=
+EXEEXT	=
+RM	= rm -f
+LN	= ln -f
+MKDIR	= mkdir -m 0755 -p
+INSTALL	= install
+
+
+all: $(TARGETS)
+
+main_OBJS =
+main_GOFLAGS = $(GOFLAGSF) $(GOFLAGS) -gcflags -S
+
+$(OBJDIR)main$(EXEEXT): main.go
+	$(GO) build $(main_GOFLAGS) -o $(OBJDIR)main$(EXEEXT) main.go
+
+app_OBJS =
+app_GOFLAGS = $(GOFLAGSF) $(GOFLAGS)
+
+$(OBJDIR)app$(EXEEXT): app.go common.go
+	$(GO) build $(app_GOFLAGS) -o $(OBJDIR)app$(EXEEXT) app.go common.go
+
+clean:
+	$(RM) -- $(main_OBJS) $(app_OBJS)
+
+distclean: clean
+	$(RM) -- $(TARGETS)
+
+install: all
+
+uninstall:
+
+.PHONY: all clean distclean install uninstall
