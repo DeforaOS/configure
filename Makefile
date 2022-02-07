@@ -114,6 +114,8 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/config.sh \
 		$(PACKAGE)-$(VERSION)/tests/include/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/include/Makefile.NetBSD \
+		$(PACKAGE)-$(VERSION)/tests/golang/project.conf \
+		$(PACKAGE)-$(VERSION)/tests/golang/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/java/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/java/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/library/project.conf \
