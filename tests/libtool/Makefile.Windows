@@ -21,20 +21,20 @@ libtest_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 libtest_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
 $(OBJDIR)libtest.la: $(libtest_OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $(OBJDIR)libtest.la $(libtest_OBJS) -rpath $(LIBDIR) $(libtest_LDFLAGS)
+	$(LIBTOOL) --mode=link --tag=CC $(CC) -o $(OBJDIR)libtest.la $(libtest_OBJS) -rpath $(LIBDIR) $(libtest_LDFLAGS)
 
 libs_p_a_c_e_OBJS = $(OBJDIR)s\ p\ a\ c\ e.lo
 libs_p_a_c_e_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 libs_p_a_c_e_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
 $(OBJDIR)libs\ p\ a\ c\ e.la: $(libs_p_a_c_e_OBJS)
-	$(LIBTOOL) --mode=link $(CC) -o $(OBJDIR)libs\ p\ a\ c\ e.la $(libs_p_a_c_e_OBJS) -rpath $(LIBDIR) $(libs_p_a_c_e_LDFLAGS)
+	$(LIBTOOL) --mode=link --tag=CC $(CC) -o $(OBJDIR)libs\ p\ a\ c\ e.la $(libs_p_a_c_e_OBJS) -rpath $(LIBDIR) $(libs_p_a_c_e_LDFLAGS)
 
 $(OBJDIR)test.o $(OBJDIR)test.lo: test.c
-	$(LIBTOOL) --mode=compile $(CC) $(libtest_CFLAGS) -o $(OBJDIR)test.o -c test.c
+	$(LIBTOOL) --mode=compile --tag=CC $(CC) $(libtest_CFLAGS) -o $(OBJDIR)test.o -c test.c
 
 $(OBJDIR)s\ p\ a\ c\ e.o $(OBJDIR)s\ p\ a\ c\ e.lo: s\ p\ a\ c\ e.c
-	$(LIBTOOL) --mode=compile $(CC) $(libs_p_a_c_e_CFLAGS) -o $(OBJDIR)s\ p\ a\ c\ e.o -c s\ p\ a\ c\ e.c
+	$(LIBTOOL) --mode=compile --tag=CC $(CC) $(libs_p_a_c_e_CFLAGS) -o $(OBJDIR)s\ p\ a\ c\ e.o -c s\ p\ a\ c\ e.c
 
 clean:
 	$(RM) -- $(libtest_OBJS) $(libs_p_a_c_e_OBJS)
