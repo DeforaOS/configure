@@ -1586,7 +1586,7 @@ static int _target_libtool(Makefile * makefile, String const * target)
 	_makefile_print_escape_variable(makefile, target);
 	_makefile_print(makefile, "%s", "_OBJS)\n");
 	_makefile_print(makefile, "%s",
-			"\t$(LIBTOOL) --mode=link $(CC) -o $(OBJDIR)");
+			"\t$(LIBTOOL) --mode=link --tag=CC $(CC) -o $(OBJDIR)");
 	_makefile_print_escape(makefile, target);
 	_makefile_print(makefile, "%s", ".la $(");
 	_makefile_print_escape_variable(makefile, target);
@@ -1991,8 +1991,8 @@ static int _target_source(Makefile * makefile, String const * target,
 			if(strchr(source, '/') != NULL)
 				ret = _source_subdir(makefile, source);
 			if(tt == TT_LIBTOOL)
-				_makefile_print(makefile, "%s",
-						"$(LIBTOOL) --mode=compile ");
+				_makefile_print(makefile, "%s", "$(LIBTOOL)"
+						" --mode=compile --tag=CC ");
 			_makefile_print(makefile, "%s", "$(AS)");
 			source[len] = '.'; /* FIXME ugly */
 			if(ot == OT_ASMPP_SOURCE)
@@ -2062,8 +2062,8 @@ static int _target_source(Makefile * makefile, String const * target,
 			q = _makefile_get_config(makefile, source, "cflags");
 			source[len] = '\0';
 			if(tt == TT_LIBTOOL)
-				_makefile_print(makefile, "%s",
-						"$(LIBTOOL) --mode=compile ");
+				_makefile_print(makefile, "%s", "$(LIBTOOL)"
+						" --mode=compile --tag=CC ");
 			_makefile_print(makefile, "%s", "$(CC)");
 			if(p != NULL)
 				_makefile_print(makefile, " %s", p);
@@ -2119,8 +2119,8 @@ static int _target_source(Makefile * makefile, String const * target,
 			if(strchr(source, '/') != NULL)
 				ret = _source_subdir(makefile, source);
 			if(tt == TT_LIBTOOL)
-				_makefile_print(makefile, "%s",
-						"$(LIBTOOL) --mode=compile ");
+				_makefile_print(makefile, "%s", "$(LIBTOOL)"
+						" --mode=compile --tag=CXX ");
 			_makefile_print(makefile, "%s", "$(CXX) $(");
 			_makefile_print_escape(makefile, target);
 			_makefile_print(makefile, "%s", "_CXXFLAGS)");
