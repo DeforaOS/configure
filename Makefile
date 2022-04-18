@@ -88,6 +88,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/coverage.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/distcheck.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/fixme.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tests/golint.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/htmllint.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/phplint.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/pylint.sh \
