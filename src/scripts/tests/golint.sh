@@ -91,7 +91,7 @@ _golint_directory()
 {
 	directory="$1"
 
-	$DEBUG $GOLINT "$directory" 2>&1			|| return 2
+	$DEBUG $GOLINT "$directory/..." 2>&1			|| return 2
 	return 0
 }
 
