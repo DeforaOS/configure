@@ -1159,13 +1159,18 @@ static int _target_binary_cc(Makefile * makefile, String const * target)
 static int _target_binary_golang(Makefile * makefile, String const * target)
 {
 	String const * sources;
+	String const * p;
 
 	/* output the binary target */
 	_makefile_print(makefile, "%s", "$(OBJDIR)");
 	_makefile_print_escape(makefile, target);
 	_makefile_print(makefile, "%s", "$(EXEEXT):");
-	if((sources = _makefile_get_config(makefile, target, "sources")) != NULL)
-		_makefile_expand(makefile, sources);
+	if((sources = _makefile_get_config(makefile, target, "sources")) != NULL
+			&& _makefile_expand(makefile, sources) != 0)
+		return error_print(PROGNAME_CONFIGURE);
+	if((p = _makefile_get_config(makefile, target, "depends")) != NULL
+			&& _makefile_expand(makefile, p) != 0)
+		return error_print(PROGNAME_CONFIGURE);
 	_makefile_print(makefile, "%s", "\n");
 	/* build the binary */
 	_makefile_print(makefile, "%s", "\t$(GO) build $(");
