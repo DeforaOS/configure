@@ -25,7 +25,7 @@ $(OBJDIR)main$(EXEEXT): main.go
 app_OBJS =
 app_GOFLAGS = $(GOFLAGSF) $(GOFLAGS)
 
-$(OBJDIR)app$(EXEEXT): app.go common.go
+$(OBJDIR)app$(EXEEXT): app.go common.go $(OBJDIR)main$(EXEEXT)
 	$(GO) build $(app_GOFLAGS) -o $(OBJDIR)app$(EXEEXT) app.go common.go
 
 clean:
