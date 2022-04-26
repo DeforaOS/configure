@@ -1,5 +1,5 @@
 PACKAGE	= configure
-VERSION	= 0.4.3
+VERSION	= 0.4.4
 VENDOR	= Devel
 SUBDIRS	= data doc src tools tests
 OBJDIR	=
