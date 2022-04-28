@@ -95,7 +95,7 @@ _fixme_callback()
 			echo "_fixme_callback_asm"
 			return 0
 			;;
-		c|cc|cpp|cxx|h|js|v)
+		c|cc|cpp|cxx|go|h|js|v)
 			echo "_fixme_callback_c"
 			return 0
 			;;
