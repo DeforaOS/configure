@@ -683,12 +683,12 @@ static void _binary_ldflags(Makefile * makefile, String const * ldflags)
 {
 	char const * libs_bsd[] = { "dl", "resolv", "ossaudio", "socket",
 		"ws2_32", NULL };
+	char const * libs_darwin[] = { "crypt", "ossaudio", "socket", "ws2_32",
+		NULL };
 	char const * libs_deforaos[] = { "ossaudio", "resolv", "ssl", "ws2_32",
 		NULL };
 	char const * libs_gnu[] = { "intl", "ossaudio", "resolv", "socket",
 		"ws2_32", NULL };
-	char const * libs_macosx[] = { "crypt", "ossaudio", "socket", "ws2_32",
-		NULL };
 	char const * libs_netbsd[] = { "dl", "resolv", "socket", "ws2_32",
 		NULL };
 	char const * libs_sunos[] = { "dl", "ossaudio", "ws2_32", NULL };
@@ -706,6 +706,10 @@ static void _binary_ldflags(Makefile * makefile, String const * ldflags)
 	}
 	switch(configure_get_os(makefile->configure))
 	{
+		case HO_DARWIN:
+			libs = libs_darwin;
+			flags = flags_darwin;
+			break;
 		case HO_DEFORAOS:
 			libs = libs_deforaos;
 			break;
@@ -715,9 +719,6 @@ static void _binary_ldflags(Makefile * makefile, String const * ldflags)
 			break;
 		case HO_GNU_LINUX:
 			libs = libs_gnu;
-			break;
-		case HO_MACOSX:
-			libs = libs_macosx;
 			break;
 		case HO_NETBSD:
 			libs = libs_netbsd;
@@ -1430,8 +1431,8 @@ static int _target_library(Makefile * makefile, String const * target)
 	os = configure_get_os(makefile->configure);
 	if((p = _makefile_get_config(makefile, target, "soname")) != NULL)
 		soname = string_new(p);
-	else if(os == HO_MACOSX)
-		/* versioning is different on MacOS X */
+	else if(os == HO_DARWIN)
+		/* versioning is different on Darwin/macOS */
 		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
 	else if(os == HO_WIN32)
 		/* and on Windows */
@@ -1440,7 +1441,7 @@ static int _target_library(Makefile * makefile, String const * target)
 		soname = string_new_append(target, "$(SOEXT)", ".0", NULL);
 	if(soname == NULL)
 		return 1;
-	if(os == HO_MACOSX || os == HO_WIN32)
+	if(os == HO_DARWIN || os == HO_WIN32)
 	{
 		_makefile_print(makefile, "%s", "\n$(OBJDIR)");
 		_makefile_print_escape(makefile, soname);
@@ -1461,12 +1462,12 @@ static int _target_library(Makefile * makefile, String const * target)
 	/* build the shared library */
 	_makefile_print(makefile, "%s", "\t$(CCSHARED) -o $(OBJDIR)");
 	_makefile_print_escape(makefile, soname);
-	_makefile_print(makefile, "%s", (os != HO_MACOSX && os != HO_WIN32)
+	_makefile_print(makefile, "%s", (os != HO_DARWIN && os != HO_WIN32)
 			? ".0" : "");
 	if((p = _makefile_get_config(makefile, target, "install")) != NULL)
 	{
-		/* soname is not available on MacOS X */
-		if(os == HO_MACOSX)
+		/* soname is not available on Darwin/macOS */
+		if(os == HO_DARWIN)
 		{
 			_makefile_print(makefile, "%s", " -install_name ");
 			_makefile_print_escape(makefile, p);
@@ -1494,7 +1495,7 @@ static int _target_library(Makefile * makefile, String const * target)
 		_binary_ldflags(makefile, p);
 	string_delete(q);
 	_makefile_print(makefile, "\n");
-	if(os == HO_MACOSX)
+	if(os == HO_DARWIN)
 	{
 		_makefile_print(makefile, "%s", "\n$(OBJDIR)");
 		_makefile_print_escape(makefile, target);
@@ -2730,8 +2731,8 @@ static int _install_target_library(Makefile * makefile, String const * target)
 	os = configure_get_os(makefile->configure);
 	if((p = _makefile_get_config(makefile, target, "soname")) != NULL)
 		soname = string_new(p);
-	else if(os == HO_MACOSX)
-		/* versioning is different on MacOS X */
+	else if(os == HO_DARWIN)
+		/* versioning is different on Darwin/macOS */
 		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
 	else if(os == HO_WIN32)
 		/* and on Windows */
@@ -2741,7 +2742,7 @@ static int _install_target_library(Makefile * makefile, String const * target)
 	if(soname == NULL)
 		return 1;
 	/* install the shared library */
-	if(os == HO_MACOSX)
+	if(os == HO_DARWIN)
 	{
 		_makefile_print(makefile, "%s",
 				"\t$(INSTALL) -m 0755 $(OBJDIR)");
@@ -3275,8 +3276,8 @@ static int _uninstall_target_library(Makefile * makefile, String const * target,
 	os = configure_get_os(makefile->configure);
 	if((p = _makefile_get_config(makefile, target, "soname")) != NULL)
 		soname = string_new(p);
-	else if(os == HO_MACOSX)
-		/* versioning is different on MacOS X */
+	else if(os == HO_DARWIN)
+		/* versioning is different on Darwin/macOS */
 		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
 	else if(os == HO_WIN32)
 		/* and on Windows */
@@ -3286,7 +3287,7 @@ static int _uninstall_target_library(Makefile * makefile, String const * target,
 	if(soname == NULL)
 		return 1;
 	/* uninstall the shared library */
-	if(os == HO_MACOSX)
+	if(os == HO_DARWIN)
 	{
 		_makefile_print(makefile, "%s", rm_destdir);
 		_makefile_print_escape(makefile, path);
@@ -3686,8 +3687,8 @@ static int _print_target_library(Makefile * makefile, String const * target)
 
 	if((p = _makefile_get_config(makefile, target, "soname")) != NULL)
 		soname = string_new(p);
-	else if(configure_get_os(makefile->configure) == HO_MACOSX)
-		/* versioning is different on MacOS X */
+	else if(configure_get_os(makefile->configure) == HO_DARWIN)
+		/* versioning is different on Darwin/macOS */
 		soname = string_new_append(target, ".0.0$(SOEXT)", NULL);
 	else if(configure_get_os(makefile->configure) == HO_WIN32)
 		/* and on Windows */
@@ -3704,7 +3705,7 @@ static int _print_target_library(Makefile * makefile, String const * target)
 		_makefile_print(makefile, "%s", ".a");
 		sep = " ";
 	}
-	if((os = configure_get_os(makefile->configure)) == HO_MACOSX)
+	if((os = configure_get_os(makefile->configure)) == HO_DARWIN)
 	{
 		_makefile_print(makefile, "%s%s", sep, "$(OBJDIR)");
 		_makefile_print_escape(makefile, soname);
