@@ -62,6 +62,7 @@ typedef enum _HostOS
 # define HO_LAST	HO_UNKNOWN
 # define HO_COUNT	(HO_LAST + 1)
 /* aliases */
+# define HO_MACOS	HO_DARWIN
 # define HO_MACOSX	HO_DARWIN
 extern const String * sHostOS[HO_COUNT];
 
