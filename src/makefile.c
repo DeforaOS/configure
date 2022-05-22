@@ -693,8 +693,11 @@ static void _binary_ldflags(Makefile * makefile, String const * ldflags)
 		NULL };
 	char const * libs_sunos[] = { "dl", "ossaudio", "ws2_32", NULL };
 	char const * libs_win32[] = { "dl", "ossaudio", NULL };
+	char const * flags_darwin[] = { "-Wl,--export-dynamic",
+		"--export-dynamic", NULL };
 	char buf[16];
 	char const ** libs;
+	char const ** flags = NULL;
 	String * p;
 	String * q;
 	size_t i;
@@ -739,6 +742,14 @@ static void _binary_ldflags(Makefile * makefile, String const * ldflags)
 		if((q = string_find(p, buf)) == NULL)
 			continue;
 		memmove(q, q + strlen(buf), strlen(q) - strlen(buf) + 1);
+	}
+	for(i = 0; flags != NULL && flags[i] != NULL; i++)
+	{
+		if((q = string_find(p, flags[i])) == NULL)
+			continue;
+		memmove(q, q + string_get_length(flags[i]),
+				string_get_length(q
+					+ string_get_length(flags[i])) + 1);
 	}
 	_makefile_print(makefile, " %s", p);
 	string_delete(p);
