@@ -29,6 +29,7 @@ CONFIGSH="${0%/subst.sh}/../config.sh"
 PREFIX="/usr/local"
 BINDIR=
 DATADIR=
+DEVNULL="/dev/null"
 INCLUDEDIR=
 LDSO=
 LIBDIR=
@@ -41,7 +42,6 @@ SYSCONFDIR=
 CHMOD="chmod"
 DATE="date"
 DEBUG="_debug"
-DEVNULL="/dev/null"
 INSTALL="install"
 MKDIR="mkdir -m 0755 -p"
 RM="rm -f"
@@ -142,6 +142,7 @@ _subst()
 	done
 	return 0
 }
+
 
 #debug
 _debug()
