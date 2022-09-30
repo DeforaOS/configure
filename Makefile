@@ -146,6 +146,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/tests/plugin/Makefile.NetBSD \
 		$(PACKAGE)-$(VERSION)/tests/script/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/script/Makefile.NetBSD \
+		$(PACKAGE)-$(VERSION)/tests/scripts/data/pkgconfig.in \
 		$(PACKAGE)-$(VERSION)/tests/scripts/tools/subst.in \
 		$(PACKAGE)-$(VERSION)/tests/template.md.in \
 		$(PACKAGE)-$(VERSION)/tests/template.xml.in \
