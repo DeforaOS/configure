@@ -54,33 +54,33 @@ _tests_date()
 #tests_makefile
 _tests_makefile()
 {
-	ret=0
+	res=0
 
 	#XXX cross-compiling
 	[ -n "$PKG_CONFIG_SYSROOT_DIR" ] && return 0
-	_makefile_test "Darwin" "binary"			|| ret=2
-	_makefile_test "Darwin" "library"			|| ret=2
-	_makefile_test "Darwin" "libtool"			|| ret=2
-	_makefile_test "Darwin" "plugin"			|| ret=2
-	_makefile_test "DeforaOS" "binary"			|| ret=2
-	_makefile_test "Linux" "library"			|| ret=2
-	_makefile_test "Linux" "libtool"			|| ret=2
-	_makefile_test "NetBSD" "binary"			|| ret=2
-	_makefile_test "NetBSD" "command"			|| ret=2
-	_makefile_test "NetBSD" "include"			|| ret=2
-	_makefile_test "NetBSD" "golang"			|| ret=2
-	_makefile_test "NetBSD" "java"				|| ret=2
-	_makefile_test "NetBSD" "library"			|| ret=2
-	_makefile_test "NetBSD" "libtool"			|| ret=2
-	_makefile_test "NetBSD" "object"			|| ret=2
-	_makefile_test "NetBSD" "package"			|| ret=2
-	_makefile_test "NetBSD" "plugin"			|| ret=2
-	_makefile_test "NetBSD" "script"			|| ret=2
-	_makefile_test "NetBSD" "verilog"			|| ret=2
-	_makefile_test "Windows" "binary"			|| ret=2
-	_makefile_test "Windows" "library"			|| ret=2
-	_makefile_test "Windows" "libtool"			|| ret=2
-	return $ret
+	_makefile_test "Darwin" "binary"			|| res=2
+	_makefile_test "Darwin" "library"			|| res=2
+	_makefile_test "Darwin" "libtool"			|| res=2
+	_makefile_test "Darwin" "plugin"			|| res=2
+	_makefile_test "DeforaOS" "binary"			|| res=2
+	_makefile_test "Linux" "library"			|| res=2
+	_makefile_test "Linux" "libtool"			|| res=2
+	_makefile_test "NetBSD" "binary"			|| res=2
+	_makefile_test "NetBSD" "command"			|| res=2
+	_makefile_test "NetBSD" "include"			|| res=2
+	_makefile_test "NetBSD" "golang"			|| res=2
+	_makefile_test "NetBSD" "java"				|| res=2
+	_makefile_test "NetBSD" "library"			|| res=2
+	_makefile_test "NetBSD" "libtool"			|| res=2
+	_makefile_test "NetBSD" "object"			|| res=2
+	_makefile_test "NetBSD" "package"			|| res=2
+	_makefile_test "NetBSD" "plugin"			|| res=2
+	_makefile_test "NetBSD" "script"			|| res=2
+	_makefile_test "NetBSD" "verilog"			|| res=2
+	_makefile_test "Windows" "binary"			|| res=2
+	_makefile_test "Windows" "library"			|| res=2
+	_makefile_test "Windows" "libtool"			|| res=2
+	return $res
 }
 
 _makefile_test()
@@ -120,10 +120,13 @@ _makefile_test()
 #tests_scripts
 _tests_scripts()
 {
+	res=0
+
 	_scripts_test "../src/scripts/data/pkgconfig.sh" \
-		"${OBJDIR}scripts/data/pkgconfig"
+		"${OBJDIR}scripts/data/pkgconfig"		|| res=2
 	_scripts_test "../src/scripts/tools/subst.sh" \
-		"${OBJDIR}scripts/tools/subst"
+		"${OBJDIR}scripts/tools/subst"			|| res=2
+	return $res
 }
 
 _scripts_test()
