@@ -27,9 +27,11 @@
 #variables
 PROGNAME="tests.sh"
 #executables
+CAT="cat"
 CONFIGURE="$OBJDIR../tools/configure -S -q -v"
 DATE="date"
 DIFF="diff"
+MKDIR="mkdir -p"
 RM="rm -f"
 
 
@@ -37,13 +39,51 @@ RM="rm -f"
 #fail
 _fail()
 {
-	_test "$@"
+	_makefile_test "$@"
 	return 0
 }
 
 
-#test
-_test()
+#tests_date
+_tests_date()
+{
+	$DATE
+}
+
+
+#tests_makefile
+_tests_makefile()
+{
+	ret=0
+
+	#XXX cross-compiling
+	[ -n "$PKG_CONFIG_SYSROOT_DIR" ] && return 0
+	_makefile_test "Darwin" "binary"			|| ret=2
+	_makefile_test "Darwin" "library"			|| ret=2
+	_makefile_test "Darwin" "libtool"			|| ret=2
+	_makefile_test "Darwin" "plugin"			|| ret=2
+	_makefile_test "DeforaOS" "binary"			|| ret=2
+	_makefile_test "Linux" "library"			|| ret=2
+	_makefile_test "Linux" "libtool"			|| ret=2
+	_makefile_test "NetBSD" "binary"			|| ret=2
+	_makefile_test "NetBSD" "command"			|| ret=2
+	_makefile_test "NetBSD" "include"			|| ret=2
+	_makefile_test "NetBSD" "golang"			|| ret=2
+	_makefile_test "NetBSD" "java"				|| ret=2
+	_makefile_test "NetBSD" "library"			|| ret=2
+	_makefile_test "NetBSD" "libtool"			|| ret=2
+	_makefile_test "NetBSD" "object"			|| ret=2
+	_makefile_test "NetBSD" "package"			|| ret=2
+	_makefile_test "NetBSD" "plugin"			|| ret=2
+	_makefile_test "NetBSD" "script"			|| ret=2
+	_makefile_test "NetBSD" "verilog"			|| ret=2
+	_makefile_test "Windows" "binary"			|| ret=2
+	_makefile_test "Windows" "library"			|| ret=2
+	_makefile_test "Windows" "libtool"			|| ret=2
+	return $ret
+}
+
+_makefile_test()
 {
 	[ $# -eq 2 ]						|| return 2
 	system="$1"
@@ -72,40 +112,38 @@ _test()
 		echo "$system $subdir: FAIL" 1>&2
 		return 2
 	fi
+	echo "$system $subdir: PASS"
 	echo "$system $subdir: PASS" 1>&2
 }
 
 
-_tests()
+#tests_scripts
+_tests_scripts()
 {
-	ret=0
+	_scripts_test "../src/scripts/tools/subst.sh" \
+		"${OBJDIR}scripts/tools/subst"
+}
 
-	$DATE
-	#XXX cross-compiling
-	[ -n "$PKG_CONFIG_SYSROOT_DIR" ] && return 0
-	_test "Darwin" "binary"					|| ret=2
-	_test "Darwin" "library"				|| ret=2
-	_test "Darwin" "libtool"				|| ret=2
-	_test "Darwin" "plugin"					|| ret=2
-	_test "DeforaOS" "binary"				|| ret=2
-	_test "Linux" "library"					|| ret=2
-	_test "Linux" "libtool"					|| ret=2
-	_test "NetBSD" "binary"					|| ret=2
-	_test "NetBSD" "command"				|| ret=2
-	_test "NetBSD" "include"				|| ret=2
-	_test "NetBSD" "golang"					|| ret=2
-	_test "NetBSD" "java"					|| ret=2
-	_test "NetBSD" "library"				|| ret=2
-	_test "NetBSD" "libtool"				|| ret=2
-	_test "NetBSD" "object"					|| ret=2
-	_test "NetBSD" "package"				|| ret=2
-	_test "NetBSD" "plugin"					|| ret=2
-	_test "NetBSD" "script"					|| ret=2
-	_test "NetBSD" "verilog"				|| ret=2
-	_test "Windows" "binary"				|| ret=2
-	_test "Windows" "library"				|| ret=2
-	_test "Windows" "libtool"				|| ret=2
-	return $ret
+_scripts_test()
+{
+	script="$1"
+	target="$2"
+	shift
+	shift
+
+	echo
+	echo "Testing: $script"
+	$MKDIR "$OBJDIR${target%/*}"
+	$script "$target" "$@" &&
+		$CAT "$target"
+	res=$?
+	if [ $res -ne 0 ]; then
+		echo "$script: Failed with error code $res"
+		echo "$script: FAIL" 1>&2
+		return 2
+	fi
+	echo "$script: PASS"
+	echo "$script: PASS" 1>&2
 }
 
 
@@ -144,9 +182,15 @@ fi
 
 [ "$clean" -ne 0 ] && exit 0
 
+ret=0
 while [ $# -gt 0 ]; do
 	target="$1"
 	shift
 
-	_tests > "$target"					|| exit 2
+	(ret=0
+	_tests_date
+	_tests_makefile						|| ret=2
+	_tests_scripts						|| ret=2
+	exit $ret) > "$target"					|| exit 2
 done
+exit $ret
