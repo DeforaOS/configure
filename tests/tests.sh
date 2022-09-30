@@ -120,6 +120,8 @@ _makefile_test()
 #tests_scripts
 _tests_scripts()
 {
+	_scripts_test "../src/scripts/data/pkgconfig.sh" \
+		"${OBJDIR}scripts/data/pkgconfig"
 	_scripts_test "../src/scripts/tools/subst.sh" \
 		"${OBJDIR}scripts/tools/subst"
 }
