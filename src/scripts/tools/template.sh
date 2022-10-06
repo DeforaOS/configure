@@ -31,6 +31,7 @@ DATABASEDIR="../data"
 PROGNAME="template.sh"
 #executables
 DEBUG="_debug"
+MKDIR="mkdir -p"
 INSTALL="install -m 0644"
 RM="rm -f"
 SED="sed"
