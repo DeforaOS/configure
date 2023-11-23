@@ -37,8 +37,8 @@ FOP="fop"
 INSTALL="install -m 0644"
 MKDIR="mkdir -m 0755 -p"
 RM="rm -f"
-XMLLINT="xmllint --nonet --xinclude"
-XSLTPROC="xsltproc --nonet --xinclude"
+XMLLINT="xmllint --nonet --xinclude --path ${PWD}"
+XSLTPROC="xsltproc --nonet --xinclude --path ${PWD}"
 
 [ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
