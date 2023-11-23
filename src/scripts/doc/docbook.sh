@@ -67,11 +67,13 @@ _docbook()
 			[ -f "${source%.*}.xsl" ] && XSL="${source%.*}.xsl"
 			[ -f "${target%.*}.xsl" ] && XSL="${target%.*}.xsl"
 			if [ -f "${target%.*}.css.xml" ]; then
-				XSLTPROC="$XSLTPROC --param custom.css.source \"${target%.*}.css.xml\" --param generate.css.header 1"
+				XSLTPROC_PARAMS="--param custom.css.source \"${target%.*}.css.xml\" --param generate.css.header 1"
 			elif [ -f "${source%.*}.css.xml" ]; then
-				XSLTPROC="$XSLTPROC --param custom.css.source \"${source%.*}.css.xml\" --param generate.css.header 1"
+				XSLTPROC_PARAMS="--param custom.css.source \"${source%.*}.css.xml\" --param generate.css.header 1"
+			else
+				XSLTPROC_PARAMS=
 			fi
-			$DEBUG $XSLTPROC -o "$target" "$XSL" "$source"
+			$DEBUG $XSLTPROC $XSLTPROC_PARAMS -o "$target" "$XSL" "$source"
 			;;
 		pdf)
 			XSL="$XSL_PDF"
