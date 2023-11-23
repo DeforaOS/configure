@@ -175,7 +175,7 @@ while [ $# -gt 0 ]; do
 			source="${target#$OBJDIR}"
 			source="${source%.*}.xml"
 			xpath="string(/refentry/refmeta/manvolnum)"
-			section=$($XMLLINT --xpath "$xpath" "$source")
+			section=$($DEBUG $XMLLINT --xpath "$xpath" "$source")
 			if [ $? -eq 0 -a -n "$section" ]; then
 				instdir="$MANDIR/html$section"
 			fi
