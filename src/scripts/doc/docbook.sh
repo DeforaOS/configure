@@ -28,6 +28,9 @@
 CONFIGSH="${0%/docbook.sh}/../config.sh"
 PREFIX="/usr/local"
 PROGNAME="docbook.sh"
+XSL_HTML="http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl"
+XSL_MAN="http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl"
+XSL_PDF="http://docbook.sourceforge.net/release/xsl/current/fo/docbook.xsl"
 #executables
 DEBUG="_debug"
 FOP="fop"
@@ -60,7 +63,7 @@ _docbook()
 	ext="${ext##.}"
 	case "$ext" in
 		html)
-			XSL="http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl"
+			XSL="$XSL_HTML"
 			[ -f "${source%.*}.xsl" ] && XSL="${source%.*}.xsl"
 			[ -f "${target%.*}.xsl" ] && XSL="${target%.*}.xsl"
 			if [ -f "${target%.*}.css.xml" ]; then
@@ -71,7 +74,7 @@ _docbook()
 			$DEBUG $XSLTPROC -o "$target" "$XSL" "$source"
 			;;
 		pdf)
-			XSL="http://docbook.sourceforge.net/release/xsl/current/fo/docbook.xsl"
+			XSL="$XSL_PDF"
 			[ -f "${source%.*}.xsl" ] && XSL="${source%.*}.xsl"
 			[ -f "${target%.*}.xsl" ] && XSL="${target%.*}.xsl"
 			$DEBUG $XSLTPROC -o "${target%.*}.fo" "$XSL" "$source" &&
@@ -79,7 +82,7 @@ _docbook()
 			$RM -- "${target%.*}.fo"
 			;;
 		1|2|3|4|5|6|7|8|9)
-			XSL="http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl"
+			XSL="$XSL_MAN"
 			$DEBUG $XSLTPROC -o "$target" "$XSL" "$source"
 			;;
 		*)
