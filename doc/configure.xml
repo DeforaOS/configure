@@ -1,20 +1,21 @@
-<?xml version="1.0" encoding="iso-8859-15"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- $Id$ -->
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V4.5//EN"
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
 	<!ENTITY firstname "Pierre">
 	<!ENTITY surname   "Pronchery">
 	<!ENTITY email     "khorben@defora.org">
 	<!ENTITY section   "1">
-	<!ENTITY package   "DeforaOS configure">
+	<!ENTITY title     "User Manual">
 	<!ENTITY name      "configure">
-	<!ENTITY title     "configure documentation">
 	<!ENTITY purpose   "Generates and maintain software build systems">
+	<!ENTITY % configentities SYSTEM "../config.ent">
+	%configentities;
 ]>
 <refentry>
 	<refentryinfo>
-		<title>&title;</title>
-		<productname>&package;</productname>
+		<title>&package; &title;</title>
+		<productname>&vendor; &package;</productname>
 		<authorgroup>
 			<author>
 				<firstname>&firstname;</firstname>
@@ -33,14 +34,21 @@
 			<year>2016</year>
 			<year>2017</year>
 			<year>2018</year>
+			<year>2019</year>
+			<year>2020</year>
+			<year>2021</year>
+			<year>2022</year>
+			<year>2023</year>
+			<year>2024</year>
 			<holder>&firstname; &surname; &lt;&email;&gt;</holder>
 		</copyright>
 		<legalnotice>
-			<para>This manual page was written for the DeforaOS project (and may be
-				used by others).</para>
-			<para>Permission is granted to copy, distribute and/or modify this
-				document under the terms of the GNU General Public License,
-				Version 3 as published by the Free Software Foundation.</para>
+			<para>This manual page was written for the DeforaOS
+				project (and may be used by others).</para>
+			<para>Permission is granted to copy, distribute and/or
+				modify this document under the terms of the
+				Creative Commons Attribution 4.0 International
+				license.</para>
 		</legalnotice>
 	</refentryinfo>
 	<refmeta>
@@ -71,7 +79,7 @@
 	<refsect1 id="description">
 		<title>Description</title>
 		<para>
-			&name; generates and maintain software build systems, suitable for use with
+			<command>&name;</command> generates and maintain software build systems, suitable for use with
 			the most common implementations of the make command. It uses project
 			description files to provide simple Makefiles. It is intended to keep the
 			code generated as simple and portable as possible.
@@ -131,7 +139,7 @@
 			<varlistentry>
 				<term><option>-q</option></term>
 				<listitem>
-					<para>This option runs &name; in quiet mode.</para>
+					<para>This option runs <command>&name;</command> in quiet mode.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
@@ -209,13 +217,13 @@
 		<refsect2>
 			<title>Migrating to &package;</title>
 			<para>
-				You may first create all necessary "project.conf" files with the
+				You may first create all necessary <filename>project.conf<filename> files with the
 				subdirectories definitions. Then for every binary or library built, specify
 				the adequate target along with its section.
 			</para>
 			<para>
 				When migrating from automake/autoconf, the existing subdirectories are
-				defined in the "Makefile.am" files, in the "SUBDIRS" variable. The binary
+				defined in the <filename>Makefile.am</filename> files, in the "SUBDIRS" variable. The binary
 				targets are defined in the same file, as the "bin_PROGRAMS" variable, each
 				declined to "program_SOURCES" for their respective source files.
 			</para>

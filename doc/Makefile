@@ -10,16 +10,16 @@ INSTALL	= install
 
 all: $(TARGETS)
 
-$(OBJDIR)configure.1: ../src/scripts/doc/docbook.sh configure.xml
+$(OBJDIR)configure.1: ../src/scripts/doc/docbook.sh configure.xml ../config.ent
 	../src/scripts/doc/docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)configure.1"
 
-$(OBJDIR)configure.html: ../src/scripts/doc/docbook.sh configure.css.xml configure.xml manual.css.xml
+$(OBJDIR)configure.html: ../src/scripts/doc/docbook.sh configure.css.xml configure.xml manual.css.xml ../config.ent
 	../src/scripts/doc/docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)configure.html"
 
-$(OBJDIR)project.conf.5: ../src/scripts/doc/docbook.sh project.conf.xml
+$(OBJDIR)project.conf.5: ../src/scripts/doc/docbook.sh project.conf.xml ../config.ent
 	../src/scripts/doc/docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)project.conf.5"
 
-$(OBJDIR)project.conf.html: ../src/scripts/doc/docbook.sh project.conf.css.xml project.conf.xml manual.css.xml
+$(OBJDIR)project.conf.html: ../src/scripts/doc/docbook.sh project.conf.css.xml project.conf.xml manual.css.xml ../config.ent
 	../src/scripts/doc/docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)project.conf.html"
 
 clean:
