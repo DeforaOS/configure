@@ -217,7 +217,7 @@
 		<refsect2>
 			<title>Migrating to &package;</title>
 			<para>
-				You may first create all necessary <filename>project.conf<filename> files with the
+				You may first create all necessary <filename>project.conf</filename> files with the
 				subdirectories definitions. Then for every binary or library built, specify
 				the adequate target along with its section.
 			</para>
