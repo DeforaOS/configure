@@ -90,7 +90,7 @@ _info()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME -nqv [target...]" 1>&2
+	echo "Usage: $PROGNAME -nqv [directory...]" 1>&2
 	return 1
 }
 
