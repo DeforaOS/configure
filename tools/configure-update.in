@@ -32,12 +32,20 @@ PREFIX="@PREFIX@"
 LIBEXECDIR="$PREFIX/libexec"
 PROGNAME="configure-update"
 PROJECTCONF="project.conf"
+SYSCONFDIR="@SYSCONFDIR@"
+VENDOR="DeforaOS"
 VERBOSE=1
 #executables
 CMP="cmp"
 CP="cp -f"
 DEBUG=
 FIND="find"
+
+#load local settings
+[ -f "$SYSCONFDIR/$VENDOR/$PROGNAME.conf" ] &&
+	. "$SYSCONFDIR/$VENDOR/$PROGNAME.conf"
+[ -f "$HOME/.config/$VENDOR/$PROGNAME.conf" ] &&
+	. "$HOME/.config/$VENDOR/$PROGNAME.conf"
 
 
 #functions
