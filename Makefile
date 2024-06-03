@@ -60,6 +60,8 @@ dist:
 		$(PACKAGE)-$(VERSION)/doc/Makefile \
 		$(PACKAGE)-$(VERSION)/doc/configure.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/configure.xml \
+		$(PACKAGE)-$(VERSION)/doc/configure-update.css.xml \
+		$(PACKAGE)-$(VERSION)/doc/configure-update.xml \
 		$(PACKAGE)-$(VERSION)/doc/manual.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/project.conf.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/project.conf.xml \
