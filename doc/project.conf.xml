@@ -231,6 +231,10 @@
 				<manvolnum>1</manvolnum>
 			</citerefentry>,
 			<citerefentry>
+				<refentrytitle>configure-update</refentrytitle>
+				<manvolnum>1</manvolnum>
+			</citerefentry>,
+			<citerefentry>
 				<refentrytitle>make</refentrytitle>
 				<manvolnum>1</manvolnum>
 			</citerefentry>
