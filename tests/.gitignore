@@ -2,6 +2,8 @@
 /coverage.log
 /distcheck.log
 /fixme.log
+/golint.log
+/gotest.log
 /htmllint.log
 /markdown.1
 /markdown.html
