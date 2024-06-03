@@ -1,5 +1,5 @@
 #define PACKAGE "configure"
-#define VERSION "0.4.4"
+#define VERSION "0.4.5"
 #define VENDOR "Devel"
 
 #ifndef PREFIX
