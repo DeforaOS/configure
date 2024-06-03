@@ -26,7 +26,7 @@ configure_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs libSystem`
 $(OBJDIR)configure$(EXEEXT): $(configure_OBJS)
 	$(CC) -o $(OBJDIR)configure$(EXEEXT) $(configure_OBJS) $(configure_LDFLAGS)
 
-$(OBJDIR)configure-update: configure-update.in
+$(OBJDIR)configure-update: configure-update.in ../config.sh
 	../src/scripts/tools/subst.sh -P "$(PREFIX)" -- "$(OBJDIR)configure-update"
 
 pkg-config_OBJS = $(OBJDIR)pkg-config.o
