@@ -1,0 +1,3 @@
+if has("autocmd")
+	autocmd BufNewFile,BufRead project.conf setlocal syntax=dosini
+endif "has("autocmd")
