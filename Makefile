@@ -65,6 +65,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/doc/manual.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/project.conf.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/project.conf.xml \
+		$(PACKAGE)-$(VERSION)/doc/vimrc \
 		$(PACKAGE)-$(VERSION)/doc/project.conf \
 		$(PACKAGE)-$(VERSION)/src/common.c \
 		$(PACKAGE)-$(VERSION)/src/configure.c \
