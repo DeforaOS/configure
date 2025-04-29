@@ -1,5 +1,5 @@
 SUBDIRS	= gtkdoc
-TARGETS	= $(OBJDIR)clint.log $(OBJDIR)coverage.log $(OBJDIR)distcheck.log $(OBJDIR)fixme.log $(OBJDIR)golint.log $(OBJDIR)gotest.log $(OBJDIR)htmllint.log $(OBJDIR)markdown.1 $(OBJDIR)markdown.html $(OBJDIR)markdown.pdf $(OBJDIR)markdown.rst $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)template-test.md $(OBJDIR)template-test.xml $(OBJDIR)tests.log $(OBJDIR)xmllint.log
+TARGETS	= $(OBJDIR)clint.log $(OBJDIR)coverage.log $(OBJDIR)distcheck.log $(OBJDIR)fixme.log $(OBJDIR)golint.log $(OBJDIR)gotest.log $(OBJDIR)htmllint.log $(OBJDIR)manlint.log $(OBJDIR)markdown.1 $(OBJDIR)markdown.html $(OBJDIR)markdown.pdf $(OBJDIR)markdown.rst $(OBJDIR)phplint.log $(OBJDIR)pylint.log $(OBJDIR)shlint.log $(OBJDIR)template-test.md $(OBJDIR)template-test.xml $(OBJDIR)tests.log $(OBJDIR)xmllint.log
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -38,6 +38,9 @@ $(OBJDIR)gotest.log: ../src/scripts/tests/gotest.sh
 
 $(OBJDIR)htmllint.log: ../src/scripts/tests/htmllint.sh
 	../src/scripts/tests/htmllint.sh -P "$(PREFIX)" -- "$(OBJDIR)htmllint.log"
+
+$(OBJDIR)manlint.log: ../src/scripts/tests/manlint.sh
+	../src/scripts/tests/manlint.sh -P "$(PREFIX)" -- "$(OBJDIR)manlint.log"
 
 $(OBJDIR)markdown.1: ../src/scripts/doc/markdown.sh markdown.md
 	../src/scripts/doc/markdown.sh -P "$(PREFIX)" -- "$(OBJDIR)markdown.1"
@@ -84,6 +87,7 @@ clean:
 	../src/scripts/tests/golint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)golint.log"
 	../src/scripts/tests/gotest.sh -c -P "$(PREFIX)" -- "$(OBJDIR)gotest.log"
 	../src/scripts/tests/htmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)htmllint.log"
+	../src/scripts/tests/manlint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)manlint.log"
 	../src/scripts/doc/markdown.sh -c -P "$(PREFIX)" -- "$(OBJDIR)markdown.1"
 	../src/scripts/doc/markdown.sh -c -P "$(PREFIX)" -- "$(OBJDIR)markdown.html"
 	../src/scripts/doc/markdown.sh -c -P "$(PREFIX)" -- "$(OBJDIR)markdown.pdf"
@@ -108,6 +112,7 @@ distclean:
 	../src/scripts/tests/golint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)golint.log"
 	../src/scripts/tests/gotest.sh -c -P "$(PREFIX)" -- "$(OBJDIR)gotest.log"
 	../src/scripts/tests/htmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)htmllint.log"
+	../src/scripts/tests/manlint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)manlint.log"
 	../src/scripts/doc/markdown.sh -c -P "$(PREFIX)" -- "$(OBJDIR)markdown.1"
 	../src/scripts/doc/markdown.sh -c -P "$(PREFIX)" -- "$(OBJDIR)markdown.html"
 	../src/scripts/doc/markdown.sh -c -P "$(PREFIX)" -- "$(OBJDIR)markdown.pdf"
