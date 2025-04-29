@@ -40,6 +40,8 @@ install: all
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
 	$(INSTALL) -m 0755 tests/htmllint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/htmllint.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
+	$(INSTALL) -m 0755 tests/manlint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/manlint.sh
+	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
 	$(INSTALL) -m 0755 tests/phplint.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/phplint.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests
 	$(INSTALL) -m 0755 tests/pkgconfig.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/pkgconfig.sh
@@ -72,6 +74,7 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/golint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/gotest.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/htmllint.sh
+	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/manlint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/phplint.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/pkgconfig.sh
 	$(RM) -- $(DESTDIR)$(PREFIX)/libexec/configure/scripts/tests/pylint.sh
