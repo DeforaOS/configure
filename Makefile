@@ -96,6 +96,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/htmllint.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/manlint.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/phplint.sh \
+		$(PACKAGE)-$(VERSION)/src/scripts/tests/pclint.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/pkgconfig.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/pylint.sh \
 		$(PACKAGE)-$(VERSION)/src/scripts/tests/shlint.sh \
