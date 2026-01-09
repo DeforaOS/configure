@@ -18,7 +18,7 @@ jobs:
         sudo apt-get install -y \
           docbook-xsl \
           gtk-doc-tools \
-          xmllint \
+          libxml2-utils \
           xsltproc
     - name: bootstrap libSystem
       run: git clone https://github.com/DeforaOS/libSystem.git libSystem && for dir in include data src tools; do (cd libSystem/$dir && make PREFIX="$HOME/opt/DeforaOS" install); done
