@@ -34,7 +34,7 @@ DEBUG="_debug"
 ECHO="/bin/echo"
 FIND="find"
 MKDIR="mkdir -p"
-GOLINT="golint"
+GOLINT="go vet"
 SORT="sort -n"
 TR="tr"
 
@@ -91,7 +91,7 @@ _golint_directory()
 {
 	directory="$1"
 
-	$DEBUG $GOLINT "$directory/..." 2>&1			|| return 2
+	(cd "$directory" && $DEBUG $GOLINT "./..." 2>&1)	|| return 2
 	return 0
 }
 
