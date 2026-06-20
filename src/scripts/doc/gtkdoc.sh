@@ -252,8 +252,6 @@ while [ $# -gt 0 ]; do
 				$DEBUG $MKDIR -- "$output/xml"	|| exit 2
 				$DEBUG $CP -- "$sections" "$output" \
 								|| exit 2
-			else
-				output="gtkdoc"
 			fi
 			_gtkdoc_scan "$MODULE" "include" "$output" \
 								|| exit 2
