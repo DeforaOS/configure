@@ -27,7 +27,7 @@ clean:
 distclean: clean
 	$(RM) -- $(OBJDIR)s\ p\ a\ c\ e\ s\ 2 $(OBJDIR)target $(OBJDIR)xinstall
 
-install: all
+install: $(OBJDIR)s\ p\ a\ c\ e\ s\ 2 $(OBJDIR)xinstall
 	$(MKDIR) $(DESTDIR)$(PREFIX)
 	$(INSTALL) -m 0644 $(OBJDIR)s\ p\ a\ c\ e\ s\ 2 $(DESTDIR)$(PREFIX)/s\ p\ a\ c\ e\ s\ 2
 	$(MKDIR) $(DESTDIR)$(PREFIX)

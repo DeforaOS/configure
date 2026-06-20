@@ -35,7 +35,7 @@ clean:
 distclean: clean
 	$(RM) -- $(OBJDIR)test $(OBJDIR)disabled $(OBJDIR)s\ p\ a\ c\ e\ s\ 2
 
-install: all
+install: $(OBJDIR)test phony s\ p\ a\ c\ e\ s $(OBJDIR)s\ p\ a\ c\ e\ s\ 2
 	./script.sh -P "$(DESTDIR)/somewhere/else/again" -i -- "$(OBJDIR)test"
 	./script.sh -P "$(DESTDIR)$(PREFIX)" -i -O TARGET=phony -- "phony"
 	./s\ c\ r\ i\ p\ t.sh -P "$(DESTDIR)$(PREFIX)" -i -- "s p a c e s"

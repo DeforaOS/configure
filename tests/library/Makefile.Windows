@@ -41,7 +41,7 @@ clean:
 distclean: clean
 	$(RM) -- $(TARGETS)
 
-install: all
+install: $(OBJDIR)libtest$(SOEXT) $(OBJDIR)libs\ p\ a\ c\ e$(SOEXT)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
 	$(INSTALL) -m 0755 $(OBJDIR)libtest$(SOEXT) $(DESTDIR)$(LIBDIR)/libtest$(SOEXT)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)

@@ -42,7 +42,7 @@ clean:
 distclean: clean
 	$(RM) -- $(TARGETS)
 
-install: all
+install: $(OBJDIR)libtest.la $(OBJDIR)libs\ p\ a\ c\ e.la
 	$(MKDIR) $(DESTDIR)$(LIBDIR)
 	$(LIBTOOL) --mode=install $(INSTALL) -m 0755 $(OBJDIR)libtest.la $(DESTDIR)$(LIBDIR)/libtest.la
 	$(LIBTOOL) --mode=finish $(DESTDIR)$(LIBDIR)
