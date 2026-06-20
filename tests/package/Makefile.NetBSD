@@ -40,7 +40,7 @@ distcheck: dist
 	cd "$(PACKAGE)-$(VERSION)" && $(MAKE) dist
 	$(RM) -r -- $(PACKAGE)-$(VERSION)
 
-install: all
+install:
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/doc/s\ p\ a\ c\ e
 	$(INSTALL) -m 0644 s\ p\ a\ c\ e.md $(DESTDIR)$(PREFIX)/share/doc/s\ p\ a\ c\ e/s\ p\ a\ c\ e.md
 

@@ -14,7 +14,7 @@ clean:
 
 distclean: clean
 
-install: all
+install:
 	$(MKDIR) $(DESTDIR)$(INCLUDEDIR)/s\ p\ /a\ c\ e
 	$(INSTALL) -m 0644 s\ p\ a\ c\ e.h $(DESTDIR)$(INCLUDEDIR)/s\ p\ /a\ c\ e/s\ p\ a\ c\ e.h
 	$(MKDIR) $(DESTDIR)$(INCLUDEDIR)

@@ -12,7 +12,7 @@ clean:
 
 distclean: clean
 
-install: all
+install:
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/data
 	$(INSTALL) -m 0755 data/pkgconfig.sh $(DESTDIR)$(PREFIX)/libexec/configure/scripts/data/pkgconfig.sh
 	$(MKDIR) $(DESTDIR)$(PREFIX)/libexec/configure/scripts/doc
