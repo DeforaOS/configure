@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2006-2022 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2006-2026 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Devel configure */
 /* All rights reserved.
  *
