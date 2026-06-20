@@ -126,7 +126,7 @@ distclean:
 	../src/scripts/tests/xmllint.sh -c -P "$(PREFIX)" -- "$(OBJDIR)xmllint.log"
 	$(RM) -- $(TARGETS)
 
-install: all
+install:
 	@for i in $(SUBDIRS); do (cd "$$i" && \
 		if [ -n "$(OBJDIR)" ]; then \
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/" install; \

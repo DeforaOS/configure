@@ -78,7 +78,7 @@ distclean:
 	$(RM) -- $(configure_OBJS) $(makedepend_OBJS) $(makefile.o_OBJS)
 	$(RM) -- $(TARGETS)
 
-install: all
+install: $(OBJDIR)configure$(EXEEXT)
 	@for i in $(SUBDIRS); do (cd "$$i" && \
 		if [ -n "$(OBJDIR)" ]; then \
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/" install; \

@@ -51,7 +51,7 @@ distclean:
 	../../src/scripts/doc/gtkdoc.sh -c -P "$(PREFIX)" -- "$(OBJDIR)gtkdoc/xml.stamp"
 	$(RM) -- $(TARGETS)
 
-install: all
+install:
 	@for i in $(SUBDIRS); do (cd "$$i" && \
 		if [ -n "$(OBJDIR)" ]; then \
 		$(MAKE) OBJDIR="$(OBJDIR)$$i/" install; \

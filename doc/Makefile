@@ -39,7 +39,7 @@ clean:
 distclean: clean
 	$(RM) -- $(TARGETS)
 
-install: all
+install: $(OBJDIR)configure.1 $(OBJDIR)configure.html $(OBJDIR)configure-update.1 $(OBJDIR)configure-update.html $(OBJDIR)project.conf.5 $(OBJDIR)project.conf.html
 	../src/scripts/doc/docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)configure.1"
 	../src/scripts/doc/docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)configure.html"
 	../src/scripts/doc/docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)configure-update.1"

@@ -49,7 +49,7 @@ clean:
 distclean: clean
 	$(RM) -- $(TARGETS)
 
-install: all
+install: $(OBJDIR)configure-update
 	../src/scripts/tools/subst.sh -P "$(DESTDIR)$(BINDIR)" -i -- "$(OBJDIR)configure-update"
 
 uninstall:
