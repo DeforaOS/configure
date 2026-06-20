@@ -2587,7 +2587,10 @@ static int _write_install(Makefile * makefile)
 {
 	int ret = 0;
 
-	_makefile_target(makefile, "install", "all", NULL);
+	if(_makefile_get_config(makefile, NULL, "targets") != NULL)
+		_makefile_target(makefile, "install", "all", NULL);
+	else
+		_makefile_target(makefile, "install", NULL);
 	if(_makefile_get_config_mode(makefile, NULL, "subdirs") != NULL)
 		_makefile_subdirs(makefile, "install");
 	ret |= _install_targets(makefile);
