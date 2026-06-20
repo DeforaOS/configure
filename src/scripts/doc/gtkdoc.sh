@@ -252,9 +252,12 @@ while [ $# -gt 0 ]; do
 				$DEBUG $MKDIR -- "$output/xml"	|| exit 2
 				$DEBUG $CP -- "$sections" "$output" \
 								|| exit 2
-				_gtkdoc_scan "$MODULE" "include" "$output"
-				output="${OBJDIR}gtkdoc/xml"
+			else
+				output="gtkdoc"
 			fi
+			_gtkdoc_scan "$MODULE" "include" "$output" \
+								|| exit 2
+			output="$output/xml"
 			_gtkdoc_mkdb "$MODULE" "${OBJDIR}gtkdoc" "$output"
 			;;
 		gtkdoc/*.types)
