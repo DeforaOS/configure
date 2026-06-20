@@ -90,10 +90,8 @@ static int _makefile_print_target(Makefile * makefile, String const * target);
 static int _makefile_remove(Makefile * makefile, int recursive, ...);
 static int _makefile_subdirs(Makefile * makefile, char const * target);
 static int _makefile_target(Makefile * makefile, char const * target, ...);
-#ifdef WITH_UNUSED
 static int _makefile_targetv(Makefile * makefile, char const * target,
-		char const ** depends);
-#endif
+		va_list depends);
 
 
 /* functions */
@@ -3791,36 +3789,27 @@ static int _makefile_subdirs(Makefile * makefile, char const * target)
 /* makefile_target */
 static int _makefile_target(Makefile * makefile, char const * target, ...)
 {
+	int ret;
 	va_list ap;
-	char const * sep = " ";
+
+	va_start(ap, target);
+	ret = _makefile_targetv(makefile, target, ap);
+	va_end(ap);
+	return ret;
+}
+
+
+/* makefile_targetv */
+static int _makefile_targetv(Makefile * makefile, char const * target,
+		va_list depends)
+{
 	char const * p;
 
 	if(target == NULL)
 		return -1;
 	_makefile_print(makefile, "\n%s:", target);
-	va_start(ap, target);
-	while((p = va_arg(ap, char const *)) != NULL)
-		_makefile_print(makefile, "%s%s", sep, p);
-	va_end(ap);
+	while((p = va_arg(depends, char const *)) != NULL)
+		_makefile_print(makefile, " %s", p);
 	_makefile_print(makefile, "\n");
 	return 0;
 }
-
-
-#ifdef WITH_UNUSED
-/* makefile_targetv */
-static int _makefile_targetv(FILE * fp, char const * target,
-		char const ** depends)
-{
-	char const ** p;
-
-	if(target == NULL)
-		return -1;
-	_makefile_print(makefile, "\n%s:", target);
-	if(depends != NULL)
-		for(p = depends; *p != NULL; p++)
-			_makefile_print(makefile, " %s", *p);
-	_makefile_print(makefile, "\n");
-	return 0;
-}
-#endif
