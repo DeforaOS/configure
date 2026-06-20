@@ -2580,22 +2580,61 @@ static int _dist_subdir_dist(Makefile * makefile, String const * path,
 	return 0;
 }
 
+static int _install_depends(Makefile * makefile);
 static int _install_targets(Makefile * makefile);
 static int _install_includes(Makefile * makefile);
 static int _install_dist(Makefile * makefile);
 static int _write_install(Makefile * makefile)
 {
-	int ret = 0;
+	int ret;
 
-	if(_makefile_get_config(makefile, NULL, "targets") != NULL)
-		_makefile_target(makefile, "install", "all", NULL);
-	else
-		_makefile_target(makefile, "install", NULL);
+	ret = _install_depends(makefile);
 	if(_makefile_get_config_mode(makefile, NULL, "subdirs") != NULL)
 		_makefile_subdirs(makefile, "install");
 	ret |= _install_targets(makefile);
 	ret |= _install_includes(makefile);
 	ret |= _install_dist(makefile);
+	return ret;
+}
+
+static int _install_depends(Makefile * makefile)
+{
+	int ret = 0;
+	String const * p;
+	String * q;
+	String * targets;
+	size_t i;
+	char c;
+
+	if((p = _makefile_get_config_mode(makefile, NULL, "targets")) == NULL)
+	{
+		_makefile_print(makefile, "\ninstall:\n");
+		return 0;
+	}
+	if((targets = string_new(p)) == NULL)
+		return 1;
+	_makefile_print(makefile, "\ninstall:");
+	q = targets;
+	for(i = 0; ret == 0; i++)
+	{
+		if(targets[i] != ',' && targets[i] != '\0')
+			continue;
+		c = targets[i];
+		targets[i] = '\0';
+		if(_makefile_is_enabled(makefile, targets) != 0
+				&& _makefile_get_config(makefile, targets,
+					"install") != NULL)
+		{
+			_makefile_print(makefile, " ");
+			_makefile_print_target(makefile, targets);
+		}
+		if(c == '\0')
+			break;
+		targets += i + 1;
+		i = 0;
+	}
+	string_delete(q);
+	_makefile_print(makefile, "\n");
 	return ret;
 }
 
