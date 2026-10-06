@@ -94,8 +94,29 @@
 			<para>
 				In the default section:
 				<itemizedlist>
+					<listitem><para><varname>package</varname>: name of the
+							project (depends on <varname>version</varname> to also be
+							set)</para></listitem>
+					<listitem><para><varname>version</varname>: version of the
+							project (depends on <varname>package</varname> to also be
+							set)</para></listitem>
+					<listitem><para><varname>vendor</varname>: name of the vendor, as reported
+							in the configuration files generated (defaults to
+							"DeforaOS")</para></listitem>
+					<listitem><para><varname>config</varname>: comma-separated list of
+							configuration files to generate, holding the project name, version and
+							vendor (possible values: <emphasis>h</emphasis> for a C header,
+							<emphasis>sh</emphasis> for a shell script,
+							<emphasis>ent</emphasis> for XML entities)</para></listitem>
+					<listitem><para><varname>mode</varname>: name of the build mode to apply by
+							default (see <xref linkend="modes"/>)</para></listitem>
 					<listitem><para><varname>subdirs</varname>: subdirectories to look for
 							too</para></listitem>
+					<listitem><para><varname>includes</varname>: header files to install, as a
+							comma-separated list; their destination defaults to
+							<varname>$(INCLUDEDIR)</varname> and may be overridden with
+							an <varname>install</varname> variable in a section named after
+							the file</para></listitem>
 					<listitem><para><varname>cppflags_force</varname>: CPPFLAGS to force
 							globally</para></listitem>
 					<listitem><para><varname>cppflags</varname>: optional global
@@ -108,26 +129,67 @@
 							globally</para></listitem>
 					<listitem><para><varname>ldflags</varname>: optional global
 							LDFLAGS</para></listitem>
+					<listitem><para><varname>cxxflags_force</varname>: CXXFLAGS to force
+							globally</para></listitem>
+					<listitem><para><varname>cxxflags</varname>: optional global
+							CXXFLAGS</para></listitem>
+					<listitem><para><varname>asflags_force</varname>: ASFLAGS to force
+							globally</para></listitem>
+					<listitem><para><varname>asflags</varname>: optional global
+							ASFLAGS</para></listitem>
+					<listitem><para><varname>goflags_force</varname>: GOFLAGS to force
+							globally</para></listitem>
+					<listitem><para><varname>goflags</varname>: optional global
+							GOFLAGS</para></listitem>
+					<listitem><para><varname>jflags_force</varname>: JFLAGS to force
+							globally</para></listitem>
+					<listitem><para><varname>jflags</varname>: optional global
+							JFLAGS</para></listitem>
+					<listitem><para><varname>vflags_force</varname>: VFLAGS to force
+							globally</para></listitem>
+					<listitem><para><varname>vflags</varname>: optional global
+							VFLAGS</para></listitem>
 					<listitem><para><varname>targets</varname>: targets to handle in the
 							Makefile</para></listitem>
 					<listitem><para><varname>dist</varname>: additional files to include in a
 							source archive</para></listitem>
 				</itemizedlist>
 			</para>
-			<para>In subsequent sections, respectively named after the target
-				they define:
+			<para>In subsequent sections, respectively named after the target they
+				define:
 				<itemizedlist>
 					<listitem><para><varname>type</varname> (mandatory): type of the target (eg
 							<emphasis>binary</emphasis>, <emphasis>library</emphasis>,
-							<emphasis>object</emphasis>, ...)</para></listitem>
+							<emphasis>object</emphasis>...)</para></listitem>
 					<listitem><para><varname>cppflags</varname>: additional CPPFLAGS for this
 							target</para></listitem>
 					<listitem><para><varname>cflags</varname>: additional CFLAGS for this
+							target</para></listitem>
+					<listitem><para><varname>cxxflags</varname>: additional CXXFLAGS for this
+							target</para></listitem>
+					<listitem><para><varname>asflags</varname>: additional ASFLAGS for this
+							target</para></listitem>
+					<listitem><para><varname>goflags</varname>: additional GOFLAGS for this
+							target</para></listitem>
+					<listitem><para><varname>jflags</varname>: additional JFLAGS for this
+							target</para></listitem>
+					<listitem><para><varname>vflags</varname>: additional VFLAGS for this
 							target</para></listitem>
 					<listitem><para><varname>ldflags</varname>: additional LDFLAGS for this
 							target</para></listitem>
 					<listitem><para><varname>sources</varname>: source files to
 							compile</para></listitem>
+					<listitem><para><varname>script</varname>: for targets of type
+							<emphasis>script</emphasis>, the script generating the target; it is
+							run from the directory holding the Makefile, so a script shipped with
+							the project is referred to as
+							<filename>./script.sh</filename></para></listitem>
+					<listitem><para><varname>soname</varname>: for targets of type
+							<emphasis>library</emphasis> or <emphasis>plugin</emphasis>, the
+							soname to assign to the shared object, overriding the default name
+							and version number</para></listitem>
+					<listitem><para><varname>command</varname>: for targets of type
+							<emphasis>command</emphasis>, the command to run</para></listitem>
 					<listitem><para><varname>depends</varname>: a list of files (or other
 							targets) that this target depends on</para></listitem>
 					<listitem><para><varname>install</varname>: the destination path for
@@ -139,6 +201,38 @@
 						target by default</para></listitem>
 				</itemizedlist>
 			</para>
+			<para>Sections may also be named after one of the source files listed in
+			a <varname>sources</varname> variable. Such a section applies to that file
+			only, and accepts the compiler flags relevant to its language, such as
+			<varname>cflags</varname> for a C source file, or
+			<varname>cxxflags</varname> for a C++ source file.</para>
+			<para>The <varname>install</varname> variable is likewise recognized in
+			sections named after a file listed in <varname>includes</varname> or
+			<varname>dist</varname>, and sets the destination path for that file.</para>
+		</refsect2>
+		<refsect2 id="modes">
+			<title>Build modes</title>
+			<para>A build mode is a named set of variables, overriding those from the
+			default section. Modes allow a project to be built in more than one way,
+			for instance with debugging symbols during development and with
+			optimizations enabled for a release.</para>
+			<para>A mode is defined in a section named after it, prefixed with
+			"mode::", and may carry a <varname>title</varname> variable describing it.
+			Only the variables it defines are overridden; every other variable is
+			looked up in the default section as usual.</para>
+			<para>The mode to apply is given with the <option>-M</option> option to
+			<citerefentry><refentrytitle>configure</refentrytitle>
+			<manvolnum>1</manvolnum></citerefentry>, or with a <varname>mode</varname>
+			variable in the default section. The command line takes precedence. If
+			neither is given, the default section is used on its own.</para>
+			<para>In the following example, the project is built with
+			"-O0 -g" by default, and with "-O2 -DNDEBUG"
+			when configured with "-M release":</para>
+			<programlisting>cflags=-O0 -g
+
+[mode::release]
+title=Release
+cflags=-O2 -DNDEBUG</programlisting>
 		</refsect2>
 	</refsect1>
 	<refsect1 id="targets">
@@ -151,12 +245,18 @@
 					<listitem><para><emphasis>binary</emphasis>: produces binary files, linked
 							from every object file produced with their source
 							files.</para></listitem>
+					<listitem><para><emphasis>command</emphasis>: runs the command given in the
+							<varname>command</varname> variable; no source file is
+							expected.</para></listitem>
 					<listitem><para><emphasis>library</emphasis>: produces a static and a
 							shared version of the target, linked from every object file produced with
 							their source files, and respectively appending ".a" and ".so" extensions
 							to the target name; the shared object are also assigned a version
 							number.</para></listitem>
-					<listitem><para><emphasis>libtool</emphasis>: uses the <ulink url="http://www.gnu.org/software/libtool/">libtool</ulink> project to generate libraries, as supported by the project on the underlying platform.</para></listitem>
+					<listitem><para><emphasis>libtool</emphasis>: uses the <ulink
+							url="http://www.gnu.org/software/libtool/">libtool</ulink> project to
+							generate libraries, as supported by the project on the underlying
+							platform.</para></listitem>
 					<listitem><para><emphasis>object</emphasis>: produces a binary object file
 							from the given source.</para></listitem>
 					<listitem><para><emphasis>plugin</emphasis>: produces a shared version of
