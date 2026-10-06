@@ -94,18 +94,22 @@
 			<para>
 				In the default section:
 				<itemizedlist>
-					<listitem><para><varname>package</varname> (mandatory): name of the project</para></listitem>
-					<listitem><para><varname>version</varname> (mandatory): version of the
-							project</para></listitem>
-					<listitem><para><varname>vendor</varname>: name of the vendor, as reported in the
-							generated configuration files</para></listitem>
-					<listitem><para><varname>config</varname>: comma-separated list of configuration files
-							to generate, holding the project name, version and vendor (possible
-							values: <emphasis>h</emphasis> for a C header,
+					<listitem><para><varname>package</varname>: name of the
+							project (depends on <varname>version</varname> to also be
+							set)</para></listitem>
+					<listitem><para><varname>version</varname>: version of the
+							project (depends on <varname>package</varname> to also be
+							set)</para></listitem>
+					<listitem><para><varname>vendor</varname>: name of the vendor, as reported
+							in the configuration files generated (defaults to
+							"DeforaOS")</para></listitem>
+					<listitem><para><varname>config</varname>: comma-separated list of
+							configuration files to generate, holding the project name, version and
+							vendor (possible values: <emphasis>h</emphasis> for a C header,
 							<emphasis>sh</emphasis> for a shell script,
 							<emphasis>ent</emphasis> for XML entities)</para></listitem>
-					<listitem><para><varname>mode</varname>: name of the build mode to apply by default
-							(see <xref linkend="modes"/>)</para></listitem>
+					<listitem><para><varname>mode</varname>: name of the build mode to apply by
+							default (see <xref linkend="modes"/>)</para></listitem>
 					<listitem><para><varname>subdirs</varname>: subdirectories to look for
 							too</para></listitem>
 					<listitem><para><varname>includes</varname>: header files to install, as a
@@ -151,12 +155,12 @@
 							source archive</para></listitem>
 				</itemizedlist>
 			</para>
-			<para>In subsequent sections, respectively named after the target
-				they define:
+			<para>In subsequent sections, respectively named after the target they
+				define:
 				<itemizedlist>
 					<listitem><para><varname>type</varname> (mandatory): type of the target (eg
 							<emphasis>binary</emphasis>, <emphasis>library</emphasis>,
-							<emphasis>object</emphasis>, ...)</para></listitem>
+							<emphasis>object</emphasis>...)</para></listitem>
 					<listitem><para><varname>cppflags</varname>: additional CPPFLAGS for this
 							target</para></listitem>
 					<listitem><para><varname>cflags</varname>: additional CFLAGS for this
@@ -249,7 +253,10 @@ cflags=-O2 -DNDEBUG</programlisting>
 							their source files, and respectively appending ".a" and ".so" extensions
 							to the target name; the shared object are also assigned a version
 							number.</para></listitem>
-					<listitem><para><emphasis>libtool</emphasis>: uses the <ulink url="http://www.gnu.org/software/libtool/">libtool</ulink> project to generate libraries, as supported by the project on the underlying platform.</para></listitem>
+					<listitem><para><emphasis>libtool</emphasis>: uses the <ulink
+							url="http://www.gnu.org/software/libtool/">libtool</ulink> project to
+							generate libraries, as supported by the project on the underlying
+							platform.</para></listitem>
 					<listitem><para><emphasis>object</emphasis>: produces a binary object file
 							from the given source.</para></listitem>
 					<listitem><para><emphasis>plugin</emphasis>: produces a shared version of
