@@ -4,9 +4,16 @@ DeforaOS configure
 About configure
 ---------------
 
-configure generates Makefiles from project definition files. You describe a project once, in plain `project.conf` files, and configure writes a Makefile for every directory: build rules, dependencies, installation, and source distribution.
+configure generates Makefiles from project definition files. Projects are
+described through project definition files, named `project.conf`, and configure
+creates a Makefile for each directory of the project. They contain build rules,
+with dependency handling; they implement the installation and uninstallation
+procedure, the creation of source archives for redistribution, as well as the
+execution of test suites.
 
-The generated Makefiles are portable and work with both GNU make and BSD make, without any additional tooling on the systems where the project is built.
+The Makefiles generated are meant to be portable and expected to work with any
+common variant, including both GNU make and BSD make at the same time. No
+additional tooling is required on the systems where the project is built.
 
 configure depends on the DeforaOS libSystem library (version 0.3.2 or above),
 which is found on the website for the DeforaOS Project:
@@ -16,17 +23,20 @@ which is found on the website for the DeforaOS Project:
 Getting started
 ---------------
 
-A project is described by one `project.conf` per directory. The top one names the package and lists its sub-directories:
+A project is described by one `project.conf` file per directory, in an ini-style
+file format. The top file may contain the package's name and version, and an
+optional vendor name. A list of sub-directories can also be provided, as
+follows:
 
-```
+```dosini
 package=hello
 version=0.1.0
 subdirs=src
 ```
 
-Each sub-directory then lists its targets, with a section per target:
+Targets can be defined anywhere, with a dedicated section per target:
 
-```
+```dosini
 targets=hello
 
 [hello]
@@ -37,24 +47,32 @@ install=$(BINDIR)
 
 Run configure once from the top of the project, then build as usual:
 
-```
-configure
-make
+```shell-session
+$ configure
+$ make
 ```
 
-Besides `all`, the generated Makefiles provide `clean`, `distclean`, `install`, `uninstall`, `dist` and `distcheck`. Re-run configure whenever a `project.conf` changes.
+Besides the default `all` target, the Makefiles generated provide `clean`,
+`distclean`, `install`, `uninstall`, `dist`, and `distcheck` targets when
+relevant. Re-run configure whenever a `project.conf` changes.
 
-Note: the Makefiles are generated, so they should not be edited by hand and are usually not kept in version control (always .gitignore them).
+Note: the Makefiles are generated, so they should not be edited manually and it
+is best to not include them in version control (e.g., list them in `.gitignore`
+when using Git).
 
 
 What can be described
 ---------------------
 
-Targets can be of type `binary`, `library`, `plugin`, `object`, `script`, `command` or `libtool`.
+Targets can be of type `binary`, `library`, `plugin`, `object`, `script`,
+`command`, or `libtool`.
 
-Sources can be C, C++, Objective C, Objective C++, assembly, Go, Java or Verilog, recognised by their file extension.
+Sources can be C, C++, Objective C, Objective C++, assembly, Go, Java or
+Verilog, and are recognised by their file extension.
 
-Makefiles can be generated for DeforaOS, Linux, NetBSD, FreeBSD, OpenBSD, macOS and Windows. The target system is detected automatically, and can be forced with `configure -O <system>`.
+Makefiles can be generated for DeforaOS, Linux, NetBSD, FreeBSD, OpenBSD, macOS
+and Windows. The target system is detected automatically, or can be forced
+with `configure -O <system>`.
 
 
 Documentation
@@ -72,12 +90,14 @@ man configure-update    updating the helper scripts of a project
 Compiling configure
 -------------------
 
-Please read the `INSTALL.md` file for instructions about how to compile and install configure.
+Please read the `INSTALL.md` file for instructions about how to compile and
+install configure.
 
 
 Bug reports
 -----------
 
-Please read the `BUGS` file for information about known problems and planned feature upgrades.
+Please read the `BUGS` file for information about known problems and planned
+feature upgrades.
 
 Thanks for using this program. I hope it will be useful.
